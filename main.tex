@@ -55,17 +55,35 @@
 \usepackage{amsmath}        % For mathematical equations
 \usepackage{amsthm}
 
+
+\usepackage{booktabs, caption, subcaption}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{problem}[theorem]{Problem}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{corollary}[theorem]{Corollary}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % AUTHOR: Fill in the following meta-data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Enter the title of your paper:
-\title{FedQHD}
+
+\title{FedQHD: Closed-Form Function-Space Federated Reinforcement Learning}
+%\title{FedQHD}
 
 % The "running title" will be displayed in the header on every-other page.
 % It is typically either the same as the title or a shorter version of the title.
 % Enter your running title here:
-\setrunningtitle{Enter Your Running Title Here}
+
+\setrunningtitle{FedQHD: Closed-Form Function-Space Federated Reinforcement Learning}
+%\setrunningtitle{FedQHD}
 
 % WARNING: Authors must not appear in the submitted version. They should be hidden
 % as long as the rlj package is used without the [accepted] or [preprint] options.
@@ -174,6 +192,8 @@ The abstract paragraph should be indented 1/2~inch on both left and right-hand m
 
 %% Conclusion
 \include{sections/conclusion}
+
+
 \section{Submission of papers to RLJ/RLC}
 \label{sec:submission}
 
