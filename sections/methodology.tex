@@ -15,20 +15,19 @@
 
 Hyperdimensional computing (HDC) encodes symbols using high-dimensional randomized
 hypervectors with near-orthogonality properties, enabling rich compositional structure while
-preserving simple arithmetic operations. In our setting, each agent $i$ maintains its own HDC encoder
+preserving simple arithmetic operations. In our setting, an HDC encoder
 \(
-    \Phi^{(i)}: \mathcal{S}^{(i)}\times\mathcal{A}^{(i)}\to\mathbb{C}^D
+    \Phi: \mathcal{S}\times\mathcal{A}\to\mathbb{C}^D
 \)
-that maps state--action pairs $x=(s,a)$ to $D$-dimensional hypervectors $\Phi^{(i)}(x)$.
-This encoder can be initialized independently or adapted locally, enabling model heterogeneity
-across agents with different environmental complexities or computational constraints.
-To ensure numerical stability, we assume
+maps each state--action pair $x=(s,a)$ to a $D$-dimensional hypervector $\Phi(x)$.
+The encoder is sampled once at initialization and shared across all agents.
+To ensure numerical stability and compatibility with our finite-time analysis, we assume
 \(
-    \|\Phi^{(i)}(s,a)\|_2 \le 1
-    \,\text{for all $(s,a)$ and all agents $i$}.
+    \|\Phi(s,a)\|_2 \le 1
+    \,\text{for all $(s,a)$}.
 \)
-Each agent maintains a parameter hypervector $\mathbf{M}^{(i)}\in\mathbb{C}^D$ and evaluates its
-local action--value function as
+Each agent $i$ maintains a parameter hypervector $\mathbf{M}^{(i)}\in\mathbb{C}^D$ and evaluates its
+action--value function as
 \begin{equation}
     Q_{\mathbf{M}}(s,a)
     \;=\;
@@ -56,38 +55,28 @@ This parameterization exhibits three key structural properties:
     RKHS value function.
 
 
-\subsection{Federated Learning Protocol with Heterogeneous Encoders}
+\subsection{Federated Learning Protocol}
 \label{subsec:federated_protocol}
 
-To enable federated aggregation with heterogeneous local encoders, we employ a
-\textit{regression-based aggregation} strategy that exploits the linearity of Q-functions
-in the parameter space. The server maintains a set of anchor state-action pairs
-$\mathcal{X} = \{(s_j, a_j)\}_{j=1}^{L}$ and a global encoder $\Phi_{\text{global}}$.
-During aggregation, agents upload Q-values evaluated on these anchor points, and the
-server solves a linear regression problem to find the global parameter vector that best
-approximates the averaged Q-function.
+With a shared encoder $\Phi$ across all agents, the linearity of HDC Q-functions in the
+parameter space enables a simple and efficient federated aggregation strategy: direct
+parameter averaging. This approach leverages the parameter-function equivalence property
+(Theorem~\ref{thm:parameter_function_equivalence}), which guarantees that averaging
+parameter vectors is equivalent to averaging Q-functions pointwise.
 
-This approach provides two key advantages: (i) it allows agents to maintain
-heterogeneous encoders $\Phi^{(i)}$ adapted to their local environments, and
-(ii) it preserves the aggregation-equivalence property in expectation over the
-anchor distribution.
-
-\subsection{Regression-Based Federated Aggregation}
+\subsection{Direct Parameter Averaging}
 \label{subsec:federated_averaging}
 FedQHD operates in synchronous communication rounds indexed by $k=0,1,2,\dots$. Each
 round consists of three phases with $K$ local update steps, so the global iteration count and
 round index are related by $t = kK + u$, where $u \in \{0,\dots,K-1\}$ denotes
 the local step within round $k$.
 
-\subsubsection{Initialization and Broadcast}
-The server maintains a global encoder $\Phi_{\text{global}}$, a global hypervector $\mathbf{M}_k$,
-and a set of anchor points $\mathcal{X} = \{(s_j, a_j)\}_{j=1}^{L}$ sampled from a representative
-distribution over state-action space. At the start of round $k$, the server broadcasts
-$(\mathbf{M}_k, \Phi_{\text{global}}, \mathcal{X})$ to all clients. Each client can either use
-$\Phi_{\text{global}}$ directly or adapt it locally to form $\Phi^{(i)}$.
+\subsubsection{Broadcast}
+The server maintains a global hypervector $\mathbf{M}_k$ and broadcasts it along with the
+shared encoder $\Phi$ to all clients. Each client initializes its local parameter to $\mathbf{M}_k$.
 
 \subsubsection{Local Updates}
-Agent $i$ executes $K$ on-policy HDC TD updates using its local encoder $\Phi^{(i)}$,
+Agent $i$ executes $K$ on-policy HDC TD updates using the shared encoder $\Phi$,
 generating
 \begin{equation}
 \begin{split}
@@ -96,100 +85,73 @@ generating
      \mathbf{M}^{(i)}_{k,u+1}
     =
     \mathbf{M}^{(i)}_{k,u}
-    + \alpha_{k,u}\, \delta_t^{(i)} \Phi^{(i)}(s_t^{(i)}, a_t^{(i)})
+    + \alpha_{k,u}\, \delta_t^{(i)} \Phi(s_t^{(i)}, a_t^{(i)})
 \end{split}
     \label{eq:local_update}
 \end{equation}
 for $u=0,\dots,K-1$, where $\delta_t^{(i)}$ is the TD error computed using the local Q-function
-$Q_{\mathbf{M}^{(i)}_{k,u}}^{(i)}(s,a) = \langle \Phi^{(i)}(s,a), \mathbf{M}^{(i)}_{k,u} \rangle$.
+$Q_{\mathbf{M}^{(i)}_{k,u}}(s,a) = \langle \Phi(s,a), \mathbf{M}^{(i)}_{k,u} \rangle$.
 
-\subsubsection{Upload and Regression-Based Aggregation}
-Instead of uploading parameter vectors directly, each agent evaluates its local Q-function
-on the anchor set and uploads the Q-value vector:
+\subsubsection{Upload and Aggregation}
+The server receives the local parameter vectors $\{\mathbf{M}^{(i)}_{k,K}\}_{i=1}^N$ and performs
+direct federated averaging:
 \begin{equation}
-    \mathbf{q}^{(i)}_k = \left[ Q_{\mathbf{M}^{(i)}_{k,K}}^{(i)}(s_j, a_j) \right]_{j=1}^{L}
-    \in \mathbb{R}^L.
-    \label{eq:q_value_upload}
+    \mathbf{M}_{k+1}
+    =
+    \frac{1}{N}\sum_{i=1}^{N}
+    \mathbf{M}^{(i)}_{k,K}.
+    \label{eq:federated_averaging}
 \end{equation}
-The server computes the target averaged Q-values:
-\begin{equation}
-    \bar{\mathbf{q}}_k = \frac{1}{N}\sum_{i=1}^{N} \mathbf{q}^{(i)}_k.
-    \label{eq:averaged_q}
-\end{equation}
-Finally, the server solves a weighted least-squares regression to find the global parameter
-that best approximates $\bar{\mathbf{q}}_k$ under the global encoder:
-\begin{equation}
-    \mathbf{M}_{k+1} = \arg\min_{\mathbf{M} \in \mathbb{C}^D}
-    \sum_{j=1}^{L} \left\|
-    \langle \Phi_{\text{global}}(s_j, a_j), \mathbf{M} \rangle - \bar{q}_{k,j}
-    \right\|^2,
-    \label{eq:regression_aggregation}
-\end{equation}
-where $\bar{q}_{k,j}$ is the $j$-th component of $\bar{\mathbf{q}}_k$.
-This least-squares problem has the closed-form solution:
-\begin{equation}
-    \mathbf{M}_{k+1} = \mathbf{\Psi}^\dagger \bar{\mathbf{q}}_k,
-    \label{eq:closed_form_aggregation}
-\end{equation}
-where $\mathbf{\Psi} = [\Phi_{\text{global}}(s_1,a_1), \dots, \Phi_{\text{global}}(s_L,a_L)]^T \in \mathbb{C}^{L \times D}$
-and $\mathbf{\Psi}^\dagger$ denotes the Moore-Penrose pseudoinverse. The updated model is
-then broadcast to initiate round $k+1$.
-\subsection{Unified FedQHD Algorithm}
+By Theorem~\ref{thm:parameter_function_equivalence}, this parameter averaging is equivalent
+to averaging the Q-functions, i.e., $Q_{\mathbf{M}_{k+1}}(s,a) = \frac{1}{N}\sum_{i=1}^N Q_{\mathbf{M}^{(i)}_{k,K}}(s,a)$
+for all $(s,a)$. The averaged model $\mathbf{M}_{k+1}$ is then broadcast to all clients to
+initiate round $k+1$.
+\subsection{FedQHD Algorithm}
 \label{subsec:algorithm}
 
-We now present the complete FedQHD algorithm with regression-based aggregation for
-heterogeneous encoders. Our algorithm design emphasizes two key advantages: (i) it supports
-model heterogeneity by allowing agents to maintain different encoders, and (ii) it exploits
-the linearity of HDC Q-functions to perform efficient aggregation through regression on anchor
-points, requiring only $O(L)$ Q-value uploads instead of $O(D)$ parameter uploads when $L \ll D$.
-
-\subsubsection{Complete Algorithm Description}
-
-Algorithm~\ref{alg:fedqhd_unified} presents the unified FedQHD protocol, showing both
-server coordination and client learning in a single framework.
+We present the complete FedQHD algorithm with shared encoder and direct parameter averaging.
+This approach leverages the parameter-function equivalence property to enable efficient
+federated aggregation with minimal communication overhead ($O(D)$ parameter uploads per round).
 
 \begin{algorithm}[t]
-\caption{FedQHD: Unified Protocol with Heterogeneous Encoders}
-\label{alg:fedqhd_unified}
+\caption{FedQHD: Shared Encoder Protocol}
+\label{alg:fedqhd_shared}
 \begin{algorithmic}[1]
-\STATE \textbf{Input:} Rounds $T$, local steps $K$, agents $N$, anchor size $L$, learning rates $\{\alpha_{k,u}\}$
+\STATE \textbf{Input:} Rounds $T$, local steps $K$, agents $N$, learning rates $\{\alpha_{k,u}\}$
 \STATE \textbf{Server Initialize:}
-\STATE \quad Global encoder $\Phi_{\text{global}}: \mathcal{S}\times\mathcal{A}\to\mathbb{C}^D$
+\STATE \quad Shared encoder $\Phi: \mathcal{S}\times\mathcal{A}\to\mathbb{C}^D$
 \STATE \quad Global model $\mathbf{M}_0 = \mathbf{0} \in \mathbb{C}^D$
-\STATE \quad Anchor set $\mathcal{X} = \{(s_j, a_j)\}_{j=1}^{L}$ sampled from state-action distribution
-\STATE \quad Feature matrix $\mathbf{\Psi} = [\Phi_{\text{global}}(s_1,a_1), \dots, \Phi_{\text{global}}(s_L,a_L)]^T \in \mathbb{C}^{L \times D}$
 \STATE
 \FOR{round $k = 0, 1, \ldots, T-1$}
     \STATE \textbf{[Server Broadcast]}
-    \STATE \quad Send $(\mathbf{M}_k, \Phi_{\text{global}}, \mathcal{X})$ to all agents
+    \STATE \quad Send $\mathbf{M}_k$ to all agents (encoder $\Phi$ sent once at initialization)
     \STATE
     \STATE \textbf{[Client Local Learning]} (in parallel for all agents $i = 1, \ldots, N$)
     \STATE \quad Initialize: $\mathbf{M}^{(i)}_{k,0} = \mathbf{M}_k$
-    \STATE \quad \textbf{Encoder adaptation:} Set $\Phi^{(i)} = \Phi_{\text{global}}$ or adapt locally
     \FOR{local step $u = 0, 1, \ldots, K-1$}
-        \STATE \quad Observe state $s_t^{(i)}$, select action $a_t^{(i)}$ via $\epsilon$-greedy on $Q_{\mathbf{M}^{(i)}_{k,u}}^{(i)}$
-        \STATE \quad Execute $a_t^{(i)}$, observe $r_t^{(i)}, s_{t+1}^{(i)}$, select next action $a_{t+1}^{(i)}$
-        \STATE \quad Encode: $\phi_t = \Phi^{(i)}(s_t^{(i)}, a_t^{(i)})$, $\phi_{t+1} = \Phi^{(i)}(s_{t+1}^{(i)}, a_{t+1}^{(i)})$
+        \STATE \quad Observe state $s_t^{(i)}$, select action $a_t^{(i)}$ via $\epsilon$-greedy on $Q_{\mathbf{M}^{(i)}_{k,u}}$
+        \STATE \quad Execute $a_t^{(i)}$, observe reward $r_t^{(i)}$ and next state $s_{t+1}^{(i)}$
+        \STATE \quad Select next action $a_{t+1}^{(i)}$ using current policy (SARSA)
+        \STATE \quad Encode: $\phi_t = \Phi(s_t^{(i)}, a_t^{(i)})$, $\phi_{t+1} = \Phi(s_{t+1}^{(i)}, a_{t+1}^{(i)})$
         \STATE \quad TD error: $\delta_t^{(i)} = r_t^{(i)} + \gamma \langle \phi_{t+1}, \mathbf{M}^{(i)}_{k,u} \rangle - \langle \phi_t, \mathbf{M}^{(i)}_{k,u} \rangle$
         \STATE \quad \textbf{Update:} $\mathbf{M}^{(i)}_{k,u+1} = \mathbf{M}^{(i)}_{k,u} + \alpha_{k,u} \delta_t^{(i)} \phi_t$
     \ENDFOR
-    \STATE \quad \textbf{Evaluate on anchors:} $\mathbf{q}^{(i)}_k = [Q_{\mathbf{M}^{(i)}_{k,K}}^{(i)}(s_j, a_j)]_{j=1}^{L}$
-    \STATE \quad \textbf{Upload:} Send $\mathbf{q}^{(i)}_k$ to server
+    \STATE \quad \textbf{Upload:} Send $\mathbf{M}^{(i)}_{k,K}$ to server
     \STATE
     \STATE \textbf{[Server Aggregation]}
-    \STATE \quad Receive Q-value vectors $\{\mathbf{q}^{(i)}_k\}_{i=1}^{N}$ from all agents
-    \STATE \quad \textbf{Average Q-values:} $\bar{\mathbf{q}}_k = \frac{1}{N}\sum_{i=1}^{N} \mathbf{q}^{(i)}_k$
-    \STATE \quad \textbf{Regression:} $\mathbf{M}_{k+1} = \mathbf{\Psi}^\dagger \bar{\mathbf{q}}_k$ \quad (closed-form least squares)
+    \STATE \quad Receive parameter vectors $\{\mathbf{M}^{(i)}_{k,K}\}_{i=1}^{N}$ from all agents
+    \STATE \quad \textbf{Average parameters:} $\mathbf{M}_{k+1} = \frac{1}{N}\sum_{i=1}^{N} \mathbf{M}^{(i)}_{k,K}$
     \STATE \quad \textbf{(Optional)} Project: $\mathbf{M}_{k+1} \leftarrow \text{Proj}_{\mathcal{B}(G)}(\mathbf{M}_{k+1})$
 \ENDFOR
 \STATE
-\STATE \textbf{Output:} Global Q-function $Q_{\mathbf{M}_T}(s,a) = \langle \Phi_{\text{global}}(s,a), \mathbf{M}_T \rangle$
+\STATE \textbf{Output:} Global Q-function $Q_{\mathbf{M}_T}(s,a) = \langle \Phi(s,a), \mathbf{M}_T \rangle$
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Theoretical Properties}
+\subsection{Theoretical Property: Parameter-Function Equivalence}
+\label{subsec:theory}
 
-\begin{theorem}[Parameter-Function Equivalence for Shared Encoders]
+\begin{theorem}[Parameter-Function Equivalence]
 \label{thm:parameter_function_equivalence}
 Let $\Phi: \mathcal{S}\times\mathcal{A} \to \mathbb{C}^D$ be a shared encoder fixed across all agents, and let $\{\mathbf{M}^{(i)}\}_{i=1}^N$ be local model hypervectors. Define the averaged hypervector as
 \begin{equation}
@@ -213,7 +175,129 @@ By definition of the HDC Q-function~\eqref{eq:hdc_q_function} and linearity of t
 \end{align}
 \end{proof}
 
-\begin{theorem}[Regression-Based Aggregation for Heterogeneous Encoders]
+This theorem justifies the direct parameter averaging strategy in Algorithm~\ref{alg:fedqhd_shared}
+and distinguishes HDC-based Q-learning from deep neural network approaches, where parameter
+averaging does not preserve function-level aggregation due to nonlinear activation functions.
+
+\subsection{Extension: Heterogeneous Encoders via Regression-Based Aggregation}
+\label{subsec:heterogeneous_extension}
+
+While the shared encoder approach provides efficient aggregation through direct parameter
+averaging, practical federated deployments often involve agents with heterogeneous
+computational capabilities or environmental complexities. To support such scenarios, we
+extend FedQHD to accommodate \textit{agent-specific encoders} $\{\Phi^{(i)}\}_{i=1}^N$
+while preserving the ability to aggregate learned knowledge.
+
+\subsubsection{Motivation for Heterogeneous Encoders}
+
+Different agents may benefit from different encoder architectures for several reasons:
+\begin{itemize}
+    \item \textbf{Computational constraints:} Edge devices may require lower-dimensional
+    encoders than datacenter agents.
+    \item \textbf{Environmental complexity:} Agents operating in complex environments may
+    need richer feature representations.
+    \item \textbf{Local adaptation:} Fine-tuning encoders to local state distributions can
+    improve sample efficiency.
+\end{itemize}
+
+However, with heterogeneous encoders, direct parameter averaging is no longer valid since
+$\mathbf{M}^{(i)}$ lives in the feature space induced by $\Phi^{(i)}$. We address this
+challenge through \textit{regression-based aggregation}.
+
+\subsubsection{Regression-Based Aggregation Protocol}
+
+The key insight is that while parameters cannot be directly averaged across different
+feature spaces, Q-\textit{functions} can be averaged pointwise. By exploiting the linearity
+of HDC Q-functions in parameter space, we can solve a regression problem to find global
+parameters that approximate the averaged Q-function.
+
+\textbf{Anchor-based aggregation:} The server maintains:
+\begin{itemize}
+    \item A global encoder $\Phi_{\text{global}}: \mathcal{S}\times\mathcal{A}\to\mathbb{C}^D$
+    \item A set of anchor state-action pairs $\mathcal{X} = \{(s_j, a_j)\}_{j=1}^{L}$
+    sampled from a representative distribution
+\end{itemize}
+
+\textbf{Upload phase:} Instead of uploading parameter vectors, each agent evaluates its
+local Q-function on the anchor set:
+\begin{equation}
+    \mathbf{q}^{(i)}_k = \left[ Q_{\mathbf{M}^{(i)}_{k,K}}^{(i)}(s_j, a_j) \right]_{j=1}^{L}
+    = \left[ \langle \Phi^{(i)}(s_j, a_j), \mathbf{M}^{(i)}_{k,K} \rangle \right]_{j=1}^{L}
+    \in \mathbb{R}^L.
+    \label{eq:q_value_upload_het}
+\end{equation}
+This requires $O(L)$ communication per agent, which can be more efficient than $O(D)$
+parameter uploads when $L \ll D$.
+
+\textbf{Aggregation phase:} The server computes the target averaged Q-values:
+\begin{equation}
+    \bar{\mathbf{q}}_k = \frac{1}{N}\sum_{i=1}^{N} \mathbf{q}^{(i)}_k,
+    \label{eq:averaged_q_het}
+\end{equation}
+and solves a least-squares regression to find global parameters that best approximate
+$\bar{\mathbf{q}}_k$ under $\Phi_{\text{global}}$:
+\begin{equation}
+    \mathbf{M}_{k+1} = \arg\min_{\mathbf{M} \in \mathbb{C}^D}
+    \sum_{j=1}^{L} \left\|
+    \langle \Phi_{\text{global}}(s_j, a_j), \mathbf{M} \rangle - \bar{q}_{k,j}
+    \right\|^2.
+    \label{eq:regression_aggregation_het}
+\end{equation}
+
+This has a closed-form solution via the Moore-Penrose pseudoinverse:
+\begin{equation}
+    \mathbf{M}_{k+1} = \mathbf{\Psi}^\dagger \bar{\mathbf{q}}_k,
+    \label{eq:closed_form_aggregation_het}
+\end{equation}
+where $\mathbf{\Psi} = [\Phi_{\text{global}}(s_1,a_1), \dots, \Phi_{\text{global}}(s_L,a_L)]^T \in \mathbb{C}^{L \times D}$.
+
+\subsubsection{Modified Algorithm for Heterogeneous Encoders}
+
+Algorithm~\ref{alg:fedqhd_heterogeneous} presents the complete protocol with regression-based
+aggregation.
+
+\begin{algorithm}[t]
+\caption{FedQHD: Heterogeneous Encoder Extension}
+\label{alg:fedqhd_heterogeneous}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} Rounds $T$, local steps $K$, agents $N$, anchor size $L$, learning rates $\{\alpha_{k,u}\}$
+\STATE \textbf{Server Initialize:}
+\STATE \quad Global encoder $\Phi_{\text{global}}: \mathcal{S}\times\mathcal{A}\to\mathbb{C}^D$
+\STATE \quad Global model $\mathbf{M}_0 = \mathbf{0} \in \mathbb{C}^D$
+\STATE \quad Anchor set $\mathcal{X} = \{(s_j, a_j)\}_{j=1}^{L}$
+\STATE \quad Feature matrix $\mathbf{\Psi} = [\Phi_{\text{global}}(s_1,a_1), \dots, \Phi_{\text{global}}(s_L,a_L)]^T \in \mathbb{C}^{L \times D}$
+\STATE \textbf{Client Initialize:} Each agent $i$ initializes or adapts local encoder $\Phi^{(i)}$
+\STATE
+\FOR{round $k = 0, 1, \ldots, T-1$}
+    \STATE \textbf{[Server Broadcast]} Send $(\mathbf{M}_k, \Phi_{\text{global}}, \mathcal{X})$ to all agents
+    \STATE
+    \STATE \textbf{[Client Local Learning]} (in parallel for all agents $i = 1, \ldots, N$)
+    \STATE \quad Initialize: $\mathbf{M}^{(i)}_{k,0} = \mathbf{M}_k$
+    \STATE \quad \textbf{(Optional) Adapt encoder:} Fine-tune $\Phi^{(i)}$ based on $\Phi_{\text{global}}$
+    \FOR{local step $u = 0, 1, \ldots, K-1$}
+        \STATE \quad Observe state $s_t^{(i)}$, select action $a_t^{(i)}$ via $\epsilon$-greedy
+        \STATE \quad Execute $a_t^{(i)}$, observe $r_t^{(i)}, s_{t+1}^{(i)}$, select next action $a_{t+1}^{(i)}$
+        \STATE \quad Encode: $\phi_t = \Phi^{(i)}(s_t^{(i)}, a_t^{(i)})$, $\phi_{t+1} = \Phi^{(i)}(s_{t+1}^{(i)}, a_{t+1}^{(i)})$
+        \STATE \quad TD error: $\delta_t^{(i)} = r_t^{(i)} + \gamma \langle \phi_{t+1}, \mathbf{M}^{(i)}_{k,u} \rangle - \langle \phi_t, \mathbf{M}^{(i)}_{k,u} \rangle$
+        \STATE \quad \textbf{Update:} $\mathbf{M}^{(i)}_{k,u+1} = \mathbf{M}^{(i)}_{k,u} + \alpha_{k,u} \delta_t^{(i)} \phi_t$
+    \ENDFOR
+    \STATE \quad \textbf{Evaluate on anchors:} $\mathbf{q}^{(i)}_k = [\langle \Phi^{(i)}(s_j, a_j), \mathbf{M}^{(i)}_{k,K} \rangle]_{j=1}^{L}$
+    \STATE \quad \textbf{Upload:} Send Q-value vector $\mathbf{q}^{(i)}_k \in \mathbb{R}^L$ to server
+    \STATE
+    \STATE \textbf{[Server Aggregation]}
+    \STATE \quad Receive $\{\mathbf{q}^{(i)}_k\}_{i=1}^{N}$ from all agents
+    \STATE \quad \textbf{Average Q-values:} $\bar{\mathbf{q}}_k = \frac{1}{N}\sum_{i=1}^{N} \mathbf{q}^{(i)}_k$
+    \STATE \quad \textbf{Regression:} $\mathbf{M}_{k+1} = \mathbf{\Psi}^\dagger \bar{\mathbf{q}}_k$
+    \STATE \quad \textbf{(Optional)} Project: $\mathbf{M}_{k+1} \leftarrow \text{Proj}_{\mathcal{B}(G)}(\mathbf{M}_{k+1})$
+\ENDFOR
+\STATE
+\STATE \textbf{Output:} Global Q-function $Q_{\mathbf{M}_T}(s,a) = \langle \Phi_{\text{global}}(s,a), \mathbf{M}_T \rangle$
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Theoretical Guarantee}
+
+\begin{theorem}[Regression-Based Aggregation Correctness]
 \label{thm:regression_aggregation}
 Let $\{\Phi^{(i)}\}_{i=1}^N$ be heterogeneous local encoders and $\{\mathbf{M}^{(i)}\}_{i=1}^N$ be
 corresponding parameter vectors. Let $\Phi_{\text{global}}$ be the global encoder and
@@ -222,7 +306,7 @@ $\mathcal{X} = \{(s_j, a_j)\}_{j=1}^{L}$ be anchor points. Define the target ave
     \bar{Q}(s,a) = \frac{1}{N}\sum_{i=1}^N Q_{\mathbf{M}^{(i)}}^{(i)}(s,a),
 \end{equation}
 where $Q_{\mathbf{M}^{(i)}}^{(i)}(s,a) = \langle \Phi^{(i)}(s,a), \mathbf{M}^{(i)} \rangle$.
-Let $\mathbf{M}_{\text{reg}}$ be the solution to the regression problem~\eqref{eq:regression_aggregation}.
+Let $\mathbf{M}_{\text{reg}}$ be the solution to~\eqref{eq:regression_aggregation_het}.
 Then, $\mathbf{M}_{\text{reg}}$ minimizes the mean squared error on the anchor set:
 \begin{equation}
     \mathbf{M}_{\text{reg}} = \arg\min_{\mathbf{M}} \sum_{j=1}^{L}
@@ -243,5 +327,7 @@ exact interpolation on $\mathcal{X}$. \qed
 \textbf{Remark:} Theorem~\ref{thm:regression_aggregation} shows that regression-based
 aggregation preserves the averaged Q-function on anchor points, enabling heterogeneous
 model aggregation. The choice of anchor distribution and size $L$ controls the
-approximation quality and generalization to unseen states.
+approximation quality and generalization to unseen states. In practice, anchors can be
+sampled from a replay buffer or from the empirical state-action distribution observed
+during training.
 
