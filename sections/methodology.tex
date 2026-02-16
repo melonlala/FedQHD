@@ -9,33 +9,190 @@
 
 [Formally define the problem you are solving.]
 
-\subsection{Hyperdimensional Approximation}
-\label{subsec:hd_approximation}
 
-[Explain how hyperdimensional computing is used for function approximation.]
+\subsection{HDC Q-function Representation}
+\label{subsec:hdc_q_representation}
+
+Hyperdimensional computing (HDC) encodes symbols using high-dimensional randomized
+hypervectors with near-orthogonality properties, enabling rich compositional structure while
+preserving simple arithmetic operations. In our setting, an HDC encoder
+\(
+    \Phi: \mathcal{S}\times\mathcal{A}\to\mathbb{C}^D
+\)
+maps each state--action pair $x=(s,a)$ to a $D$-dimensional hypervector $\Phi(x)$.
+The encoder is sampled once at initialization and fixed thereafter, identical across agents.
+To ensure numerical stability and compatibility with our finite-time analysis, we assume
+\(
+    \|\Phi(s,a)\|_2 \le 1
+    \,\text{for all $(s,a)$}.
+\)
+Each agent maintains a parameter hypervector $\mathbf{M}\in\mathbb{C}^D$ and evaluates its
+action--value function as
+\begin{equation}
+    Q_{\mathbf{M}}(s,a)
+    \;=\;
+    \langle \Phi(s,a),\, \mathbf{M} \rangle,
+    \label{eq:hdc_q_function}
+\end{equation}
+where $\langle\cdot,\cdot\rangle$ is the standard inner product on $\mathbb{C}^D$.
+This parameterization exhibits three key structural properties:
+
+\textit{1)Linearity in parameters:}
+    The map $M \mapsto Q_M$ is linear, so the HDC semi-gradient update 
+    reduces to a rank-one adjustment with $O(D)$ cost, matching the 
+    computational footprint of linear federated TD methods.
+
+\textit{2)Nonlinearity in inputs:}
+    The encoder $\Phi(s,a)$ is generally nonlinear in $(s,a)$, enabling 
+    $Q_M$ to capture dependencies that cannot be expressed by linear 
+    features. As a result, the HDC representation behaves like a 
+    high-capacity function class while retaining computational simplicity.
+
+\textit{3)Random-feature kernel structure:}
+    The induced kernel $k_D(x,x')=\langle \Phi(x),\Phi(x')\rangle$ 
+    concentrates to a smooth limiting kernel $k_\ast$ as $D\to\infty$. 
+    Thus, $Q_M$ can be viewed as a finite-dimensional approximation to an 
+    RKHS value function.
+
 
 \subsection{Federated Learning Protocol}
 \label{subsec:federated_protocol}
 
 [Describe the federated learning protocol, including client updates and server aggregation.]
 
+\subsection{Federated Averaging and Communication}
+\label{subsec:federated_averaging}
+HDC FedSARSA operates in synchronous communication rounds indexed by $k=0,1,2,\dots$. Each
+round consists of three phases and $K$ local update steps, so the global iteration count and 
+round index are related by $t = kK + u$, where $u \in \{0,\dots,K-1\}$ denotes 
+the local step within round $k$. 
+
+
+
+\subsubsection{Broadcast}
+The server maintains a global hypervector $\mathbf{M}_k$ and broadcasts it to all clients.
+Each client sets its local parameter to $\mathbf{M}_k$.
+
+\subsubsection{Local Updates}
+Agent $i$ executes $K$ on-policy HDC TD updates using
+\eqref{eq:local_hdc_update}, generating
+\begin{equation}
+\begin{split}
+    \mathbf{M}^{(i)}_{k,0}=\mathbf{M}_k,  
+    \quad
+     \mathbf{M}^{(i)}_{k,u+1}
+    =
+    \mathbf{M}^{(i)}_{k,u}
+    + \alpha_{k,u}\, g_{k,u}^{(i)}\!\left(\mathbf{M}^{(i)}_{k,u}\right)
+\end{split}
+    \label{eq:local_update}
+\end{equation}
+for $u=0,\dots,K-1$.
+
+\subsubsection{Upload and Aggregation}
+The server receives the local models $\mathbf{M}^{(i)}_{k,K}$ and performs federated
+averaging:
+\begin{equation}
+    \mathbf{M}_{k+1}
+    =
+    \frac{1}{N}\sum_{i=1}^{N}
+    \mathbf{M}^{(i)}_{k,K}.
+    \label{eq:federated_averaging}
+\end{equation}
+% To guarantee boundedness, we optionally project
+% $\mathbf{M}_{k+1}$ onto a Euclidean ball
+% $\mathcal{B}(G)=\{\mathbf{M}:\|\mathbf{M}\|_2\le G\}$.
+
+% {\color{purple}
+% Is the projection involved in lemma 2, or just for implementation?
+% }
+
+The averaged model $\mathbf{M}_{k+1}$ is then broadcast to all clients to initiate the next
+round.
 \subsection{Algorithm}
 \label{subsec:algorithm}
 
-[Present the main algorithm with pseudocode if applicable.]
+We now present the complete FedQHD algorithm, detailing both server-side and client-side operations. Our algorithm design emphasizes the key advantage of HDC-based Q-learning: the ability to perform efficient federated aggregation without requiring anchor points, a critical distinction from existing DQN-based federated RL methods.
 
-% Example algorithm structure (uncomment if needed):
-% \begin{algorithm}
-% \caption{FedQHD Algorithm}
-% \label{alg:fedqhd}
-% \begin{algorithmic}[1]
-% \STATE Initialize parameters
-% \FOR{each round $t = 1, 2, \ldots, T$}
-%     \STATE Server broadcasts global model
-%     \FOR{each client $k = 1, 2, \ldots, K$}
-%         \STATE Client performs local Q-learning updates
-%     \ENDFOR
-%     \STATE Server aggregates client updates
-% \ENDFOR
-% \end{algorithmic}
-% \end{algorithm}
+\subsubsection{Complete Algorithm Description}
+
+Algorithm~\ref{alg:fedqhd_server} presents the server-side coordination protocol, while Algorithm~\ref{alg:fedqhd_client} details the client-side learning procedure. The algorithms operate in synchronous rounds, with the server orchestrating global model updates through simple hypervector averaging.
+
+\begin{algorithm}[t]
+\caption{FedQHD: Server Protocol}
+\label{alg:fedqhd_server}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} Number of rounds $T$, local steps per round $K$, number of agents $N$
+\STATE \textbf{Initialize:} Global model $\mathbf{M}_0 = \mathbf{0} \in \mathbb{C}^D$
+\STATE \textbf{Initialize:} Shared encoder $\Phi: \mathcal{S}\times\mathcal{A}\to\mathbb{C}^D$ (broadcast to all clients)
+\FOR{round $k = 0, 1, \ldots, T-1$}
+    \STATE \textbf{Broadcast:} Send global model $\mathbf{M}_k$ to all agents
+    \STATE \textbf{Wait:} Receive local models $\{\mathbf{M}^{(i)}_{k,K}\}_{i=1}^{N}$ from all agents
+    \STATE \textbf{Aggregate:} Compute federated average
+    \begin{equation}
+        \mathbf{M}_{k+1} = \frac{1}{N}\sum_{i=1}^{N} \mathbf{M}^{(i)}_{k,K}
+    \end{equation}
+    \STATE \textbf{(Optional)} Project: $\mathbf{M}_{k+1} \leftarrow \text{Proj}_{\mathcal{B}(G)}(\mathbf{M}_{k+1})$
+\ENDFOR
+\STATE \textbf{Output:} Final global Q-function $Q_{\mathbf{M}_T}(s,a) = \langle \Phi(s,a), \mathbf{M}_T \rangle$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[t]
+\caption{FedQHD: Client Learning (Agent $i$)}
+\label{alg:fedqhd_client}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} Global model $\mathbf{M}_k$, learning rate $\{\alpha_{k,u}\}_{u=0}^{K-1}$, exploration rate $\epsilon_k$
+\STATE \textbf{Initialize:} Local model $\mathbf{M}^{(i)}_{k,0} = \mathbf{M}_k$
+\FOR{local step $u = 0, 1, \ldots, K-1$}
+    \STATE Observe current state $s_t^{(i)} \in \mathcal{S}^{(i)}$
+    \STATE \textbf{Select action} using $\epsilon$-greedy policy:
+    \begin{equation}
+        a_t^{(i)} = \begin{cases}
+        \text{uniform random from } \mathcal{A}^{(i)} & \text{w.p. } \epsilon_k \\
+        \arg\max_{a \in \mathcal{A}^{(i)}} Q_{\mathbf{M}^{(i)}_{k,u}}(s_t^{(i)}, a) & \text{w.p. } 1-\epsilon_k
+        \end{cases}
+    \end{equation}
+    \STATE Execute action $a_t^{(i)}$, observe reward $r_t^{(i)}$ and next state $s_{t+1}^{(i)}$
+    \STATE Select next action $a_{t+1}^{(i)}$ using current policy (SARSA)
+    \STATE \textbf{Encode features:} $\phi_t = \Phi(s_t^{(i)}, a_t^{(i)})$, $\phi_{t+1} = \Phi(s_{t+1}^{(i)}, a_{t+1}^{(i)})$
+    \STATE \textbf{Compute TD error:}
+    \begin{equation}
+        \delta_t^{(i)} = r_t^{(i)} + \gamma \langle \phi_{t+1}, \mathbf{M}^{(i)}_{k,u} \rangle - \langle \phi_t, \mathbf{M}^{(i)}_{k,u} \rangle
+    \end{equation}
+    \STATE \textbf{HDC update:}
+    \begin{equation}
+        \mathbf{M}^{(i)}_{k,u+1} = \mathbf{M}^{(i)}_{k,u} + \alpha_{k,u} \delta_t^{(i)} \phi_t
+        \label{eq:local_hdc_update}
+    \end{equation}
+    \STATE \textbf{(Optional)} Experience replay: Store $(s_t^{(i)}, a_t^{(i)}, r_t^{(i)}, s_{t+1}^{(i)}, a_{t+1}^{(i)})$ to buffer $\mathcal{B}^{(i)}$ and perform batch update
+    \STATE Update time step: $t \leftarrow t+1$
+\ENDFOR
+\STATE \textbf{Output:} Upload local model $\mathbf{M}^{(i)}_{k,K}$ to server
+\end{algorithmic}
+\end{algorithm}
+
+\begin{theorem}[Parameter-Function Equivalence]
+\label{thm:parameter_function_equivalence}
+Let $\Phi: \mathcal{S}\times\mathcal{A} \to \mathbb{C}^D$ be a shared encoder fixed across all agents, and let $\{\mathbf{M}^{(i)}\}_{i=1}^N$ be local model hypervectors. Define the averaged hypervector as
+\begin{equation}
+    \bar{\mathbf{M}} = \frac{1}{N}\sum_{i=1}^N \mathbf{M}^{(i)}.
+\end{equation}
+Then, for all state-action pairs $(s,a) \in \mathcal{S} \times \mathcal{A}$, parameter averaging is equivalent to function averaging:
+\begin{equation}
+    Q_{\bar{\mathbf{M}}}(s,a) = \frac{1}{N}\sum_{i=1}^N Q_{\mathbf{M}^{(i)}}(s,a).
+    \label{eq:param_func_equiv}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+By definition of the HDC Q-function~\eqref{eq:hdc_q_function} and linearity of the inner product:
+\begin{align}
+    Q_{\bar{\mathbf{M}}}(s,a) 
+    &= \langle \Phi(s,a), \bar{\mathbf{M}} \rangle \\
+    &= \left\langle \Phi(s,a), \frac{1}{N}\sum_{i=1}^N \mathbf{M}^{(i)} \right\rangle \\
+    &= \frac{1}{N}\sum_{i=1}^N \langle \Phi(s,a), \mathbf{M}^{(i)} \rangle \quad \text{(linearity of $\langle\cdot,\cdot\rangle$)} \\
+    &= \frac{1}{N}\sum_{i=1}^N Q_{\mathbf{M}^{(i)}}(s,a). \qquad \qed
+\end{align}
+\end{proof}
+

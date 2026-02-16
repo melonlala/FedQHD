@@ -4,14 +4,33 @@
 % Motivation: Why is this problem important?
 [Introduce the problem of federated reinforcement learning and the challenges it addresses.]
 
+Federated reinforcement learning(FRL) is ...
+
+challenges:
+
+
+
+
+
 % Gap: What is missing in current approaches?
 [Discuss limitations of existing federated learning and Q-learning methods.]
 
+i) Deep reinforcement learning does not hold representation-aware expressiveness in FedAvg's linear aggregation process.
+ii) The model configuration of deep reinforcement learning is limited to being the same in FedAvg.
+
+
 % Our approach: What do we propose?
 [Briefly introduce your approach using hyperdimensional approximation.]
+We introduce  hyperdimensional regression model to approximate the Q-value function in federated learning.
+
+
+
 
 % Contributions: What are the main contributions?
 [List the main contributions of this work.]
+i) Aggregation Equivalence: hold expressiveness of aggregating decentralized interaction data through averaging linearly approximated Q functions; 
+ii) support model heterogeneity
+
 
 % Organization: How is the paper structured?
 The rest of this paper is organized as follows. Section~\ref{sec:related_work} reviews related work. Section~\ref{sec:preliminaries} provides background on federated learning, Q-learning, and hyperdimensional computing. Section~\ref{sec:methodology} describes our proposed FedQHD approach. Section~\ref{sec:experiments} details our experimental setup. Section~\ref{sec:results} presents our experimental results. Section~\ref{sec:discussion} discusses the implications of our findings. Finally, Section~\ref{sec:conclusion} concludes the paper.
