@@ -13,8 +13,8 @@ We evaluate FedQHD on four continuous-state control tasks from OpenAI Gym \cite{
     \item \textbf{Acrobot-v1}: Swing up a two-link underactuated robot (6D state, 3 actions)
     \item \textbf{LunarLander}
     \item \textbf{MountainCar}
-    \item \textbf{Hopper-v2}: MuJoCo single-legged hopping robot (11D state, 3 actions)
-    \item \textbf{HalfCheetah-v2}: MuJoCo planar biped locomotion (17D state, 6 actions)
+    \item \textbf{Pong-v0}
+    \item \textbf{Freeway}
 \end{itemize}
 
 % To construct heterogeneous federated environments, we systematically vary physical parameters to create diverse MDPs that share the same state-action space but differ in dynamics:
@@ -48,7 +48,7 @@ We compare FedQHD against the following methods:
     \item Centralized DQN (oracle)
     \item \textbf{FedAvg-DQN}~\cite{jin2022federated}: Federated deep Q-learning with parameter averaging. Uses a 2-layer MLP with 128 hidden units per layer.
     \item Pad/Truncate FedAvg-QHD
-    \item Hetero Distillation (DQN using knowledge distillation)
+    \item Hetero Distillation (DQN using knowledge distillation) \cite{rusu2016policydistillation}
     \item \textbf{FedQHD(Ours)}
 \end{enumerate}
 
