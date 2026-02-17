@@ -4,52 +4,32 @@
 \section{Related Work}
  \label{sec:related_work}
 \paragraph{Federated Reinforcement Learning with Shared Parameterizations.}
-
+Fed - DQN 
 
 \paragraph{Distillation-Based Federated RL for Heterogeneous Agents.}
+FedHPD 
+
+Instead of sharing parameters between the different workers, \cite{teh2017distral} proposes to share a distilled policy that captures common behavior across tasks
+
+\paragraph{Black-Box and Query-Based Federated Q-Learning.}  FHQL 
 
 
-\paragraph{Black-Box and Query-Based Federated Q-Learning.}
+\paragraph{Heterogeneous Environments and Tasks in Federated RL.} In reward, environment not structure 
 
 
-\paragraph{Heterogeneous Environments and Tasks in Federated RL.}
+
+% \cite{ni2022qhd} proposes a hyperdimensional regression model to approximate the Q-value function.
+
+\cite{ye2023fedfm} anchor based feature matching FRL
+
+\cite{jin2022federated}  Federated Reinforcement Learning with Environment Heterogeneity (FRL-EH) framework
+
+\cite{hwang2025fed} Federated Reinforcement Learning with Environment Heterogeneity (FRL-EH) framework by incorporating a regularization term in the local update
 
 
 \paragraph{Proposed FedQHD.}
 In contrast, \textbf{FedQHD} targets \emph{structural heterogeneity}, where clients may use different encoders and different parameter dimensions, rendering parameter-space synchronization algebraically undefined.
 FedQHD replaces parameter averaging with a \emph{function-space} federation primitive based on a shared anchor interface: client models are aggregated via Q-value consensus on anchor states, and the resulting global teacher is compiled back into each client’s private representation through a \emph{one-shot closed-form ridge or proximal-ridge projection}. This structure avoids iterative distillation, remains well-defined under mixed encoders and dimensions, and admits a homogeneous limit in which the method reduces exactly to FedAvg, providing a principled bridge between classical federated learning and heterogeneous federation.
 
-% \subsection{Hyperdimensional Computing (HDC)}
-% \label{subsec:hdc_background}
-
-% Hyperdimensional computing (HDC) is a brain-inspired computational paradigm in which symbols and structured entities are represented as high-dimensional vectors---called \emph{hypervectors}---with components drawn independently from simple distributions~\cite{kanerva2009hyperdimensional}. In such spaces, independently sampled hypervectors are nearly orthogonal with high probability, a geometric property that underlies classical HDC operations such as \emph{bundling} (superposition via addition), \emph{binding} (association via elementwise multiplication or permutation), and \emph{permutation} (role shifting). Because information is distributed holographically across all dimensions, HDC representations exhibit strong robustness to noise, quantization, and partial corruption.
-
-% Given an input $x$, an HDC encoder produces a bounded hypervector $h=\phi(x)\in\mathbb{R}^D$ (or $\mathbb{C}^D$) using random projections or compositional schemes built from a small set of base hypervectors. These encoders admit a precise random-feature interpretation: the empirical kernel
-% \begin{equation}
-% \label{eq:empirical_kernel}
-% k_D(x,x')=\langle \phi(x),\phi(x')\rangle
-% \end{equation}
-% converges to a smooth limiting kernel $k_\ast(x,x')$ as $D\to\infty$, with uniform concentration at rate $O(D^{-1/2})$.
-
-% The following concentration property, standard in the random-feature literature, quantifies this convergence.
-
-% With probability at least $1-\delta$ over the random generation of hypervectors, the empirical kernel concentrates uniformly around the limiting kernel:
-% \begin{equation}
-% \label{eq:kernel_concentration}
-% \big| k_D(x,x') - k^\ast(x,x') \big| \leq \frac{C_k}{\sqrt{D}},
-% \quad \forall\, x,x' \in \mathcal{S} \times \mathcal{A},
-% \end{equation}
-% where $C_k > 0$ is an absolute constant depending only on the encoding scheme.
-
-% This $O(D^{-1/2})$ concentration rate is established for various random-feature constructions, including Random Fourier Features and related schemes~\cite{rahimi2007random,bach2015equivalence,rudi2017generalization}. As a consequence, linear prediction in the hypervector domain serves as a computationally efficient, finite-dimensional approximation to kernel methods in the RKHS associated with $k_\ast$.
 
 
-
-
-% \cite{ni2022qhd} proposes a hyperdimensional regression model to approximate the Q-value function.
-
-% \cite{ye2023fedfm} anchor based feature matching FRL
-
-% \cite{jin2022federated}  Federated Reinforcement Learning with Environment Heterogeneity (FRL-EH) framework
-
-% \cite{hwang2025fed} Federated Reinforcement Learning with Environment Heterogeneity (FRL-EH) framework by incorporating a regularization term in the local update

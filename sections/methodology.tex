@@ -1,7 +1,7 @@
 
 
 
-\subsection{Problem Formulation}
+\section{Problem Formulation}
 \label{subsec:problem_formulation}
 \subsection{QHD: hyperdimensional Q-learning for continuous-state control}
 We now describe how hyperdimensional representations are used to approximate action-value functions in continuous-state, discrete-action control. Agent $i$ selects an HDC encoder
@@ -30,8 +30,7 @@ QHD performs a lightweight rank-one update
 \end{equation}
 where $\eta>0$ is a step size...
 
-% Describe your proposed approach
-[Describe the FedQHD framework and algorithm in detail.]
+{\color{red} explain the updates}
 
 
 
@@ -85,7 +84,7 @@ where $\eta>0$ is a step size...
 
 
 \subsection{Federated value learning as a global objective}
-We consider $N$ agents learning concurrently, each interacting with its own environment and collecting a private replay buffer $\mathcal{D}_i$. ...
+We consider $N$ agents learning concurrently, each interacting with its own environment and collecting a private replay buffer $\mathcal{D}_i$. ... 
 
 
 Federated reinforcement learning seeks to aggregate local value knowledge into a global representation without centralizing data, data sharing is impossible due to privacy, communication limitations, latency, etc. 
@@ -105,6 +104,10 @@ This objective is to combine the clients' knowledge in a shared output space rat
 Q^{\mathrm{glob}}(s,a) \;=\; \sum_{i=1}^N \pi_i\,Q_i(s,a) \qquad (\mu\text{-a.e.}).
 \label{eq:qglob_avg}
 \end{equation}
+
+{\color{red} introduce the general problem of function space Q Learning, which can be implied to tabular or continuous state-action setting, to linear or non-linear paprameter averaging in reinforcement learning methond. claim the obstacless}
+
+
 For TABLUAR, THE solution on top is like hsaring their Q-table, which leads to the exact function-sapce soltuions knowln asn Federated Q-Learning.  FEDERATED AVERAGING HOLDS THE EXACT FUNCTION SPACE, SIMILAR TO A LINEAR FORM LIKE QHD. BUT, FOR NONLINEAR, THEY RELY ON THE HEURISTIC PARAMETER AVERAGING. 
 
 
@@ -145,7 +148,8 @@ which is a strictly convex quadratic problem whenever $\Sigma_\mu \succ 0$, with
 W^{\mathrm{glob}} = \sum_{i=1}^N \pi_i W_i.
 \label{eq:exact_avg}
 \end{equation}
-[Formally define the problem you are solving.]
+
+{\color{red} remind that $\Sigma_\mu$ doesn't explicitly appear in solution but involves the raw data sharing with homo encoders}
 
 
 \subsection{Fed-QHD with Heterogeneous Encoders}
@@ -165,15 +169,63 @@ $\min_{Q\in\mathbb{R}^{m\times|\mathcal{A}|}} \sum_i \pi_i \|Q^{\mathrm{ref}}_i 
 
 DEFINE AN ANCHOR FOR CLIENT I
 
+For each client $i$, define the \emph{anchor feature matrix} by stacking encoded anchor states:
+\begin{equation}
+X_i \;=\; 
+\begin{bmatrix}
+\Phi_i(s_1) \\
+\Phi_i(s_2) \\
+\vdots \\
+\Phi_i(s_m)
+\end{bmatrix}
+\in \mathbb{K}^{m \times D_i}.
+\label{eq:anchor_matrix_i}
+\end{equation}
+The local Q-function evaluations on the anchor set can then be written compactly as
+\begin{equation}
+Q^{\mathrm{ref}}_i = \Re(X_i W_i),
+\qquad W_i = [\mathbf{w}_{i,a}]_{a\in\mathcal{A}} \in \mathbb{K}^{D_i \times |\mathcal{A}|}.
+\label{eq:anchor_q_matrix_form}
+\end{equation}
 
 THEN WRITE THE REGULARIZED NONLINEAR EQUATIONS
 
+We seek a client-side parameter matrix $W^{\mathrm{glob}}_i\in\mathbb{K}^{D_i\times|\mathcal{A}|}$ that enables client $i$ to reproduce the global teacher $Q^{\mathrm{glob}}_{\mathrm{ref}}$ as closely as possible using its own encoder $\Phi_i$. This leads to the \emph{regularized least-squares compilation problem}:
+\begin{equation}
+W^{\mathrm{glob}}_i \;=\; \arg\min_{W \in \mathbb{K}^{D_i \times |\mathcal{A}|}} 
+\left\|X_i W - Q^{\mathrm{glob}}_{\mathrm{ref}}\right\|_F^2 
++ \lambda \|W\|_F^2,
+\label{eq:regularized_compilation}
+\end{equation}
+where $\lambda \ge 0$ is a regularization parameter that controls model complexity and stabilizes the solution when the anchor set is small ($m < D_i$) or when $X_i$ is ill-conditioned.
+
+
 AND THE CONVEX SOLUTIUON FOR IT. 
 
+Problem~\eqref{eq:regularized_compilation} is a convex quadratic optimization problem in $W$ with a unique global minimizer. Taking the gradient with respect to $W$ and setting it to zero yields the regularized normal equations:
+\begin{equation}
+\left(X_i^\mathrm{H} X_i + \lambda I_{D_i}\right) W^{\mathrm{glob}}_i = X_i^\mathrm{H} Q^{\mathrm{glob}}_{\mathrm{ref}}.
+\label{eq:normal_equations}
+\end{equation}
+When $\lambda > 0$ or when $X_i^\mathrm{H} X_i$ is full rank, the system~\eqref{eq:normal_equations} is invertible, yielding the explicit solution:
+\begin{equation}
+W^{\mathrm{glob}}_i = \left(X_i^\mathrm{H} X_i + \lambda I_{D_i}\right)^{-1} X_i^\mathrm{H} Q^{\mathrm{glob}}_{\mathrm{ref}}.
+\label{eq:ridge_solution}
+\end{equation}
+In the unregularized limit $\lambda \to 0$, this reduces to the Moore-Penrose pseudoinverse solution:
+\begin{equation}
+W^{\mathrm{glob}}_i = X_i^\dagger Q^{\mathrm{glob}}_{\mathrm{ref}},
+\qquad X_i^\dagger = (X_i^\mathrm{H} X_i)^{-1} X_i^\mathrm{H},
+\label{eq:pseudoinverse_solution}
+\end{equation}
+provided $\mathrm{rank}(X_i) = \min(m, D_i)$.
 
 
-We seek a client-side parameter matrix $W^{\mathrm{glob}}_i\in\mathbb{K}^{D_i\times|\mathcal{A}|}$
 
+SEE IF YOU CAN CONNECT HERE WITH ONE EQUATION TO GRAM MATRIX
+
+
+PROCESS: CLIENT SHARE THEIR DATA, THE SERVER COMPUTES THE Q GLOBAL, AND RETURN THE .... 
 
 
 
@@ -499,7 +551,7 @@ exact interpolation on $\mathcal{X}$. \qed
 
 \textbf{Remark:} Theorem~\ref{thm:regression_aggregation} shows that regression-based
 aggregation preserves the averaged Q-function on anchor points, enabling heterogeneous
-model aggregation. The choice of anchor distribution and size $L$ controls the
+ model aggregation. The choice of anchor distribution and size $L$ controls the
 approximation quality and generalization to unseen states. In practice, anchors can be
 sampled from a replay buffer or from the empirical state-action distribution observed
 during training.

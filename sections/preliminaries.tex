@@ -11,7 +11,20 @@ Q^\star(s,a)= r(s,a) + \gamma\,\mathbb{E}_{s'\sim P(\cdot|s,a)}
 Keep the RL background minimal here and focus to have space in the next section to talk about federation
 
 \subsection{Hyperdimensional computing (HDC)}
-DESCRIBE ONLY GENERAL HDC HERE COMPACT. 
+
+\label{subsec:hdc_background}
+{\color{red} DESCRIBE ONLY GENERAL HDC HERE COMPACT. }
+Hyperdimensional computing (HDC) is a brain-inspired computational paradigm in which symbols and structured entities are represented as high-dimensional vectors---called \emph{hypervectors}---with components drawn independently from simple distributions~\cite{kanerva2009hyperdimensional}. In such spaces, independently sampled hypervectors are nearly orthogonal with high probability, a geometric property that underlies classical HDC operations such as \emph{bundling} (superposition via addition), \emph{binding} (association via elementwise multiplication or permutation), and \emph{permutation} (role shifting). Because information is distributed holographically across all dimensions, HDC representations exhibit strong robustness to noise, quantization, and partial corruption.
+
+Given an input $x$, an HDC encoder produces a bounded hypervector $h=\phi(x)\in\mathbb{R}^D$ (or $\mathbb{C}^D$) using random projections or compositional schemes built from a small set of base hypervectors. These encoders admit a precise random-feature interpretation: the empirical kernel
+\begin{equation}
+\label{eq:empirical_kernel}
+k_D(x,x')=\langle \phi(x),\phi(x')\rangle
+\end{equation}
+converges to a smooth limiting kernel $k_\ast(x,x')$ as $D\to\infty$, with uniform concentration at rate $O(D^{-1/2})$ \cite{rahimi2007random,bach2015equivalence,rudi2017generalization}. As a consequence, linear prediction in the hypervector domain serves as a computationally efficient, finite-dimensional approximation to kernel methods in the RKHS associated with $k_\ast$.
+
+
+
 % \begin{enumerate}
 %     \item \textbf{Reward heterogeneity}
 %     \item \textbf{}

@@ -7,7 +7,7 @@ We conduct comprehensive experiments to validate FedQHD's effectiveness in feder
 \label{subsec:exp_setup}
 
 \paragraph{Environments and Tasks.}
-We evaluate FedQHD on four continuous-state control tasks from OpenAI Gym:
+We evaluate FedQHD on four continuous-state control tasks from OpenAI Gym \cite{brockman2016openai}:
 \begin{itemize}
     \item \textbf{CartPole-v1}: Balance a pole on a moving cart (4D state, 2 actions)
     \item \textbf{Acrobot-v1}: Swing up a two-link underactuated robot (6D state, 3 actions)
@@ -44,12 +44,17 @@ All methods use $\epsilon$-greedy exploration with $\epsilon$ annealed from 1.0 
 We compare FedQHD against the following methods:
 \begin{enumerate}
     \item \textbf{Independent QHD}: The performance of a randomly selected local model in each of the $N$ involved environments. This serves as a lower bound, representing the case where no federation occurs and clients learn independently.
-
     \item \textbf{Oracle QHD}: A single QHD agent trained on data pooled from all client environments (not federated). This provides an upper bound assuming perfect data sharing.
-
+    \item Centralized DQN (oracle)
     \item \textbf{FedAvg-DQN}~\cite{jin2022federated}: Federated deep Q-learning with parameter averaging. Uses a 2-layer MLP with 128 hidden units per layer.
+    \item Pad/Truncate FedAvg-QHD
+    \item Hetero Distillation (DQN using knowledge distillation)
     \item \textbf{FedQHD(Ours)}
 \end{enumerate}
+
+
+A table showing the time for training. 
+
 
 \subsection{Evaluation Metrics}
 \label{subsec:metrics}
@@ -107,19 +112,9 @@ We vary anchor set size $m \in \{50, 100, 200, 500\}$ and observe that performan
 %     \label{fig:hetero_comparison}
 % \end{figure}
 
-\subsubsection{Robustness to Environmental Heterogeneity (Q3)}
-\label{subsec:heterogeneity_robustness}
+\subsubsection{Computation Cost}
 
-To systematically evaluate robustness, we vary the heterogeneity level by controlling the range of environment parameter variation. Let $\Delta \in [0, 1]$ control the heterogeneity level, where environment parameters are sampled uniformly in $[(1-\Delta)L_0, (1+\Delta)L_0]$. Figure~\ref{fig:heterogeneity_sweep} plots final performance vs. $\Delta$ for $\Delta \in \{0, 0.2, 0.4, 0.6, 0.8\}$.
-
-FedQHD maintains robust performance up to $\Delta = 0.4$, with less than 15\% degradation compared to the homogeneous case ($\Delta=0$). At higher heterogeneity levels ($\Delta > 0.6$), performance degrades more significantly but remains 30-40\% better than Independent learning. In contrast, FedAvg-DQN shows severe degradation beyond $\Delta=0.3$, with performance dropping below Independent learning at $\Delta=0.6$. This suggests that parameter averaging in nonlinear models fails under high heterogeneity, whereas FedQHD's function-space aggregation is more robust.
-
-% \begin{figure}[t]
-%     \centering
-%     \includegraphics[width=0.8\linewidth]{figures/heterogeneity_sweep.pdf}
-%     \caption{Performance vs. environmental heterogeneity level $\Delta$.}
-%     \label{fig:heterogeneity_sweep}
-% \end{figure}
+traning time table
 
 \subsubsection{Projection Residual as Heterogeneity Diagnostic (Q4)}
 \label{subsec:projection_residual}
