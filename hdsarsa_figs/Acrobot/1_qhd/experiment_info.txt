@@ -1,0 +1,25 @@
+grid_size: [8, 8]
+episodes: 600
+agent_type: qhd
+aggregation_interval: 5
+learning_rate: 0.1
+discount_factor: 0.9
+exploration_rate: 1
+exploration_decay: 0.995
+exploration_min: 0.001
+output_dir: test_figs
+avg_window: 5
+test: False
+convergence_threshold: 1
+convergence_window: 20
+agent_range: 1
+env: Acrobot
+runs: 3
+agent_num: 1
+Training time (seconds): 650.07
+
+Final Results (last 100 episodes average):
+Parallel Avg Reward: -420.12
+FedAvg Avg Reward: -375.66
+Parallel Avg Success: 0.00
+FedAvg Avg Success: 0.00

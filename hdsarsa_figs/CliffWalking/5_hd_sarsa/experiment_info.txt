@@ -1,0 +1,25 @@
+grid_size: [8, 8]
+episodes: 200
+agent_type: hd_sarsa
+aggregation_interval: 10
+learning_rate: 0.01
+discount_factor: 0.99
+exploration_rate: 1.0
+exploration_decay: 0.995
+exploration_min: 0.01
+output_dir: fed_figs
+avg_window: 1
+test: False
+convergence_threshold: 1
+convergence_window: 20
+agent_range: 1, 5
+env: CliffWalking
+runs: 3
+agent_num: 5
+Training time (seconds): 956.17
+
+Final Results (last 100 episodes average):
+Parallel Avg Reward: -46.83
+FedAvg Avg Reward: -86.33
+Parallel Avg Success: 1.00
+FedAvg Avg Success: 1.00

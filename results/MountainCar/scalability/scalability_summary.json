@@ -1,0 +1,65 @@
+{
+  "configuration": {
+    "client_counts": [
+      5,
+      10,
+      20,
+      50
+    ],
+    "episodes": 600,
+    "environment": "MountainCar",
+    "aggregation_interval": 50,
+    "learning_rate": 0.1,
+    "hyperdimension": 10000
+  },
+  "results": {
+    "N=5": {
+      "Independent": {
+        "final_reward": -200.0,
+        "training_time": 401.6156358718872
+      },
+      "FedQHD": {
+        "final_reward": -149.586,
+        "training_time": 426.79335618019104
+      },
+      "improvement": 50.41399999999999,
+      "speedup": 1.0626910858528809
+    },
+    "N=10": {
+      "Independent": {
+        "final_reward": -200.0,
+        "training_time": 802.7116641998291
+      },
+      "FedQHD": {
+        "final_reward": -140.858,
+        "training_time": 853.6707301139832
+      },
+      "improvement": 59.141999999999996,
+      "speedup": 1.0634836494682705
+    },
+    "N=20": {
+      "Independent": {
+        "final_reward": -200.0,
+        "training_time": 1589.800731420517
+      },
+      "FedQHD": {
+        "final_reward": -150.38299999999998,
+        "training_time": 2793.722359418869
+      },
+      "improvement": 49.61700000000002,
+      "speedup": 1.7572783206123106
+    },
+    "N=50": {
+      "Independent": {
+        "final_reward": -200.0,
+        "training_time": 9844.136247873306
+      },
+      "FedQHD": {
+        "final_reward": -140.649,
+        "training_time": 10082.50148677826
+      },
+      "improvement": 59.351,
+      "speedup": 1.024213931309255
+    }
+  }
+}

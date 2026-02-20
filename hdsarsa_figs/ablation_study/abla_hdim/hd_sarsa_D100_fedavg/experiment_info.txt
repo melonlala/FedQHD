@@ -1,0 +1,33 @@
+============================================================
+Experiment Configuration
+============================================================
+
+env: CartPole
+grid_size: [8, 8]
+episodes: 1500
+runs: 3
+agent_type: hd_sarsa
+learning_rate: 0.2
+discount_factor: 0.9
+exploration_rate: 0.8
+exploration_decay: 0.9
+exploration_min: 0.001
+aggregation_interval: 1
+ablation_mode: hdim
+agent_range: 1,2,5,10,40
+hdim_range: 100, 1000, 5000, 10000, 100000
+fixed_hdim: 10000
+fixed_num_agents: 2
+reference_hdim: 10000
+output_dir: mac_figs
+avg_window: 10
+convergence_threshold: 1
+convergence_window: 20
+hyperdimension: 100
+agent_num: 2
+
+Training time (seconds): 825.16
+
+Final Results (last 100 episodes average):
+----------------------------------------
+Config 100: Final MSE = 6732.788563

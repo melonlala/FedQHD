@@ -3,56 +3,21 @@ Comprehensive Experiment Runner for FedQHD Paper
 Supports all baselines and experiment types mentioned in sections/experiments.tex
 """
 
+import copy
 import numpy as np
 import time
 import os
 import json
 from typing import Dict, List, Tuple
 import tqdm
+import torch
+import torch.nn.functional as F
 from env.utils import create_env
 from env.bounds import state_bounds
 from agent.qhd_agent import QHDAgent
 from agent.dqn_agent import DQNAgent
 from agent.fedavg import FedAvgAgent
 
-
-def check_convergence(reward_history: List[float], window_size: int = 100,
-                      patience: int = 50, min_episodes: int = 200) -> bool:
-    """
-    Check if training has converged based on reward history.
-
-    Args:
-        reward_history: List of episode rewards
-        window_size: Window to compute rolling statistics
-        patience: Number of episodes without improvement to trigger convergence
-        min_episodes: Minimum episodes before checking convergence
-
-    Returns:
-        True if converged, False otherwise
-    """
-    if len(reward_history) < min_episodes:
-        return False
-
-    if len(reward_history) < window_size + patience:
-        return False
-
-    # Compute rolling mean over last window
-    recent_rewards = reward_history[-window_size:]
-    recent_mean = np.mean(recent_rewards)
-    recent_std = np.std(recent_rewards)
-
-    # Check if variance is low (stable performance)
-    if recent_std < 0.1 * abs(recent_mean):  # CV < 10%
-        # Check if there's no improvement in last 'patience' episodes
-        older_window = reward_history[-(window_size + patience):-patience]
-        older_mean = np.mean(older_window)
-
-        # Converged if recent performance is not significantly better
-        improvement = (recent_mean - older_mean) / max(abs(older_mean), 1.0)
-        if improvement < 0.02:  # Less than 2% improvement
-            return True
-
-    return False
 
 
 class ExperimentResults:
@@ -103,11 +68,11 @@ def train_independent_qhd(episodes: int, args) -> ExperimentResults:
         action_dim=envs[0].action_dim,
         agent_type='qhd',
         num_agents=num_agents,
-        learning_rate=args.learning_rate,
-        discount_factor=args.discount_factor,
-        exploration_rate=args.exploration_rate,
-        exploration_decay=args.exploration_decay,
-        exploration_min=args.exploration_min,
+        learning_rate=args.qhd_lr,
+        discount_factor=args.qhd_discount,
+        exploration_rate=getattr(args, 'qhd_exploration_rate', 1.0),
+        exploration_decay=getattr(args, 'qhd_exploration_decay', 0.995),
+        exploration_min=getattr(args, 'qhd_exploration_min', 0.001),
         hd_dim=args.hyperdimension,
         state_bounds=state_bounds.get(args.env)
     )
@@ -118,7 +83,7 @@ def train_independent_qhd(episodes: int, args) -> ExperimentResults:
         episode_successes = []
 
         for agent_id in range(num_agents):
-            agent = agent.get_agent(agent_id)  # Get the local agent
+            agent = fed_agent.get_agent(agent_id)  # Get the local agent
             env = envs[agent_id]
             state, _ = env.reset()
             done = False
@@ -140,11 +105,8 @@ def train_independent_qhd(episodes: int, args) -> ExperimentResults:
         reward_history.append(np.mean(episode_rewards))
         success_history.append(np.mean(episode_successes))
 
-        if check_convergence(reward_history):
-            print(f"\nConverged at episode {episode + 1}")
-            break
 
-        if (episode + 1) % args.aggregation_interval == 0:
+        if (episode + 1) % args.qhd_agg_interval == 0:
             
             fed_agent.aggregate()
             #instead pf distributing the global model, we keep the local models randomly initialized every aggregation round to simulate the independent learning scenario
@@ -153,11 +115,11 @@ def train_independent_qhd(episodes: int, args) -> ExperimentResults:
                 action_dim=envs[0].action_dim,
                 agent_type='qhd',
                 num_agents=num_agents,
-                learning_rate=args.learning_rate,
-                discount_factor=args.discount_factor,
-                exploration_rate=args.exploration_rate,
-                exploration_decay=args.exploration_decay,
-                exploration_min=args.exploration_min,
+                learning_rate=args.qhd_lr,
+                discount_factor=args.qhd_discount,
+                exploration_rate=getattr(args, 'qhd_exploration_rate', 1.0),
+                exploration_decay=getattr(args, 'qhd_exploration_decay', 0.995),
+                exploration_min=getattr(args, 'qhd_exploration_min', 0.01),
                 hd_dim=args.hyperdimension,
                 state_bounds=state_bounds.get(args.env)
             )
@@ -177,72 +139,123 @@ def train_independent_qhd(episodes: int, args) -> ExperimentResults:
     return results
 
 
-def train_oracle_qhd(episodes: int, args) -> ExperimentResults:
+def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False) -> ExperimentResults:
     """
-    Baseline 2: Oracle QHD
-    Single agent trained on pooled data from all client environments.
-    This provides an upper bound assuming perfect data sharing.
+    Baseline 2: Oracle QHD (Heterogeneous-Aware)
+
+    Server collects ALL raw data from all clients and trains N separate Q-functions.
+    Each Q_i uses client i's encoder Φ_i but is trained on ALL pooled data.
+
+    This provides the true upper bound for heterogeneous case:
+    - Perfect data sharing (all clients contribute all data)
+    - Each client gets parameters optimized on global data
+    - Parameters remain compatible with each client's local encoder
+
+    Args:
+        episodes: Number of training episodes
+        args: Configuration arguments
+        use_heterogeneous: If True, use heterogeneous encoders; else use homogeneous
     """
     results = ExperimentResults()
-    results.method_name = "Oracle QHD"
+    results.method_name = "Oracle QHD (Heterogeneous)" if use_heterogeneous else "Oracle QHD"
 
     print(f"\n{'='*60}")
-    print("Training Oracle QHD (centralized data pooling)")
+    print(f"Training Oracle QHD {'(heterogeneous-aware)' if use_heterogeneous else '(homogeneous)'}")
+    print("Server: Trains N separate Q-functions on pooled data")
     print(f"{'='*60}")
 
     start_time = time.time()
 
-    # Create multiple environments (one per client)
-    envs = [create_env(args) for _ in range(args.agent_num)]
+    num_agents = args.agent_num
+    envs = [create_env(args) for _ in range(num_agents)]
+    state_dim = envs[0].state_dim
+    action_dim = envs[0].action_dim
 
-    # Single centralized agent
-    agent = QHDAgent(
-        state_dim=envs[0].state_dim,
-        action_dim=envs[0].action_dim,
-        hd_dim=args.hyperdimension,
-        learning_rate=args.learning_rate,
-        discount_factor=args.discount_factor,
-        exploration_rate=args.exploration_rate,
-        exploration_decay=args.exploration_decay,
-        exploration_min=args.exploration_min,
-        state_bounds=state_bounds.get(args.env),
-        random_seed=args.random_seed if hasattr(args, 'random_seed') else 42
-    )
+    # Create N agents with heterogeneous encoders (if requested)
+    agents = []
+    if use_heterogeneous:
+        # Heterogeneous dimensions (same as FedQHD heterogeneous)
+        hd_dims = [1000, 5000, 10000, 50000]
+        agent_dims = [hd_dims[i % len(hd_dims)] for i in range(num_agents)]
+
+        for i in range(num_agents):
+            # Each client has different bandwidth and dimension
+            sigma_i = args.rff_gamma * np.random.uniform(0.5, 1.5)
+            agent = QHDAgent(
+                state_dim=state_dim,
+                action_dim=action_dim,
+                hd_dim=agent_dims[i],
+                rff_gamma=sigma_i,
+                learning_rate=args.qhd_lr,
+                discount_factor=args.qhd_discount,
+                exploration_rate=getattr(args, 'qhd_exploration_rate', 1.0),
+                exploration_decay=getattr(args, 'qhd_exploration_decay', 0.995),
+                exploration_min=args.qhd_exploration_min,
+                state_bounds=state_bounds.get(args.env),
+                random_seed=42 + i
+            )
+            agents.append(agent)
+        print(f"Using heterogeneous encoders: {agent_dims}")
+    else:
+        # Homogeneous: all agents share same encoder configuration
+        for i in range(num_agents):
+            agent = QHDAgent(
+                state_dim=state_dim,
+                action_dim=action_dim,
+                hd_dim=args.hyperdimension,
+                learning_rate=args.qhd_lr,
+                discount_factor=args.qhd_discount,
+                exploration_rate=getattr(args, 'qhd_exploration_rate', 1.0),
+                exploration_decay=getattr(args, 'qhd_exploration_decay', 0.995),
+                exploration_min=args.qhd_exploration_min,
+                state_bounds=state_bounds.get(args.env),
+                random_seed=42 + i
+            )
+            agents.append(agent)
 
     reward_history = []
     success_history = []
 
-    for episode in tqdm.tqdm(range(episodes), desc="Oracle QHD"):
+    for episode in tqdm.tqdm(range(episodes), desc=f"Oracle QHD {'(Hetero)' if use_heterogeneous else '(Homo)'}"):
         episode_rewards = []
         episode_successes = []
 
-        # Train on all environments (data pooling)
+        # For each client environment, collect the raw data and aggregation them during global server training
         for env_id, env in enumerate(envs):
             state, _ = env.reset()
             done = False
-            total_reward = 0
+
+            # Track rewards for this client's environment
+            client_rewards = []
 
             while not done:
-                action = agent.choose_action(state)
+                # Each agent makes its own decision, but we use agent env_id for consistency
+                # (In practice, Oracle has access to all policies, so we can use any agent)
+                # We'll use the corresponding agent for action selection
+                action = agents[env_id].choose_action(state)
                 next_state, reward, terminated, truncated, _ = env.step(action)
                 done = terminated or truncated
-                agent.update_model(state, action, reward, next_state, done)
-                state = next_state
-                total_reward += reward
 
+                # KEY: Train ALL N agents on this transition (data pooling)
+                for agent in agents:
+                    agent.update_model(state, action, reward, next_state, done)
+
+                state = next_state
+                client_rewards.append(reward)
+
+            # Record performance using the agent corresponding to this environment
+            total_reward = sum(client_rewards)
             episode_rewards.append(total_reward)
             episode_successes.append(1 if env.is_success(state) else 0)
 
-        agent.decay_exploration()
+        # Decay exploration for all agents
+        for agent in agents:
+            agent.decay_exploration()
 
-        # Average across all environments
+        # Average across all client environments
         reward_history.append(np.mean(episode_rewards))
         success_history.append(np.mean(episode_successes))
 
-        # Check for convergence
-        if check_convergence(reward_history):
-            print(f"\nConverged at episode {episode + 1}")
-            break
 
     end_time = time.time()
 
@@ -254,6 +267,8 @@ def train_oracle_qhd(episodes: int, args) -> ExperimentResults:
 
     print(f"Oracle QHD completed in {results.training_time:.2f}s")
     print(f"Final avg reward (last 100 eps): {results.final_avg_reward:.2f}")
+    if use_heterogeneous:
+        print(f"Note: Each client has encoder-compatible parameters trained on global data")
 
     return results
 
@@ -282,11 +297,11 @@ def train_fedqhd_homogeneous(episodes: int, args) -> ExperimentResults:
         action_dim=envs[0].action_dim,
         agent_type='qhd',
         num_agents=num_agents,
-        learning_rate=args.learning_rate,
-        discount_factor=args.discount_factor,
-        exploration_rate=args.exploration_rate,
-        exploration_decay=args.exploration_decay,
-        exploration_min=args.exploration_min,
+        learning_rate=args.qhd_lr,
+        discount_factor=args.qhd_discount,
+        exploration_rate=getattr(args, 'qhd_exploration_rate', 1.0),
+        exploration_decay=getattr(args, 'qhd_exploration_decay', 0.995),
+        exploration_min=args.qhd_exploration_min,
         hd_dim=args.hyperdimension,
         state_bounds=state_bounds.get(args.env)
     )
@@ -327,10 +342,6 @@ def train_fedqhd_homogeneous(episodes: int, args) -> ExperimentResults:
         reward_history.append(np.mean(episode_rewards))
         success_history.append(np.mean(episode_successes))
 
-        # Check for convergence
-        if check_convergence(reward_history):
-            print(f"\nConverged at episode {episode + 1}")
-            break
 
     end_time = time.time()
 
@@ -381,11 +392,11 @@ def train_fedqhd_heterogeneous(episodes: int, args) -> ExperimentResults:
             action_dim=action_dim,
             hd_dim=agent_dims[i],
             rff_gamma=sigma_i,
-            learning_rate=args.learning_rate,
-            discount_factor=args.discount_factor,
-            exploration_rate=args.exploration_rate,
-            exploration_decay=args.exploration_decay,
-            exploration_min=args.exploration_min,
+            learning_rate=args.qhd_lr,
+            discount_factor=args.qhd_discount,
+            exploration_rate=getattr(args, 'qhd_exploration_rate', 1.0),
+            exploration_decay=getattr(args, 'qhd_exploration_decay', 0.995),
+            exploration_min=args.qhd_exploration_min,
             state_bounds=state_bounds.get(args.env),
             random_seed=42 + i  # Different seed per agent
         )
@@ -406,8 +417,7 @@ def train_fedqhd_heterogeneous(episodes: int, args) -> ExperimentResults:
                 break
     anchor_states = np.array(anchor_states[:args.anchor_set_size])
 
-    # Server: Global encoder (fixed dimension D=10000)
-    global_encoder_dim = args.hyperdimension
+    
 
     reward_history = []
     success_history = []
@@ -481,10 +491,6 @@ def train_fedqhd_heterogeneous(episodes: int, args) -> ExperimentResults:
         reward_history.append(np.mean(episode_rewards))
         success_history.append(np.mean(episode_successes))
 
-        # Check for convergence
-        if check_convergence(reward_history):
-            print(f"\nConverged at episode {episode + 1}")
-            break
 
     end_time = time.time()
 
@@ -525,11 +531,11 @@ def train_fedavg_dqn(episodes: int, args) -> ExperimentResults:
         action_dim=envs[0].action_dim,
         agent_type='dqn',
         num_agents=num_agents,
-        learning_rate=args.learning_rate,
-        discount_factor=args.discount_factor,
-        exploration_rate=args.exploration_rate,
-        exploration_decay=args.exploration_decay,
-        exploration_min=args.exploration_min,
+        learning_rate=args.dqn_lr if args.dqn_lr is not None else args.learning_rate,
+        discount_factor=args.dqn_discount if args.dqn_discount is not None else args.discount_factor,
+        exploration_rate=getattr(args, 'dqn_exploration_rate', 1.0),
+        exploration_decay=getattr(args, 'dqn_exploration_decay', 0.995),
+        exploration_min=args.dqn_exploration_min if args.dqn_exploration_min is not None else args.exploration_min,
         hd_dim=None,
         state_bounds=state_bounds.get(args.env)
     )
@@ -568,10 +574,6 @@ def train_fedavg_dqn(episodes: int, args) -> ExperimentResults:
         reward_history.append(np.mean(episode_rewards))
         success_history.append(np.mean(episode_successes))
 
-        # Check for convergence
-        if check_convergence(reward_history):
-            print(f"\nConverged at episode {episode + 1}")
-            break
 
     end_time = time.time()
 
@@ -609,11 +611,11 @@ def train_oracle_dqn(episodes: int, args) -> ExperimentResults:
     agent = DQNAgent(
         state_dim=envs[0].state_dim,
         action_dim=envs[0].action_dim,
-        learning_rate=args.learning_rate,
-        discount_factor=args.discount_factor,
-        exploration_rate=args.exploration_rate,
-        exploration_decay=args.exploration_decay,
-        exploration_min=args.exploration_min
+        learning_rate=args.dqn_lr if args.dqn_lr is not None else args.learning_rate,
+        discount_factor=args.dqn_discount if args.dqn_discount is not None else args.discount_factor,
+        exploration_rate=getattr(args, 'dqn_exploration_rate', 1.0),
+        exploration_decay=getattr(args, 'dqn_exploration_decay', 0.995),
+        exploration_min=args.dqn_exploration_min if args.dqn_exploration_min is not None else args.exploration_min
     )
 
     reward_history = []
@@ -646,10 +648,6 @@ def train_oracle_dqn(episodes: int, args) -> ExperimentResults:
         reward_history.append(np.mean(episode_rewards))
         success_history.append(np.mean(episode_successes))
 
-        # Check for convergence
-        if check_convergence(reward_history):
-            print(f"\nConverged at episode {episode + 1}")
-            break
 
     end_time = time.time()
 
@@ -698,11 +696,11 @@ def train_truncate_fedavg_qhd(episodes: int, args) -> ExperimentResults:
             state_dim=state_dim,
             action_dim=action_dim,
             hd_dim=agent_dims[i],
-            learning_rate=args.learning_rate,
-            discount_factor=args.discount_factor,
-            exploration_rate=args.exploration_rate,
-            exploration_decay=args.exploration_decay,
-            exploration_min=args.exploration_min,
+            learning_rate=args.qhd_lr,
+            discount_factor=args.qhd_discount,
+            exploration_rate=getattr(args, 'qhd_exploration_rate', 1.0),
+            exploration_decay=getattr(args, 'qhd_exploration_decay', 0.995),
+            exploration_min=args.qhd_exploration_min,
             state_bounds=state_bounds.get(args.env),
             rff_gamma=sigma_i
         )
@@ -774,10 +772,6 @@ def train_truncate_fedavg_qhd(episodes: int, args) -> ExperimentResults:
         reward_history.append(np.mean(episode_rewards))
         success_history.append(np.mean(episode_successes))
 
-        # Check for convergence
-        if check_convergence(reward_history):
-            print(f"\nConverged at episode {episode + 1}")
-            break
 
     end_time = time.time()
 
@@ -793,17 +787,39 @@ def train_truncate_fedavg_qhd(episodes: int, args) -> ExperimentResults:
     return results
 
 
-def train_distillation_dqn(episodes: int, args) -> ExperimentResults:
+def train_distillation_dqn(episodes: int, args,
+                           heterogeneous: bool = True) -> ExperimentResults:
     """
-    Baseline: Knowledge Distillation for Heterogeneous FedQHD
-    Uses policy distillation to align heterogeneous agents.
-    Reference: experiments.tex line 51
+    Baseline: Federated DQN with Knowledge Distillation (homogeneous or heterogeneous)
+
+    Implements the distillation-based federation approach based on:
+      - Policy Distillation (Rusu et al. 2016): KL divergence against soft Q-value targets
+      - Distral (Teh et al. 2017): shared distilled policy as softmax of mean Q-values
+
+    Algorithm (per aggregation round):
+      1. Each client i trains its DQN locally for K episodes (standard DQN).
+      2. Each client evaluates Q-values on a shared distillation set S_d.
+      3. Server computes a teacher soft-policy via softmax averaging in Q-space
+         (Distral-style):
+           Q_teacher(s) = (1/N) Σ_i Q_i(s)
+           π_teacher(a|s) = softmax(Q_teacher(s) / τ)
+      4. Each client distills the teacher back by minimising KL divergence
+         (Policy Distillation, Rusu et al. 2016):
+           L_KL(θ_i) = Σ_{s∈S_d} KL( π_teacher(·|s) ‖ softmax(Q_i(s)/τ) )
+
+    Args:
+        heterogeneous: If True, each client uses a different hidden-layer width
+                       [64, 128, 256, 512], making parameter averaging undefined
+                       (Q2 / hetero encoder setting).
+                       If False, all clients share hidden_size=128, so architectures
+                       are identical (Q1 / homo encoder setting).
     """
+    label = "Distillation FedDQN (Hetero)" if heterogeneous else "Distillation FedDQN"
     results = ExperimentResults()
-    results.method_name = "Distillation FedQHD"
+    results.method_name = label
 
     print(f"\n{'='*60}")
-    print("Training FedQHD with Knowledge Distillation")
+    print(f"Training {label}")
     print(f"{'='*60}")
 
     start_time = time.time()
@@ -813,43 +829,59 @@ def train_distillation_dqn(episodes: int, args) -> ExperimentResults:
     state_dim = envs[0].state_dim
     action_dim = envs[0].action_dim
 
-    # Heterogeneous dimensions
-    hd_dims = [1000, 5000, 10000, 50000]
-    agent_dims = [hd_dims[i % len(hd_dims)] for i in range(num_agents)]
+    # Homogeneous: all clients share the same hidden width (128), identical to
+    # standard FedAvg-DQN in architecture; federation still occurs via distillation.
+    # Heterogeneous: clients cycle through [64, 128, 256, 512], so parameter
+    # averaging is algebraically undefined — only function-space distillation applies.
+    if heterogeneous:
+        hidden_sizes = [64, 128, 256, 512]
+        agent_hidden = [hidden_sizes[i % len(hidden_sizes)] for i in range(num_agents)]
+    else:
+        agent_hidden = [128] * num_agents
+    print(f"  Client hidden sizes: {agent_hidden}")
 
-    # Create agents with heterogeneous encoders
+    # Instantiate one DQN per client with its own architecture
     agents = []
     for i in range(num_agents):
-        sigma_i = args.rff_gamma * np.random.uniform(0.5, 1.5)
-        agent = QHDAgent(
+        agent = DQNAgent(
             state_dim=state_dim,
             action_dim=action_dim,
-            hd_dim=agent_dims[i],
-            learning_rate=args.learning_rate,
-            discount_factor=args.discount_factor,
-            exploration_rate=args.exploration_rate,
-            exploration_decay=args.exploration_decay,
-            exploration_min=args.exploration_min,
-            state_bounds=state_bounds.get(args.env),
-            rff_gamma=sigma_i
+            hidden_size=agent_hidden[i],
+            learning_rate=args.dqn_lr if args.dqn_lr is not None else args.learning_rate,
+            discount_factor=args.dqn_discount if args.dqn_discount is not None else args.discount_factor,
+            exploration_rate=getattr(args, 'dqn_exploration_rate', 1.0),
+            exploration_decay=getattr(args, 'dqn_exploration_decay', 0.995),
+            exploration_min=args.dqn_exploration_min if args.dqn_exploration_min is not None else args.exploration_min,
         )
         agents.append(agent)
 
-    # Distillation set: sample states for policy distillation
-    distill_states = []
-    for _ in range(100):  # 100 distillation samples
-        env = envs[0]
-        state, _ = env.reset()
+    # Build distillation set S_d: random rollout states from the environment
+    distill_states: List[np.ndarray] = []
+    temp_env = create_env(args)
+    while len(distill_states) < args.anchor_set_size:
+        state, _ = temp_env.reset()
         distill_states.append(state)
+        for _ in range(50):
+            action = np.random.randint(action_dim)
+            next_state, _, done, _, _ = temp_env.step(action)
+            distill_states.append(next_state)
+            if done or len(distill_states) >= args.anchor_set_size:
+                break
+    distill_states = distill_states[:args.anchor_set_size]
+
+    # Distillation temperature τ: higher → softer targets (less confident teacher)
+    tau = 1.0
+    # Number of gradient steps per distillation round
+    distill_steps = 10
 
     reward_history = []
     success_history = []
 
-    for episode in tqdm.tqdm(range(episodes), desc="Distillation FedQHD"):
+    for episode in tqdm.tqdm(range(episodes), desc=label):
         episode_rewards = []
         episode_successes = []
 
-        # Local training
+        # ── Phase 1: Local DQN training ──────────────────────────────────────
         for agent_id in range(num_agents):
             agent = agents[agent_id]
             env = envs[agent_id]
@@ -868,44 +900,53 @@ def train_distillation_dqn(episodes: int, args) -> ExperimentResults:
             episode_rewards.append(total_reward)
             episode_successes.append(1 if env.is_success(state) else 0)
 
-        # Knowledge distillation every K episodes
+        # ── Phase 2: Distillation aggregation every K episodes ───────────────
         if (episode + 1) % args.aggregation_interval == 0:
-            # Step 1: Compute ensemble Q-values on distillation set
-            Q_ensemble = np.zeros((len(distill_states), action_dim))
-            for state_idx, state in enumerate(distill_states):
-                Q_votes = []
+            device = agents[0].device
+
+            # Convert distillation states to a batch tensor (shared across all clients)
+            S_d = torch.tensor(
+                np.array(distill_states, dtype=np.float32), dtype=torch.float32
+            ).to(device)  # shape: (|S_d|, state_dim)
+
+            # Step 2a: Collect each client's Q-values on S_d (no-grad, inference only)
+            with torch.no_grad():
+                Q_clients = []  # list of (|S_d|, action_dim) tensors
                 for agent in agents:
-                    phi = agent.encode_state(state)  # Φ_i(s)
-                    Q = agent.model_vectors @ phi  # Q_i(s, a) for all a
-                    Q_votes.append(Q)
-                Q_ensemble[state_idx] = np.mean(Q_votes, axis=0)
+                    Q_i = agent.q_network(S_d)          # (|S_d|, action_dim)
+                    Q_clients.append(Q_i)
 
-            # Step 2: Distill ensemble policy to each agent
-            distill_lr = 0.01  # Distillation learning rate
+            # Step 2b: Server computes teacher Q as the arithmetic mean (Distral)
+            #   Q_teacher = (1/N) Σ_i Q_i(s)
+            Q_teacher = torch.mean(torch.stack(Q_clients, dim=0), dim=0)  # (|S_d|, action_dim)
+            # Soft teacher policy: π_teacher = softmax(Q_teacher / τ)
+            pi_teacher = F.softmax(Q_teacher / tau, dim=-1).detach()  # (|S_d|, action_dim)
+
+            # Step 2c: Each client distills the teacher via KL divergence
+            #   L_KL = KL( π_teacher ‖ softmax(Q_i/τ) )
+            #        = Σ_a π_teacher(a) * [log π_teacher(a) - log π_student(a)]
+            # PyTorch F.kl_div expects log-probs as input and probs as target.
             for agent in agents:
-                for state_idx, state in enumerate(distill_states):
-                    phi = agent.encode_state(state)
-                    Q_target = Q_ensemble[state_idx]
-                    Q_pred = agent.model_vectors @ phi
+                distill_optimizer = torch.optim.Adam(
+                    agent.q_network.parameters(), lr=args.learning_rate
+                )
+                for _ in range(distill_steps):
+                    Q_i = agent.q_network(S_d)                           # (|S_d|, action_dim)
+                    log_pi_student = F.log_softmax(Q_i / tau, dim=-1)    # (|S_d|, action_dim)
+                    # reduction='batchmean': sum over actions, mean over states
+                    loss = F.kl_div(log_pi_student, pi_teacher, reduction='batchmean')
+                    distill_optimizer.zero_grad()
+                    loss.backward()
+                    torch.nn.utils.clip_grad_norm_(agent.q_network.parameters(), 1.0)
+                    distill_optimizer.step()
 
-                    # Gradient step: minimize ||Q_pred - Q_target||^2
-                    gradient = (Q_pred - Q_target)[:, np.newaxis] @ phi[np.newaxis, :]
-                    agent.model_vectors -= distill_lr * gradient
-
-        # Decay exploration
+        # Decay exploration for all agents
         for agent in agents:
-            agent.epsilon = max(
-                agent.epsilon_min,
-                agent.epsilon * agent.epsilon_decay
-            )
+            agent.decay_exploration()
 
         reward_history.append(np.mean(episode_rewards))
         success_history.append(np.mean(episode_successes))
 
-        # Check for convergence
-        if check_convergence(reward_history):
-            print(f"\nConverged at episode {episode + 1}")
-            break
 
     end_time = time.time()
 
@@ -915,29 +956,37 @@ def train_distillation_dqn(episodes: int, args) -> ExperimentResults:
     results.final_avg_reward = np.mean(reward_history[-100:])
     results.final_avg_success = np.mean(success_history[-100:])
 
-    print(f"Distillation FedQHD completed in {results.training_time:.2f}s")
+    print(f"{label} completed in {results.training_time:.2f}s")
     print(f"Final avg reward (last 100 eps): {results.final_avg_reward:.2f}")
 
     return results
 
 
+
 def run_full_comparison(episodes: int, args) -> Dict[str, ExperimentResults]:
     """
     Run all baseline comparisons for a given configuration.
-    Returns dictionary mapping method names to results.
+    QHD and DQN methods are dispatched with their own hyperparameter sets
+    (qhd_lr / dqn_lr, qhd_agg_interval / dqn_agg_interval, etc.).
     """
     all_results = {}
 
-    # Q1: Homogeneous Encoders Performance Comparison
     print("\n" + "="*60)
     print("Q1: Performance Comparison - Homogeneous Encoders")
+    print(f"  QHD: lr={args.qhd_lr}, agg={args.qhd_agg_interval}, "
+          f"discount={args.qhd_discount}, eps_decay={args.qhd_exploration_decay}")
+    print(f"  DQN: lr={args.dqn_lr}, agg={args.dqn_agg_interval}")
     print("="*60)
 
-    all_results['Independent QHD'] = train_independent_qhd(episodes, args)
+    all_results['Independent QHD']     = train_independent_qhd(episodes, args)
     all_results['FedQHD (Homogeneous)'] = train_fedqhd_homogeneous(episodes, args)
-    all_results['Oracle QHD'] = train_oracle_qhd(episodes, args)
-    all_results['Oracle DQN'] = train_oracle_dqn(episodes, args)
-    all_results['FedAvg-DQN'] = train_fedavg_dqn(episodes, args)
+    all_results['Oracle QHD']           = train_oracle_qhd(episodes, args, use_heterogeneous=False)
+    all_results['Oracle DQN']           = train_oracle_dqn(episodes, args)
+    all_results['FedAvg-DQN']           = train_fedavg_dqn(episodes, args)
+    # Distillation baseline with homogeneous DQN architectures (same hidden=128).
+    # Federation still occurs via KL distillation in Q-space, not parameter averaging.
+    all_results['Distillation FedDQN']  = train_distillation_dqn(episodes, args,
+                                                                   heterogeneous=False)
 
     # Q2: Heterogeneous Encoders and Anchor-Based Aggregation
     if hasattr(args, 'test_heterogeneous') and args.test_heterogeneous:
@@ -945,9 +994,13 @@ def run_full_comparison(episodes: int, args) -> Dict[str, ExperimentResults]:
         print("Q2: Heterogeneous Encoders and Anchor-Based Aggregation")
         print("="*60)
 
-        all_results['FedQHD (Heterogeneous)'] = train_fedqhd_heterogeneous(episodes, args)
-        all_results['Truncate FedAvg-QHD'] = train_truncate_fedavg_qhd(episodes, args)
-        all_results['Distillation FedQHD'] = train_distillation_dqn(episodes, args)
+        all_results['FedQHD (Heterogeneous)']         = train_fedqhd_heterogeneous(episodes, args)
+        all_results['Oracle QHD (Heterogeneous)']     = train_oracle_qhd(episodes,  args, use_heterogeneous=True)
+        all_results['Truncate FedAvg-QHD']            = train_truncate_fedavg_qhd(episodes, args)
+        # Distillation baseline with heterogeneous DQN architectures [64,128,256,512].
+        # Parameter averaging is undefined; only function-space distillation is applicable.
+        all_results['Distillation FedDQN (Hetero)']   = train_distillation_dqn( episodes, args,
+                                                                                 heterogeneous=True)
 
     return all_results
 

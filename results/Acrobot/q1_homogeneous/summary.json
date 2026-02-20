@@ -1,0 +1,42 @@
+{
+  "configuration": {
+    "episodes": 600,
+    "num_agents": 5,
+    "aggregation_interval": 50,
+    "learning_rate": 0.1,
+    "hyperdimension": 10000,
+    "environment": "Acrobot"
+  },
+  "methods": {
+    "Independent QHD": {
+      "final_avg_reward": -499.9206666666667,
+      "final_avg_success": 0.0006666666666666666,
+      "training_time": 2964.892267227173,
+      "convergence_episode": null
+    },
+    "FedQHD (Homogeneous)": {
+      "final_avg_reward": -109.17,
+      "final_avg_success": 0.0,
+      "training_time": 1443.1316787401836,
+      "convergence_episode": null
+    },
+    "Oracle QHD": {
+      "final_avg_reward": -128.91533333333334,
+      "final_avg_success": 0.0,
+      "training_time": 5473.473445812861,
+      "convergence_episode": null
+    },
+    "Oracle DQN": {
+      "final_avg_reward": -77.15666666666668,
+      "final_avg_success": 0.0,
+      "training_time": 4058.3450330893197,
+      "convergence_episode": null
+    },
+    "FedAvg-DQN": {
+      "final_avg_reward": -84.17866666666667,
+      "final_avg_success": 0.0,
+      "training_time": 4871.70993288358,
+      "convergence_episode": null
+    }
+  }
+}

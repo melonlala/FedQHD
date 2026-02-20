@@ -1,0 +1,390 @@
+{
+  "env": "Acrobot",
+  "method_type": "qhd",
+  "results": [
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.01,
+      "aggregation_interval": 50,
+      "mean_reward": -98.89833333333334,
+      "std_reward": 1.8316666666666706,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.01,
+      "aggregation_interval": 100,
+      "mean_reward": -98.92166666666667,
+      "std_reward": 1.0250000000000057,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.01,
+      "aggregation_interval": 50,
+      "mean_reward": -98.95500000000001,
+      "std_reward": 0.585000000000008,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.01,
+      "aggregation_interval": 25,
+      "mean_reward": -99.44,
+      "std_reward": 0.4966666666666626,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.01,
+      "aggregation_interval": 100,
+      "mean_reward": -99.72833333333334,
+      "std_reward": 2.174999999999983,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.01,
+      "aggregation_interval": 10,
+      "mean_reward": -99.81833333333333,
+      "std_reward": 1.0583333333333158,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.01,
+      "aggregation_interval": 25,
+      "mean_reward": -100.06333333333333,
+      "std_reward": 1.0133333333333425,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.01,
+      "aggregation_interval": 10,
+      "mean_reward": -101.65499999999999,
+      "std_reward": 3.4283333333333275,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.001,
+      "aggregation_interval": 100,
+      "mean_reward": -101.78833333333333,
+      "std_reward": 0.8583333333333485,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.001,
+      "aggregation_interval": 50,
+      "mean_reward": -102.14333333333332,
+      "std_reward": 1.2733333333333405,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.001,
+      "aggregation_interval": 10,
+      "mean_reward": -102.23666666666665,
+      "std_reward": 0.15666666666665918,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.001,
+      "aggregation_interval": 25,
+      "mean_reward": -103.05000000000001,
+      "std_reward": 1.1366666666666632,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.05,
+      "aggregation_interval": 25,
+      "mean_reward": -103.14833333333333,
+      "std_reward": 1.2316666666666691,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.05,
+      "aggregation_interval": 10,
+      "mean_reward": -103.18666666666665,
+      "std_reward": 1.3699999999999903,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.05,
+      "aggregation_interval": 50,
+      "mean_reward": -105.08833333333331,
+      "std_reward": 1.6649999999999991,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.05,
+      "aggregation_interval": 100,
+      "mean_reward": -107.47999999999999,
+      "std_reward": 0.9100000000000037,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.05,
+      "aggregation_interval": 10,
+      "mean_reward": -108.12833333333333,
+      "std_reward": 4.901666666666671,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.1,
+      "aggregation_interval": 25,
+      "mean_reward": -110.07500000000002,
+      "std_reward": 0.80833333333333,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.05,
+      "aggregation_interval": 25,
+      "mean_reward": -110.435,
+      "std_reward": 0.06499999999999062,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.1,
+      "aggregation_interval": 100,
+      "mean_reward": -110.62666666666667,
+      "std_reward": 1.7766666666666708,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.05,
+      "aggregation_interval": 50,
+      "mean_reward": -110.70666666666666,
+      "std_reward": 0.9466666666666583,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.05,
+      "aggregation_interval": 100,
+      "mean_reward": -111.19333333333334,
+      "std_reward": 2.230000000000004,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.1,
+      "aggregation_interval": 50,
+      "mean_reward": -111.56666666666666,
+      "std_reward": 0.9066666666666592,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.1,
+      "aggregation_interval": 100,
+      "mean_reward": -111.58666666666666,
+      "std_reward": 0.040000000000020464,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.1,
+      "aggregation_interval": 10,
+      "mean_reward": -112.19666666666669,
+      "std_reward": 4.363333333333344,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.1,
+      "aggregation_interval": 25,
+      "mean_reward": -112.795,
+      "std_reward": 1.1883333333333184,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.1,
+      "aggregation_interval": 10,
+      "mean_reward": -114.47666666666667,
+      "std_reward": 0.9366666666666532,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle QHD",
+      "learning_rate": 0.1,
+      "aggregation_interval": 50,
+      "mean_reward": -116.75000000000003,
+      "std_reward": 4.149999999999999,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.001,
+      "aggregation_interval": 100,
+      "mean_reward": -156.785,
+      "std_reward": 40.938333333333325,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.001,
+      "aggregation_interval": 25,
+      "mean_reward": -159.14666666666665,
+      "std_reward": 44.993333333333325,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.001,
+      "aggregation_interval": 10,
+      "mean_reward": -195.2116666666667,
+      "std_reward": 5.061666666666682,
+      "num_runs": 2
+    },
+    {
+      "method": "FedQHD (Homo)",
+      "learning_rate": 0.001,
+      "aggregation_interval": 50,
+      "mean_reward": -199.93833333333333,
+      "std_reward": 0.22833333333333883,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.01,
+      "aggregation_interval": 100,
+      "mean_reward": -367.5566666666666,
+      "std_reward": 0.9899999999999807,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.05,
+      "aggregation_interval": 100,
+      "mean_reward": -379.3133333333334,
+      "std_reward": 1.960000000000008,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.1,
+      "aggregation_interval": 100,
+      "mean_reward": -398.59000000000003,
+      "std_reward": 4.883333333333326,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.05,
+      "aggregation_interval": 50,
+      "mean_reward": -468.725,
+      "std_reward": 1.2616666666666276,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.01,
+      "aggregation_interval": 50,
+      "mean_reward": -469.2883333333333,
+      "std_reward": 0.04500000000007276,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.1,
+      "aggregation_interval": 50,
+      "mean_reward": -479.88666666666666,
+      "std_reward": 0.9766666666666595,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.001,
+      "aggregation_interval": 100,
+      "mean_reward": -484.82500000000005,
+      "std_reward": 1.3416666666667254,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.05,
+      "aggregation_interval": 25,
+      "mean_reward": -495.3983333333334,
+      "std_reward": 0.5983333333333292,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.1,
+      "aggregation_interval": 25,
+      "mean_reward": -495.84166666666664,
+      "std_reward": 2.021666666666647,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.001,
+      "aggregation_interval": 50,
+      "mean_reward": -496.78166666666664,
+      "std_reward": 0.6449999999999534,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.01,
+      "aggregation_interval": 25,
+      "mean_reward": -497.88,
+      "std_reward": 0.09333333333330529,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.001,
+      "aggregation_interval": 25,
+      "mean_reward": -499.0766666666666,
+      "std_reward": 0.3400000000000034,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.1,
+      "aggregation_interval": 10,
+      "mean_reward": -499.71500000000003,
+      "std_reward": 0.20166666666673905,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.01,
+      "aggregation_interval": 10,
+      "mean_reward": -499.7833333333333,
+      "std_reward": 0.20000000000004547,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.001,
+      "aggregation_interval": 10,
+      "mean_reward": -499.7983333333333,
+      "std_reward": 0.1850000000000307,
+      "num_runs": 2
+    },
+    {
+      "method": "Independent QHD",
+      "learning_rate": 0.05,
+      "aggregation_interval": 10,
+      "mean_reward": -499.90999999999997,
+      "std_reward": 0.0700000000000216,
+      "num_runs": 2
+    }
+  ]
+}

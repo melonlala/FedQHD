@@ -50,17 +50,34 @@ def test_independent_qhd():
 
 def test_oracle_qhd():
     print("\n" + "="*60)
-    print("TEST 2: Oracle QHD")
+    print("TEST 2: Oracle QHD (Homogeneous)")
     print("="*60)
 
     args = create_test_args()
-    results = train_oracle_qhd(args.episodes, args)
+    results = train_oracle_qhd(args.episodes, args, use_heterogeneous=False)
 
     assert len(results.reward_history) == args.episodes
     assert results.training_time > 0
     assert results.method_name == "Oracle QHD"
 
-    print(f"✓ Oracle QHD test passed")
+    print(f"✓ Oracle QHD (Homogeneous) test passed")
+    print(f"  - Final reward: {results.final_avg_reward:.2f}")
+    print(f"  - Training time: {results.training_time:.2f}s")
+
+
+def test_oracle_qhd_heterogeneous():
+    print("\n" + "="*60)
+    print("TEST 2b: Oracle QHD (Heterogeneous)")
+    print("="*60)
+
+    args = create_test_args()
+    results = train_oracle_qhd(args.episodes, args, use_heterogeneous=True)
+
+    assert len(results.reward_history) == args.episodes
+    assert results.training_time > 0
+    assert results.method_name == "Oracle QHD (Heterogeneous)"
+
+    print(f"✓ Oracle QHD (Heterogeneous) test passed")
     print(f"  - Final reward: {results.final_avg_reward:.2f}")
     print(f"  - Training time: {results.training_time:.2f}s")
 
@@ -88,7 +105,8 @@ def test_fedqhd_heterogeneous():
     print("="*60)
 
     args = create_test_args()
-    results = train_fedqhd_heterogeneous(args.episodes, args, anchor_set_size=50)
+    args.anchor_set_size = 50  # Set anchor set size in args
+    results = train_fedqhd_heterogeneous(args.episodes, args)
 
     assert len(results.reward_history) == args.episodes
     assert results.training_time > 0
@@ -148,6 +166,7 @@ def run_all_tests():
     try:
         test_independent_qhd()
         test_oracle_qhd()
+        test_oracle_qhd_heterogeneous()
         test_fedqhd_homogeneous()
         test_fedqhd_heterogeneous()
         test_atari_env()

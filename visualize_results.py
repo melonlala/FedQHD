@@ -33,9 +33,10 @@ def plot_learning_curves_comparison(
     # Define colors and styles for each method
     method_styles = {
         'Independent QHD': {'color': 'blue', 'linestyle': '--', 'label': 'Independent QHD'},
-        'FedQHD (Homogeneous)': {'color': 'red', 'linestyle': '-', 'label': 'FedQHD (Ours)', 'linewidth': 2.5},
+        'FedQHD': {'color': 'red', 'linestyle': '-', 'label': 'FedQHD (Ours)', 'linewidth': 2.5},
         'Oracle QHD': {'color': 'green', 'linestyle': '-.', 'label': 'Oracle QHD'},
-        'FedAvg-DQN': {'color': 'purple', 'linestyle': ':', 'label': 'FedAvg-DQN'}
+        'FedAvg-DQN': {'color': 'purple', 'linestyle': ':', 'label': 'FedAvg-DQN'},
+        'Oracle DQN': {'color': 'orange', 'linestyle': '--', 'label': 'Oracle DQN'},
     }
 
     for method_name, results in results_dict.items():
@@ -250,7 +251,7 @@ def visualize_all_results(results_dir: str):
     # Load results
     results_dict = {}
     for filename in os.listdir(results_dir):
-        if filename.endswith('.json') and filename != 'summary.json':
+        if filename.endswith('.json') and filename != 'summary.json' and not filename.startswith('params_'):
             method_name = filename.replace('.json', '').replace('_', ' ')
             filepath = os.path.join(results_dir, filename)
 
@@ -301,7 +302,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Visualize FedQHD experiment results')
-    parser.add_argument('--results_dir', type=str, required=True,
+    parser.add_argument('--results_dir', type=str, default='results/MountainCar/q1_homogeneous',
                        help='Directory containing experiment JSON results')
 
     args = parser.parse_args()

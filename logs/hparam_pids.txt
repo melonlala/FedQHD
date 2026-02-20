@@ -1,0 +1,4 @@
+1385067 CartPole qhd /home/yuchen/projects/FedQHD/logs/hparam_CartPole_qhd.log
+1385068 CartPole dqn /home/yuchen/projects/FedQHD/logs/hparam_CartPole_dqn.log
+1385069 Acrobot qhd /home/yuchen/projects/FedQHD/logs/hparam_Acrobot_qhd.log
+1385070 Acrobot dqn /home/yuchen/projects/FedQHD/logs/hparam_Acrobot_dqn.log

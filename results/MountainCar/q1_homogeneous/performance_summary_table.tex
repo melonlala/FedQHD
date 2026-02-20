@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\caption{Final Performance Comparison (Last 100 Episodes)}
+\label{tab:performance_summary}
+\begin{tabular}{lccc}
+\toprule
+Method & Avg Reward & Avg Success Rate & Training Time (s) \\
+\midrule
+FedAvg-DQN & -163.55 & 0.714 & 5133.11 \\
+FedQHD (Homogeneous) & -140.81 & 0.981 & 1033.39 \\
+Independent QHD & -200.00 & 0.000 & 760.10 \\
+Oracle DQN & -122.45 & 0.990 & 4065.45 \\
+Oracle QHD & -163.87 & 0.637 & 4274.92 \\
+\bottomrule
+\end{tabular}
+\end{table}

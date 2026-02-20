@@ -1,0 +1,25 @@
+grid_size: [8, 8]
+episodes: 200
+agent_type: q_learning
+aggregation_interval: 20
+learning_rate: 0.05
+discount_factor: 0.99
+exploration_rate: 1.0
+exploration_decay: 0.995
+exploration_min: 0.01
+output_dir: fed_figs
+avg_window: 1
+test: False
+convergence_threshold: 1
+convergence_window: 20
+agent_range: 1, 5
+env: CliffWalking
+runs: 3
+agent_num: 5
+Training time (seconds): 50.89
+
+Final Results (last 100 episodes average):
+Parallel Avg Reward: -356.88
+FedAvg Avg Reward: -1477.11
+Parallel Avg Success: 1.00
+FedAvg Avg Success: 1.00

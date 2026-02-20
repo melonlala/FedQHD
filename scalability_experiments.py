@@ -153,31 +153,21 @@ def plot_scalability_results(
     plt.close()
 
     # Plot 4: Learning curves for different N (combined)
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    axes = axes.flatten()
+    # draw curves in one plot with different colors and labels
 
-    for idx, N in enumerate(client_counts[:4]):  # Plot first 4
-        if idx >= len(axes):
-            break
-
-        ax = axes[idx]
-
-        # Smooth rewards with moving average
-        window = 10
+    fig = plt.figure(figsize=(12, 8))
+    for N in client_counts:
         ind_rewards = all_results[N]['Independent'].reward_history
         fed_rewards = all_results[N]['FedQHD'].reward_history
+        episodes_range = range(1, len(ind_rewards) + 1)
 
-        ind_smooth = np.convolve(ind_rewards, np.ones(window)/window, mode='valid')
-        fed_smooth = np.convolve(fed_rewards, np.ones(window)/window, mode='valid')
-
-        ax.plot(ind_smooth, label='Independent', alpha=0.8)
-        ax.plot(fed_smooth, label='FedQHD', alpha=0.8)
-        ax.set_xlabel('Episode')
-        ax.set_ylabel('Reward')
-        ax.set_title(f'N = {N} clients')
-        ax.legend()
-        ax.grid(True, alpha=0.3)
-
+        plt.plot(episodes_range, ind_rewards, label=f'Independent N={N}', linestyle='--')
+        plt.plot(episodes_range, fed_rewards, label=f'FedQHD N={N}', linestyle='-')
+    plt.xlabel('Episode', fontsize=12)
+    plt.ylabel('Average Reward', fontsize=12)
+    plt.title('Scalability: Learning Curves for Different Client Counts', fontsize=14)
+    plt.legend(fontsize=10)
+    plt.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, 'scalability_learning_curves.pdf'), dpi=300)
     plt.savefig(os.path.join(output_dir, 'scalability_learning_curves.png'), dpi=300)
@@ -245,20 +235,27 @@ if __name__ == "__main__":
     from env.bounds import state_bounds
 
     parser = argparse.ArgumentParser(description='Run scalability experiments')
-    parser.add_argument('--env', type=str, default='CartPole',
+    parser.add_argument('--env', type=str, default='LunarLander',
                        choices=['CartPole', 'Acrobot', 'LunarLander', 'MountainCar', 'Pong', 'Freeway'])
     parser.add_argument('--episodes', type=int, default=600)
-    parser.add_argument('--client_counts', type=str, default='5,10,20,50',
+    parser.add_argument('--client_counts', type=str, default='1, 2, 5,10,20,40',
                        help='Comma-separated client counts to test')
-    parser.add_argument('--aggregation_interval', type=int, default=50)
-    parser.add_argument('--learning_rate', type=float, default=0.01)
-    parser.add_argument('--discount_factor', type=float, default=0.99)
-    parser.add_argument('--exploration_rate', type=float, default=1.0)
-    parser.add_argument('--exploration_decay', type=float, default=0.9995)
-    parser.add_argument('--exploration_min', type=float, default=0.01)
+    
+    parser.add_argument('--qhd_lr', type=float, default=0.2,
+                       help='Learning rate for QHD methods')
+    parser.add_argument('--qhd_agg_interval', type=int, default=10,
+                       help='Aggregation interval for QHD methods (alias for --aggregation_interval)')
+    parser.add_argument('--qhd_discount', type=float, default=0.99,
+                       help='Discount factor for QHD methods')
+    parser.add_argument('--qhd_exploration_rate', type=float, default=1.0,
+                       help='Initial exploration rate for QHD methods')
+    parser.add_argument('--qhd_exploration_decay', type=float, default=0.99,
+                       help='Exploration decay for QHD methods')
+    parser.add_argument('--qhd_exploration_min', type=float, default=0.001,
+                       help='Minimum exploration rate for QHD methods')
     parser.add_argument('--hyperdimension', type=int, default=10000)
     parser.add_argument('--output_dir', type=str, default='results/scalability')
-    parser.add_argument('--rff_gamma', type=float, default=1.0)
+    parser.add_argument('--rff_gamma', type=float, default=0.5)
 
     args = parser.parse_args()
 

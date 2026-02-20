@@ -1,0 +1,26 @@
+grid_size: [8, 8]
+episodes: 600
+agent_type: qhd
+aggregation_interval: 50
+learning_rate: 0.1
+discount_factor: 0.9
+exploration_rate: 1.0
+exploration_decay: 0.995
+exploration_min: 0.001
+output_dir: fed_figs
+avg_window: 5
+test: False
+convergence_threshold: 1
+convergence_window: 20
+agent_range: 1,5
+env: MountainCar
+runs: 3
+hyperdimension: 10000
+agent_num: 1
+Training time (seconds): 481.53
+
+Final Results (last 100 episodes average):
+Parallel Avg Reward: -200.00
+FedAvg Avg Reward: -200.00
+Parallel Avg Success: 0.00
+FedAvg Avg Success: 0.00

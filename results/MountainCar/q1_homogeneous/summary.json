@@ -1,0 +1,42 @@
+{
+  "configuration": {
+    "episodes": 600,
+    "num_agents": 5,
+    "aggregation_interval": 50,
+    "learning_rate": 0.1,
+    "hyperdimension": 10000,
+    "environment": "MountainCar"
+  },
+  "methods": {
+    "Independent QHD": {
+      "final_avg_reward": -200.0,
+      "final_avg_success": 0.0,
+      "training_time": 760.0968712965647,
+      "convergence_episode": null
+    },
+    "FedQHD (Homogeneous)": {
+      "final_avg_reward": -140.81266666666667,
+      "final_avg_success": 0.9806666666666667,
+      "training_time": 1033.3888685703278,
+      "convergence_episode": null
+    },
+    "Oracle QHD": {
+      "final_avg_reward": -163.87133333333335,
+      "final_avg_success": 0.6373333333333333,
+      "training_time": 4274.922736088435,
+      "convergence_episode": null
+    },
+    "Oracle DQN": {
+      "final_avg_reward": -122.452,
+      "final_avg_success": 0.9900000000000001,
+      "training_time": 4065.4502018292746,
+      "convergence_episode": null
+    },
+    "FedAvg-DQN": {
+      "final_avg_reward": -163.5533333333333,
+      "final_avg_success": 0.7139999999999999,
+      "training_time": 5133.114505449931,
+      "convergence_episode": null
+    }
+  }
+}

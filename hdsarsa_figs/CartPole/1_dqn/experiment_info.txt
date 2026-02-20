@@ -1,0 +1,25 @@
+grid_size: [8, 8]
+episodes: 1000
+agent_type: dqn
+aggregation_interval: 10
+learning_rate: 0.001
+discount_factor: 0.99
+exploration_rate: 1.0
+exploration_decay: 0.995
+exploration_min: 0.001
+output_dir: test_figs
+avg_window: 5
+test: False
+convergence_threshold: 1
+convergence_window: 20
+agent_range: 1, 5
+env: CartPole
+runs: 3
+agent_num: 1
+Training time (seconds): 1018.82
+
+Final Results (last 100 episodes average):
+Parallel Avg Reward: 175.29
+FedAvg Avg Reward: 168.38
+Parallel Avg Success: 0.16
+FedAvg Avg Success: 0.14

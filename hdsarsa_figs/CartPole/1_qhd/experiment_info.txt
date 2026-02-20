@@ -1,0 +1,25 @@
+grid_size: [8, 8]
+episodes: 600
+agent_type: qhd
+aggregation_interval: 1
+learning_rate: 0.5
+discount_factor: 0.9
+exploration_rate: 0.8
+exploration_decay: 0.9
+exploration_min: 0.001
+output_dir: test_figs
+avg_window: 5
+test: False
+convergence_threshold: 1
+convergence_window: 20
+agent_range: 1
+env: CartPole
+runs: 3
+agent_num: 1
+Training time (seconds): 437.47
+
+Final Results (last 100 episodes average):
+Parallel Avg Reward: 261.92
+FedAvg Avg Reward: 263.85
+Parallel Avg Success: 0.13
+FedAvg Avg Success: 0.32

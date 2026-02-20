@@ -26,8 +26,11 @@ class LunarLanderWrapper:
     """
     support Gymnasium interface for LunarLander
     """
-    def __init__(self, render_mode=None):
-        self.env = gym.make("LunarLander-v3", render_mode=render_mode)
+    def __init__(self, render_mode=None, max_episode_steps=None):
+        kwargs = {"render_mode": render_mode}
+        if max_episode_steps is not None:
+            kwargs["max_episode_steps"] = max_episode_steps
+        self.env = gym.make("LunarLander-v3", **kwargs)
         self.state_dim = self.env.observation_space.shape[0] # 8维
         self.action_dim = self.env.action_space.n          # 4个动作
         self.episode_reward = 0 # Inner variable to track total reward
@@ -229,8 +232,10 @@ class TaxiWrapper:
 
 class AtariPongWrapper:
     """
-    Support Gymnasium interface for Atari Pong-v0/v4
-    Pong has pixel observations (210x160x3), so we need preprocessing
+    Support Gymnasium interface for Atari Pong (RAM observations).
+    State: 128D uint8 RAM normalized to [0, 1]
+    Actions: 6 (NOOP, FIRE, RIGHT, LEFT, RIGHTFIRE, LEFTFIRE)
+    Success: positive episode reward (winning the game)
     """
     def __init__(self):
         try:
@@ -239,55 +244,23 @@ class AtariPongWrapper:
         except:
             pass
 
-        self.env = gym.make("ALE/Pong-v5")
-        # Use RAM state instead of pixels for simpler learning
-        # RAM has 128 bytes of state information
-        self.state_dim = 128  # RAM size
+        self.env = gym.make("ALE/Pong-ram-v5")
+        self.state_dim = 128
         self.action_dim = self.env.action_space.n  # 6 actions
         self.episode_reward = 0
-        self.use_ram = True  # Flag to use RAM instead of pixels
-
-    def _preprocess_observation(self, obs):
-        """
-        Preprocess Atari observation
-        For RAM mode: normalize to [0, 1]
-        """
-        if self.use_ram:
-            # Normalize RAM values to [0, 1]
-            return obs / 255.0
-        return obs
 
     def reset(self):
         self.episode_reward = 0
-        obs, info = self.env.reset()
-
-        # Get RAM state if available
-        if hasattr(self.env.unwrapped, 'ale'):
-            state = self.env.unwrapped.ale.getRAM()
-            state = self._preprocess_observation(state)
-        else:
-            state = obs.flatten()[:128]  # Fallback
-
-        return state, info
+        state, info = self.env.reset()
+        return state.astype(np.float32) / 255.0, info
 
     def step(self, action):
-        obs, reward, terminated, truncated, info = self.env.step(action)
+        next_state, reward, terminated, truncated, info = self.env.step(action)
         self.episode_reward += reward
         done = terminated or truncated
-
-        # Get RAM state
-        if hasattr(self.env.unwrapped, 'ale'):
-            next_state = self.env.unwrapped.ale.getRAM()
-            next_state = self._preprocess_observation(next_state)
-        else:
-            next_state = obs.flatten()[:128]  # Fallback
-
-        return next_state, reward, done, truncated, info
+        return next_state.astype(np.float32) / 255.0, reward, done, truncated, info
 
     def is_success(self, state=None):
-        """
-        In Pong, success is winning the game (positive score)
-        """
         return self.episode_reward > 0
 
     def close(self):
@@ -296,8 +269,10 @@ class AtariPongWrapper:
 
 class AtariFreewayWrapper:
     """
-    Support Gymnasium interface for Atari Freeway
-    Freeway: Cross the road avoiding cars
+    Support Gymnasium interface for Atari Freeway (RAM observations).
+    State: 128D uint8 RAM normalized to [0, 1]
+    Actions: 3 (NOOP, UP, DOWN)
+    Success: positive episode reward (crossing the road)
     """
     def __init__(self):
         try:
@@ -306,46 +281,23 @@ class AtariFreewayWrapper:
         except:
             pass
 
-        self.env = gym.make("ALE/Freeway-v5")
-        self.state_dim = 128  # RAM size
-        self.action_dim = self.env.action_space.n  # 3 actions (up, down, noop)
+        self.env = gym.make("ALE/Freeway-ram-v5")
+        self.state_dim = 128
+        self.action_dim = self.env.action_space.n  # 3 actions
         self.episode_reward = 0
-
-    def _preprocess_observation(self, obs):
-        """Normalize RAM values to [0, 1]"""
-        return obs / 255.0
 
     def reset(self):
         self.episode_reward = 0
-        obs, info = self.env.reset()
-
-        # Get RAM state
-        if hasattr(self.env.unwrapped, 'ale'):
-            state = self.env.unwrapped.ale.getRAM()
-            state = self._preprocess_observation(state)
-        else:
-            state = obs.flatten()[:128]
-
-        return state, info
+        state, info = self.env.reset()
+        return state.astype(np.float32) / 255.0, info
 
     def step(self, action):
-        obs, reward, terminated, truncated, info = self.env.step(action)
+        next_state, reward, terminated, truncated, info = self.env.step(action)
         self.episode_reward += reward
         done = terminated or truncated
-
-        # Get RAM state
-        if hasattr(self.env.unwrapped, 'ale'):
-            next_state = self.env.unwrapped.ale.getRAM()
-            next_state = self._preprocess_observation(next_state)
-        else:
-            next_state = obs.flatten()[:128]
-
-        return next_state, reward, done, truncated, info
+        return next_state.astype(np.float32) / 255.0, reward, done, truncated, info
 
     def is_success(self, state=None):
-        """
-        In Freeway, success is crossing the road (positive reward)
-        """
         return self.episode_reward > 0
 
     def close(self):
@@ -358,7 +310,8 @@ def create_env(args):
         return env
     elif args.env == 'LunarLander':
         render_mode = "human" if hasattr(args, 'render') and args.render else None
-        env = LunarLanderWrapper(render_mode=render_mode)
+        max_ep_steps = getattr(args, 'max_episode_steps', None)
+        env = LunarLanderWrapper(render_mode=render_mode, max_episode_steps=max_ep_steps)
         return env
 
     elif args.env == 'MountainCar':

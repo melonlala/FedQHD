@@ -191,21 +191,36 @@ def main():
                        help='Number of independent runs for averaging')
 
     # Agent parameters
-    parser.add_argument('--agent_type', type=str, default='hd_sarsa',
-                       choices=['q_learning', 'dqn', 'qhd', 'sarsa', 'linear_sarsa', 'hd_sarsa'])
     parser.add_argument('--hyperdimension', type=int, default=10000,
                        help='Hyperdimensional vector dimension')
-    parser.add_argument('--learning_rate', type=float, default=0.01)
-    parser.add_argument('--discount_factor', type=float, default=0.99)
-    parser.add_argument('--exploration_rate', type=float, default=1.0)
-    parser.add_argument('--exploration_decay', type=float, default=0.9995)
-    parser.add_argument('--exploration_min', type=float, default=0.01)
     parser.add_argument('--rff_gamma', type=float, default=1.0,
                        help='RFF kernel bandwidth parameter')
 
     # Federation parameters
-    parser.add_argument('--aggregation_interval', type=int, default=50,
-                       help='Aggregate every N episodes')
+    parser.add_argument('--aggregation_interval', type=int, default=25,
+                       help='Aggregate every N episodes (fallback if type-specific not set)')
+    parser.add_argument('--anchor_set_size', type=int, default=200,
+                       help='Number of anchor states for heterogeneous aggregation')
+
+    # Per-method-type hyperparameters (override the shared defaults above)
+    parser.add_argument('--qhd_lr', type=float, default=None,
+                       help='Learning rate for QHD methods (overrides --learning_rate)')
+    parser.add_argument('--dqn_lr', type=float, default=None,
+                       help='Learning rate for DQN methods (overrides --learning_rate)')
+    parser.add_argument('--qhd_agg_interval', type=int, default=None,
+                       help='Aggregation interval for QHD methods')
+    parser.add_argument('--dqn_agg_interval', type=int, default=None,
+                       help='Aggregation interval for DQN methods')
+    parser.add_argument('--qhd_discount', type=float, default=None,
+                       help='Discount factor for QHD methods')
+    parser.add_argument('--qhd_exploration_rate', type=float, default=None,
+                       help='Initial exploration rate for QHD methods')
+    parser.add_argument('--qhd_exploration_decay', type=float, default=None,
+                       help='Exploration decay for QHD methods')
+    parser.add_argument('--dqn_exploration_rate', type=float, default=None,
+                       help='Initial exploration rate for DQN methods')
+    parser.add_argument('--dqn_exploration_decay', type=float, default=None,
+                       help='Exploration decay for DQN methods')
 
     # Scalability parameters
     parser.add_argument('--client_counts', type=str, default='5,10,20,50',

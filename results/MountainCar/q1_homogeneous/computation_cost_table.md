@@ -1,0 +1,9 @@
+# Training Time Comparison
+
+| Method | Training Time (s) | Relative Time |
+|--------|-------------------|---------------|
+| FedAvg-DQN | 5133.11 | 6.75x |
+| FedQHD (Homogeneous) | 1033.39 | 1.36x |
+| Independent QHD | 760.10 | 1.00x |
+| Oracle DQN | 4065.45 | 5.35x |
+| Oracle QHD | 4274.92 | 5.62x |

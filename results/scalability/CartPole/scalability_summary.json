@@ -1,0 +1,65 @@
+{
+  "configuration": {
+    "client_counts": [
+      5,
+      10,
+      20,
+      50
+    ],
+    "episodes": 1500,
+    "environment": "CartPole",
+    "aggregation_interval": 25,
+    "learning_rate": 0.1,
+    "hyperdimension": 10000
+  },
+  "results": {
+    "N=5": {
+      "Independent": {
+        "final_reward": 17.230000000000004,
+        "training_time": 129.33498620986938
+      },
+      "FedQHD": {
+        "final_reward": 162.874,
+        "training_time": 196.67594647407532
+      },
+      "improvement": 145.644,
+      "speedup": 1.5206708736562051
+    },
+    "N=10": {
+      "Independent": {
+        "final_reward": 18.665000000000003,
+        "training_time": 248.65989351272583
+      },
+      "FedQHD": {
+        "final_reward": 168.325,
+        "training_time": 373.67966055870056
+      },
+      "improvement": 149.66,
+      "speedup": 1.502774151793709
+    },
+    "N=20": {
+      "Independent": {
+        "final_reward": 17.8455,
+        "training_time": 460.45653080940247
+      },
+      "FedQHD": {
+        "final_reward": 158.61300000000003,
+        "training_time": 714.5378890037537
+      },
+      "improvement": 140.76750000000004,
+      "speedup": 1.5518031370903143
+    },
+    "N=50": {
+      "Independent": {
+        "final_reward": 18.411799999999996,
+        "training_time": 1233.8808641433716
+      },
+      "FedQHD": {
+        "final_reward": 160.0864,
+        "training_time": 1932.7074370384216
+      },
+      "improvement": 141.6746,
+      "speedup": 1.5663647060287413
+    }
+  }
+}

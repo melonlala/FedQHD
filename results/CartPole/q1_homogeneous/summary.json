@@ -1,0 +1,44 @@
+{
+  "configuration": {
+    "episodes": 600,
+    "num_agents": 5,
+    "aggregation_interval": 50,
+    "learning_rate": 0.1,
+    "hyperdimension": 10000,
+    "environment": "CartPole",
+    "qhd_lr": 0.2,
+    "dqn_lr": null
+  },
+  "methods": {
+    "Independent QHD": {
+      "final_avg_reward": 23.415333333333336,
+      "final_avg_success": 0.0,
+      "training_time": 101.58640901247661,
+      "convergence_episode": null
+    },
+    "FedQHD (Homogeneous)": {
+      "final_avg_reward": 456.46200000000005,
+      "final_avg_success": 0.694,
+      "training_time": 616.8729648590088,
+      "convergence_episode": null
+    },
+    "Oracle QHD": {
+      "final_avg_reward": 456.2513333333333,
+      "final_avg_success": 0.794,
+      "training_time": 6007.919318596522,
+      "convergence_episode": null
+    },
+    "Oracle DQN": {
+      "final_avg_reward": 195.12,
+      "final_avg_success": 0.09733333333333334,
+      "training_time": 1462.1413815816243,
+      "convergence_episode": null
+    },
+    "FedAvg-DQN": {
+      "final_avg_reward": 186.77733333333333,
+      "final_avg_success": 0.0006666666666666666,
+      "training_time": 1552.6109828948975,
+      "convergence_episode": null
+    }
+  }
+}

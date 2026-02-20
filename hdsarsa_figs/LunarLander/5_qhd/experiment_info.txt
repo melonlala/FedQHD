@@ -1,0 +1,25 @@
+grid_size: [8, 8]
+episodes: 600
+agent_type: qhd
+aggregation_interval: 10
+learning_rate: 0.1
+discount_factor: 0.9
+exploration_rate: 1
+exploration_decay: 0.995
+exploration_min: 0.001
+output_dir: test_figs
+avg_window: 5
+test: False
+convergence_threshold: 1
+convergence_window: 20
+agent_range: 5
+env: LunarLander
+runs: 3
+agent_num: 5
+Training time (seconds): 4108.68
+
+Final Results (last 100 episodes average):
+Parallel Avg Reward: -24.60
+FedAvg Avg Reward: 17.85
+Parallel Avg Success: 0.14
+FedAvg Avg Success: 0.22

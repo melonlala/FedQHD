@@ -1,5 +1,88 @@
 # FedQHD Project - Development Log
 
+## Session: February 17, 2026 (Update 2)
+
+### Oracle QHD Enhancement: Heterogeneous-Aware Implementation
+
+**Date**: February 17, 2026 (evening update)
+
+**Objective**: Modify Oracle QHD to properly support heterogeneous encoders, providing the correct upper bound for Q2 experiments.
+
+#### What Changed
+
+**Previous Implementation** (Homogeneous Only):
+- Single centralized agent trained on pooled data
+- Shared encoder across all clients
+- Only suitable as upper bound for homogeneous case
+
+**New Implementation** (Heterogeneous-Aware):
+- N separate agents (one per client)
+- Each agent uses client-specific encoder Φ_i with dimension D_i
+- All agents train on ALL pooled data (perfect data sharing)
+- Returns parameters W_i compatible with each client's encoder
+
+#### Algorithm
+
+**Oracle QHD (Heterogeneous-Aware)**:
+1. Server collects ALL raw data from all clients
+2. Server knows each client's encoder Φ_i and dimension D_i
+3. Server trains N separate Q-functions {Q_1, ..., Q_N}
+   - Q_i uses Φ_i with parameters W_i ∈ K^{D_i × |A|}
+   - Q_i trained on ALL pooled data (not just client i's data)
+4. Distribute W_i back to client i
+
+**Result**: Each client gets parameters optimized on global data but compatible with their local encoder.
+
+#### Function Signature
+
+```python
+def train_oracle_qhd(
+    episodes: int,
+    args,
+    use_heterogeneous: bool = False  # NEW parameter
+) -> ExperimentResults
+```
+
+#### Test Results (50 episodes, 2 agents, CartPole)
+
+- Oracle QHD (Homogeneous): 22.05 reward, 0.51s
+- Oracle QHD (Heterogeneous): 26.81 reward, 1.27s (NEW!)
+- FedQHD (Heterogeneous): 20.19 reward, 120.75s
+
+#### Files Modified
+
+1. **`experiments_runner.py`**:
+   - Modified `train_oracle_qhd()` to support `use_heterogeneous` flag
+   - Updated `run_full_comparison()` to use heterogeneous oracle in Q2
+   - Fixed bug in `train_independent_qhd()` (line 121: `agent` → `fed_agent`)
+
+2. **`test_experiments.py`**:
+   - Added `test_oracle_qhd_heterogeneous()` test
+   - Fixed `test_fedqhd_heterogeneous()` parameter passing
+   - All tests pass ✅
+
+3. **`ORACLE_QHD_UPDATE.md`**:
+   - Comprehensive documentation of changes
+
+#### Benefits
+
+1. **Fair Comparison**: Provides proper upper bound for heterogeneous experiments
+2. **Isolates Encoder Effect**: Shows what's achievable with perfect data sharing
+3. **Validates Anchor Method**: Gap quantifies aggregation loss
+4. **Backward Compatible**: Default behavior matches original implementation
+
+#### Research Impact
+
+Now Q2 experiments have complete baseline set:
+```
+Independent QHD → FedQHD (Hetero) → Oracle QHD (Hetero)
+   (no sharing)     (anchor-based)      (perfect sharing)
+```
+
+Aggregation efficiency = [FedQHD (Hetero) - Independent] / [Oracle (Hetero) - Independent]
+
+---
+
 ## Session: February 17, 2026
 
 ### Task: Implement Comprehensive Experiments for FedQHD Paper
@@ -23,8 +106,10 @@ Implemented 4 baseline methods:
    - Reference: experiments.tex line 46
 
 2. **`train_oracle_qhd()`** - Oracle QHD (Upper Bound)
-   - Centralized training with pooled data from all clients
-   - Perfect data sharing scenario
+   - **Heterogeneous-aware**: Trains N separate Q-functions on pooled data
+   - Each Q_i uses client-specific encoder Φ_i but trained on ALL data
+   - Perfect data sharing scenario with encoder compatibility
+   - Supports both homogeneous (`use_heterogeneous=False`) and heterogeneous (`use_heterogeneous=True`) modes
    - Reference: experiments.tex line 47
 
 3. **`train_fedqhd_homogeneous()`** - FedQHD with Homogeneous Encoders (Main Method)

@@ -40,8 +40,9 @@ class ReplayBuffer:
 class DQNAgent:
     def __init__(self, state_dim, action_dim, learning_rate=0.001, discount_factor=0.99,
                  exploration_rate=1.0, exploration_decay=0.995, exploration_min=0.01,
-                 buffer_size=10000, batch_size=64, target_update_freq=5, tau=0.001, device=None):
-        
+                 buffer_size=10000, batch_size=64, target_update_freq=5, tau=0.001,
+                 hidden_size=128, device=None):
+
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.lr = learning_rate
@@ -57,14 +58,14 @@ class DQNAgent:
             self.device = device
         else:
             self.device = torch.device(
-                "cuda" if torch.cuda.is_available() else 
-                "mps" if torch.backends.mps.is_available() else 
+                "cuda" if torch.cuda.is_available() else
+                "mps" if torch.backends.mps.is_available() else
                 "cpu"
             )
 
         # Build Networks
-        self.q_network = QNetwork(self.state_dim, self.action_dim).to(self.device)
-        self.target_network = QNetwork(self.state_dim, self.action_dim).to(self.device)
+        self.q_network = QNetwork(self.state_dim, self.action_dim, hidden_size=hidden_size).to(self.device)
+        self.target_network = QNetwork(self.state_dim, self.action_dim, hidden_size=hidden_size).to(self.device)
         self.target_network.load_state_dict(self.q_network.state_dict())
         
         self.optimizer = torch.optim.Adam(self.q_network.parameters(), lr=self.lr)

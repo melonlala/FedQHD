@@ -1,0 +1,24 @@
+grid_size: [8, 8]
+episodes: 1000
+agent_type: hd_sarsa
+aggregation_interval: 1
+learning_rate: 0.2
+discount_factor: 0.9
+exploration_rate: 0.8
+exploration_decay: 0.9
+exploration_min: 0.001
+output_dir: mac_figs
+avg_window: 5
+test: False
+convergence_threshold: 1
+convergence_window: 20
+agent_range: 1, 2, 5, 10, 40
+env: CartPole
+runs: 1
+agent_num: 5
+Training time (seconds): 932.36
+
+Final Results (last 100 episodes average):
+Agents: 1, Final MSE Loss: 16.0543
+Agents: 2, Final MSE Loss: 11.8479
+Agents: 5, Final MSE Loss: 9.5595
