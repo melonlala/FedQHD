@@ -7,9 +7,11 @@
 Fed - DQN 
 
 \paragraph{Distillation-Based Federated RL for Heterogeneous Agents.}
-FedHPD 
+\cite{hinton2015distilling} introduced the concept of dark knowledge: the information encoded in a teacher's soft probability distribution over classes that reveals inter-class similarities invisible in hard labels.
 
-Instead of sharing parameters between the different workers, \cite{teh2017distral} proposes to share a distilled policy that captures common behavior across tasks
+\cite{rusu2016policydistillation}  authored the foundational transfer of knowledge distillation to deep RL with policy distillation by mapping DQN's Q-value vector to logits and apply temperature-scaled softmax to yield a soft action distribution.
+
+Instead of sharing parameters between the different workers, \cite{teh2017distral} proposes to share a distilled policy that captures common behavior across tasks, FedDF \cite{lin2021ensembledistillation} received client models form an ensemble teacher, and a student global model is trained on an unlabeled server-side dataset
 
 \paragraph{Black-Box and Query-Based Federated Q-Learning.}  FHQL 
 

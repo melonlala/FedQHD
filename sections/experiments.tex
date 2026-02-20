@@ -72,45 +72,75 @@ We evaluate methods using:
 \subsubsection{Performance Comparison: Homogeneous Encoders (Q1)}
 \label{subsec:performance_homo}
 
-Figure~\ref{fig:homo_learning_curves} shows learning curves for FedQHD with shared encoders compared to baselines. FedQHD consistently outperforms Independent QHD across all environments, demonstrating effective knowledge aggregation. On CartPole and Acrobot, FedQHD achieves 85-90\% of Oracle performance while converging 3-5$\times$ faster than Independent learning. FedAvg-DQN shows competitive performance but requires significantly more communication (see Section~\ref{subsec:communication}). Distral struggles with environmental heterogeneity, achieving only 60-70\% of FedQHD's final performance.
+Table~\ref{tab:main_results} summarises the final average reward (mean over the last 100 episodes of a single run) for all methods across four environments under both homogeneous (Q1) and heterogeneous (Q2) encoder settings.
+\begin{table}[t]
+\centering
+\caption{%
+  Final average reward (last 100 episodes, 600-episode runs, $N{=}2$ clients).
+  \textbf{Bold}: best non-oracle result per column.
+  $\dagger$: oracle upper bounds (centralised data access).
+  {--}: method not applicable to this setting.
+  Higher is better for all environments.
+}
+\label{tab:main_results}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{l rr rr rr rr}
+\toprule
+ & \multicolumn{2}{c}{CartPole}
+ & \multicolumn{2}{c}{Acrobot}
+ & \multicolumn{2}{c}{LunarLander}
+ & \multicolumn{2}{c}{MountainCar} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+Method
+  & Homo & Hetero
+  & Homo & Hetero
+  & Homo & Hetero
+  & Homo & Hetero \\
+\midrule
+Independent QHD
+  &  23.42 &  23.42
+  & $-$499.92 & {--}
+  & $-$194.65 & {--}
+  & $-$200.00 & {--} \\
+Truncate FedAvg-QHD
+  & {--} & 125.03
+  & {--} & {--}
+  & {--} & {--}
+  & {--} & {--} \\
+FedAvg-DQN
+  & 186.78 & {--}
+  & $\mathbf{-84.18}$ & {--}
+  & $\mathbf{205.70}$ & {--}
+  & $-$163.55 & {--} \\
+Distillation FedDQN
+  & {--} & 176.82
+  & {--} & {--}
+  & {--} & {--}
+  & {--} & {--} \\
+FedQHD
+  & $\mathbf{456.46}$ & $\mathbf{422.53}$
+  & $-$109.17 & {--}
+  & $-$1.54 & {--}
+  & $\mathbf{-140.81}$ & {--} \\
+\midrule
+Oracle QHD$^\dagger$
+  & 456.25 & {--}
+  & $-$128.92 & {--}
+  & $-$16.93 & {--}
+  & $-$163.87 & {--} \\
+Oracle DQN$^\dagger$
+  & 195.12 & {--}
+  & $-$77.16 & {--}
+  & 93.31 & {--}
+  & $-$122.45 & {--} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-In Hopper and HalfCheetah, the performance gap between FedQHD and Oracle widens (70-75\% of Oracle) due to increased environmental complexity and heterogeneity. Nevertheless, FedQHD maintains substantial gains over Independent learning (40-50\% improvement in final return). Table~\ref{tab:convergence_speed} summarizes convergence speeds, showing FedQHD reaches target performance in 50-60\% of the steps required by Independent QHD.
-
-% \begin{figure}[t]
-%     \centering
-%     \includegraphics[width=\linewidth]{figures/homo_learning_curves.pdf}
-%     \caption{Learning curves for FedQHD with homogeneous encoders. Shaded regions show $\pm 1$ standard error over 5 seeds.}
-%     \label{fig:homo_learning_curves}
-% \end{figure}
-
-% \begin{table}[t]
-% \centering
-% \caption{Convergence speed (environment steps to 90\% oracle performance).}
-% \label{tab:convergence_speed}
-% \begin{tabular}{lcccc}
-% \toprule
-% Method & CartPole & Acrobot & Hopper & HalfCheetah \\
-% \midrule
-% Independent QHD & 125K & 180K & 450K & 600K \\
-% FedQHD (Homo) & \textbf{65K} & \textbf{95K} & \textbf{280K} & \textbf{380K} \\
-% FedAvg-DQN & 80K & 120K & 320K & 420K \\
-% \bottomrule
-% \end{tabular}
-% \end{table}
 
 \subsubsection{Heterogeneous Encoders and Anchor-Based Aggregation (Q2)}
 \label{subsec:heterogeneous_results}
 
-Figure~\ref{fig:hetero_comparison} compares FedQHD with homogeneous vs. heterogeneous encoders. Despite differences in encoder dimensions ($D_i \in \{256,512,1024\}$) and kernel bandwidths, anchor-based aggregation (Algorithm~\ref{alg:fedqhd_heterogeneous}) achieves 85-95\% of the performance of the homogeneous case. This validates our closed-form translation mechanism (Eq.~\eqref{eq:fed_quad_cov}).
-
-We vary anchor set size $m \in \{50, 100, 200, 500\}$ and observe that performance saturates around $m=200$ for CartPole/Acrobot and $m=500$ for Hopper/HalfCheetah. Smaller anchor sets ($m < 100$) lead to noticeable degradation (10-15\% performance drop), while larger sets provide diminishing returns. Figure~\ref{fig:anchor_ablation} shows this trade-off between communication cost and aggregation quality.
-
-% \begin{figure}[t]
-%     \centering
-%     \includegraphics[width=0.8\linewidth]{figures/hetero_comparison.pdf}
-%     \caption{FedQHD performance with homogeneous vs. heterogeneous encoders.}
-%     \label{fig:hetero_comparison}
-% \end{figure}
 
 \subsubsection{Computation Cost}
 
