@@ -10,10 +10,11 @@ Usage examples:
     python run_single_method.py --method fedavg_dqn  --env Acrobot  --question q1 --episodes 600 --dqn_lr 5e-4
     python run_single_method.py --method fedqhd_hetero --env CartPole --question q2 --episodes 400
     python run_single_method.py --method oracle_qhd  --env CartPole --question q1 --episodes 600 --qhd_lr 0.05
+    python run_single_method.py --method oracle_dqn_hetero --env CartPole --question q2 --episodes 600
 
 Available methods per question:
-  q1: independent_qhd, fedqhd_homo, oracle_qhd, oracle_dqn, fedavg_dqn, distillation_dqn
-  q2: fedqhd_hetero, oracle_qhd_hetero, truncate_fedavg_qhd, distillation_dqn_hetero
+  q1: independent_qhd, fedqhd_homo, oracle_qhd, oracle_dqn, fedavg_dqn, distillation_dqn, truncate_fedavg_qhd
+  q2: fedqhd_hetero, oracle_qhd_hetero, oracle_dqn_hetero, truncate_fedavg_qhd_hetero, distillation_dqn_hetero
 """
 
 import argparse
@@ -45,31 +46,37 @@ METHODS = {
     # Q1
     'independent_qhd':         ("Independent QHD",
                                  lambda ep, a: train_independent_qhd(ep, a)),
-    'fedqhd_homo':             ("FedQHD",
+    'fedqhd_homo':             ("FedQHD (Homogeneous)",
                                  lambda ep, a: train_fedqhd_homogeneous(ep, a)),
-    'oracle_qhd':              ("Oracle QHD",
+    'oracle_qhd':              ("Oracle QHD (Homogeneous)",
                                  lambda ep, a: train_oracle_qhd(ep, a, use_heterogeneous=False)),
-    'oracle_dqn':              ("Oracle DQN",
+    'oracle_dqn':              ("Oracle DQN (Homogeneous)",
                                  lambda ep, a: train_oracle_dqn(ep, a)),
     'fedavg_dqn':              ("FedAvg-DQN",
                                  lambda ep, a: train_fedavg_dqn(ep, a)),
-    'distillation_dqn':        ("Distillation FedDQN",
-                                 lambda ep, a: train_distillation_dqn(ep, a, heterogeneous=False)),
+    'distillation_dqn':        ("Distillation FedDQN (Homogeneous)",
+                                 lambda ep, a: train_distillation_dqn(ep, a, heterogeneous=False)),                        
+    'truncate_fedavg_qhd':       ("Truncate FedAvg-QHD (Homogeneous)",
+                                   lambda ep, a: train_truncate_fedavg_qhd(ep, a, heterogeneous=False)),
     # Q2
-    'fedqhd_hetero':           ("FedQHD",
+    'independent_qhd_hetero': ("Independent QHD (Heterogeneous)",
+                                 lambda ep, a: train_independent_qhd(ep, a, heterogeneous=True)),
+    'fedqhd_hetero':           ("FedQHD (Heterogeneous)",
                                  lambda ep, a: train_fedqhd_heterogeneous(ep, a)),
     'oracle_qhd_hetero':       ("Oracle QHD (Heterogeneous)",
                                  lambda ep, a: train_oracle_qhd(ep, a, use_heterogeneous=True)),
-    'truncate_fedavg_qhd':     ("Truncate FedAvg-QHD",
-                                 lambda ep, a: train_truncate_fedavg_qhd(ep, a)),
-    'distillation_dqn_hetero': ("Distillation FedDQN (Hetero)",
+    'oracle_dqn_hetero':       ("Oracle DQN (Heterogeneous)",
+                                 lambda ep, a: train_oracle_dqn(ep, a, use_heterogeneous=True)),
+    'truncate_fedavg_qhd_hetero':("Truncate FedAvg-QHD (Heterogeneous)",
+                                   lambda ep, a: train_truncate_fedavg_qhd(ep, a, heterogeneous=True)),
+    'distillation_dqn_hetero': ("Distillation FedDQN (Heterogeneous)",
                                  lambda ep, a: train_distillation_dqn(ep, a, heterogeneous=True)),
 }
 
 Q1_METHODS = {'independent_qhd', 'fedqhd_homo', 'oracle_qhd',
-              'oracle_dqn', 'fedavg_dqn', 'distillation_dqn'}
-Q2_METHODS = {'fedqhd_hetero', 'oracle_qhd_hetero',
-              'truncate_fedavg_qhd', 'distillation_dqn_hetero'}
+              'oracle_dqn', 'fedavg_dqn', 'distillation_dqn', 'truncate_fedavg_qhd'}
+Q2_METHODS = {'independent_qhd_hetero', 'fedqhd_hetero', 'oracle_qhd_hetero', 'oracle_dqn_hetero',
+              'truncate_fedavg_qhd_hetero', 'distillation_dqn_hetero'}
 
 
 def result_filename(display_name: str) -> str:
@@ -102,7 +109,8 @@ def update_summary(result: ExperimentResults, output_dir: str, args):
     summary['configuration'].update({
         'episodes':            args.episodes,
         'num_agents':          args.agent_num,
-        'aggregation_interval': args.aggregation_interval,
+        'qhd_agg_interval':     args.qhd_agg_interval,
+        'dqn_agg_interval':     args.dqn_agg_interval,
         'qhd_lr':              args.qhd_lr,
         'dqn_lr':              args.dqn_lr,
         'hyperdimension':      args.hyperdimension,
@@ -138,18 +146,15 @@ def build_params_dict(method_key: str, display_name: str, args) -> dict:
         'qhd_exploration_rate':    args.qhd_exploration_rate,
         'qhd_exploration_decay':   args.qhd_exploration_decay,
         'qhd_exploration_min':     args.qhd_exploration_min,
+        'qhd_agg_interval':     args.qhd_agg_interval,
         # DQN hyperparams (None → falls back to base value in training fn)
         'dqn_lr':                  args.dqn_lr,
         'dqn_discount':            args.dqn_discount,
         'dqn_exploration_rate':    args.dqn_exploration_rate,
         'dqn_exploration_decay':   args.dqn_exploration_decay,
         'dqn_exploration_min':     args.dqn_exploration_min,
-        # Shared / base fallbacks
-        'learning_rate':           args.learning_rate,
-        'discount_factor':         args.discount_factor,
-        'exploration_min':         args.exploration_min,
+        'dqn_agg_interval':     args.dqn_agg_interval,
         # Other
-        'aggregation_interval':    args.aggregation_interval,
         'hyperdimension':          args.hyperdimension,
         'rff_gamma':               args.rff_gamma,
         'anchor_set_size':         args.anchor_set_size,
@@ -178,7 +183,8 @@ def run_single(args):
     print(f"EPISODES: {args.episodes}   AGENTS: {args.agent_num}   RUNS: {args.runs}")
     print(f"QHD     : lr={args.qhd_lr}  discount={args.qhd_discount}  "
           f"eps={args.qhd_exploration_rate}  decay={args.qhd_exploration_decay}")
-    print(f"DQN     : lr={args.dqn_lr}  agg_interval={args.aggregation_interval}")
+    print(f"DQN     : lr={args.dqn_lr}  agg_interval={args.dqn_agg_interval}  discount={args.dqn_discount}  "
+          f"eps={args.dqn_exploration_rate}  decay={args.dqn_exploration_decay}")
     print(f"OUTPUT  : {out_dir}")
     print("=" * 70 + "\n")
 
@@ -246,7 +252,7 @@ def main():
     )
 
     # Method / environment / question
-    parser.add_argument('--method', default='fedqhd_hetero', choices=list(METHODS.keys()),
+    parser.add_argument('--method', default='fedqhd_homo', choices=sorted(METHODS.keys()),
                         help='Which method to run')
     parser.add_argument('--env', default='CartPole',
                         choices=['GridWorld', 'LunarLander', 'CartPole', 'MountainCar',
@@ -263,29 +269,28 @@ def main():
     parser.add_argument('--random_seed', type=int, default=42)
 
     # QHD hyperparams (used directly by QHD training functions)
-    parser.add_argument('--qhd_lr',               type=float, default=0.2)
-    parser.add_argument('--qhd_discount',         type=float, default=0.9)
-    parser.add_argument('--qhd_exploration_rate', type=float, default=0.8)
-    parser.add_argument('--qhd_exploration_decay',type=float, default=0.9)
-    parser.add_argument('--qhd_exploration_min',  type=float, default=0.01)
+    parser.add_argument('--qhd_lr',               type=float, default=0.1)
+    parser.add_argument('--qhd_discount',         type=float, default=0.95)
+    parser.add_argument('--qhd_exploration_rate', type=float, default=1.0)
+    parser.add_argument('--qhd_exploration_decay',type=float, default=0.95)
+    parser.add_argument('--qhd_exploration_min',  type=float, default=0.001)
+    parser.add_argument('--qhd_agg_interval', type=int, default=25)
 
     # DQN hyperparams (None → falls back to base value in training fn)
-    parser.add_argument('--dqn_lr',               type=float, default=None)
-    parser.add_argument('--dqn_discount',         type=float, default=None)
-    parser.add_argument('--dqn_exploration_rate', type=float, default=None)
-    parser.add_argument('--dqn_exploration_decay',type=float, default=None)
-    parser.add_argument('--dqn_exploration_min',  type=float, default=None)
-
-    # Base fallbacks (used when DQN overrides are None)
-    parser.add_argument('--learning_rate',   type=float, default=1e-3)
-    parser.add_argument('--discount_factor', type=float, default=0.99)
-    parser.add_argument('--exploration_min', type=float, default=0.01)
+    parser.add_argument('--dqn_lr',               type=float, default=0.001)
+    parser.add_argument('--dqn_discount',         type=float, default=0.99)
+    parser.add_argument('--dqn_exploration_rate', type=float, default=1.0)
+    parser.add_argument('--dqn_exploration_decay',type=float, default=0.995)
+    parser.add_argument('--dqn_exploration_min',  type=float, default=0.001)
+    parser.add_argument('--dqn_agg_interval', type=int, default=25)
 
     # Architecture / federation
     parser.add_argument('--hyperdimension',       type=int,   default=10000)
     parser.add_argument('--rff_gamma',            type=float, default=1.0)
-    parser.add_argument('--aggregation_interval', type=int,   default=50)
     parser.add_argument('--anchor_set_size',      type=int,   default=200)
+    parser.add_argument('--hetero_dims',          type=str,   default=None,
+                        help='Comma-separated encoder dims for Q2 heterogeneous methods '
+                             '(e.g. "2000,4000,6000,10000"). Defaults to [500,1000,2000,5000].')
 
     # Output
     parser.add_argument('--output_dir', type=str, default='results')

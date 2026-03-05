@@ -1,0 +1,262 @@
+{
+  "env": "Acrobot",
+  "method_type": "dqn",
+  "results": [
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.001,
+      "aggregation_interval": 100,
+      "mean_reward": -83.21666666666667,
+      "std_reward": 0.4233333333333249,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.001,
+      "aggregation_interval": 50,
+      "mean_reward": -83.36166666666668,
+      "std_reward": 1.20833333333335,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.001,
+      "aggregation_interval": 10,
+      "mean_reward": -84.33500000000001,
+      "std_reward": 0.9349999999999952,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.001,
+      "aggregation_interval": 25,
+      "mean_reward": -85.71333333333331,
+      "std_reward": 1.3033333333333275,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.001,
+      "aggregation_interval": 10,
+      "mean_reward": -89.29666666666665,
+      "std_reward": 1.5233333333333334,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.0001,
+      "aggregation_interval": 10,
+      "mean_reward": -90.33000000000001,
+      "std_reward": 1.9566666666666563,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.0001,
+      "aggregation_interval": 50,
+      "mean_reward": -90.68500000000003,
+      "std_reward": 1.4683333333333408,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.001,
+      "aggregation_interval": 25,
+      "mean_reward": -91.04166666666667,
+      "std_reward": 0.8516666666666737,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.001,
+      "aggregation_interval": 50,
+      "mean_reward": -91.45166666666665,
+      "std_reward": 0.9216666666666669,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.0001,
+      "aggregation_interval": 100,
+      "mean_reward": -92.10999999999999,
+      "std_reward": 0.013333333333321207,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.001,
+      "aggregation_interval": 100,
+      "mean_reward": -92.44,
+      "std_reward": 0.09666666666667822,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.0001,
+      "aggregation_interval": 25,
+      "mean_reward": -92.60499999999999,
+      "std_reward": 0.10500000000000398,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.005,
+      "aggregation_interval": 10,
+      "mean_reward": -95.75166666666667,
+      "std_reward": 2.4150000000000205,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.005,
+      "aggregation_interval": 50,
+      "mean_reward": -96.18166666666666,
+      "std_reward": 6.094999999999999,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.005,
+      "aggregation_interval": 25,
+      "mean_reward": -96.18166666666667,
+      "std_reward": 3.045000000000009,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.005,
+      "aggregation_interval": 100,
+      "mean_reward": -99.87166666666667,
+      "std_reward": 2.604999999999997,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.0001,
+      "aggregation_interval": 10,
+      "mean_reward": -103.73833333333332,
+      "std_reward": 2.3716666666666626,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.0001,
+      "aggregation_interval": 25,
+      "mean_reward": -106.01833333333332,
+      "std_reward": 0.3716666666666626,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.01,
+      "aggregation_interval": 50,
+      "mean_reward": -108.22,
+      "std_reward": 0.7233333333333363,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.0001,
+      "aggregation_interval": 50,
+      "mean_reward": -110.20333333333333,
+      "std_reward": 0.2600000000000051,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.0001,
+      "aggregation_interval": 100,
+      "mean_reward": -121.14333333333335,
+      "std_reward": 6.986666666666679,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.005,
+      "aggregation_interval": 100,
+      "mean_reward": -148.38833333333332,
+      "std_reward": 17.778333333333308,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.005,
+      "aggregation_interval": 50,
+      "mean_reward": -158.29166666666669,
+      "std_reward": 19.72833333333334,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.01,
+      "aggregation_interval": 10,
+      "mean_reward": -279.8283333333333,
+      "std_reward": 171.15499999999997,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.01,
+      "aggregation_interval": 100,
+      "mean_reward": -283.3666666666667,
+      "std_reward": 173.45333333333332,
+      "num_runs": 2
+    },
+    {
+      "method": "Oracle DQN",
+      "learning_rate": 0.01,
+      "aggregation_interval": 25,
+      "mean_reward": -295.3533333333333,
+      "std_reward": 174.48666666666668,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.01,
+      "aggregation_interval": 100,
+      "mean_reward": -397.99333333333334,
+      "std_reward": 5.516666666666737,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.01,
+      "aggregation_interval": 50,
+      "mean_reward": -452.43999999999994,
+      "std_reward": 1.7266666666666595,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.01,
+      "aggregation_interval": 25,
+      "mean_reward": -461.76666666666665,
+      "std_reward": 2.5666666666667197,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.01,
+      "aggregation_interval": 10,
+      "mean_reward": -462.7316666666667,
+      "std_reward": 1.7483333333333633,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.005,
+      "aggregation_interval": 25,
+      "mean_reward": -464.5366666666667,
+      "std_reward": 3.2099999999999795,
+      "num_runs": 2
+    },
+    {
+      "method": "FedAvg-DQN",
+      "learning_rate": 0.005,
+      "aggregation_interval": 10,
+      "mean_reward": -466.65,
+      "std_reward": 2.496666666666613,
+      "num_runs": 2
+    }
+  ]
+}

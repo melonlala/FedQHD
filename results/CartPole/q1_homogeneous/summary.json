@@ -7,7 +7,9 @@
     "hyperdimension": 10000,
     "environment": "CartPole",
     "qhd_lr": 0.2,
-    "dqn_lr": null
+    "dqn_lr": 0.001,
+    "qhd_agg_interval": 50,
+    "dqn_agg_interval": 25
   },
   "methods": {
     "Independent QHD": {
@@ -23,9 +25,9 @@
       "convergence_episode": null
     },
     "Oracle QHD": {
-      "final_avg_reward": 456.2513333333333,
-      "final_avg_success": 0.794,
-      "training_time": 6007.919318596522,
+      "final_avg_reward": 498.094,
+      "final_avg_success": 0.9899999999999999,
+      "training_time": 740.41783452034,
       "convergence_episode": null
     },
     "Oracle DQN": {
@@ -38,6 +40,18 @@
       "final_avg_reward": 186.77733333333333,
       "final_avg_success": 0.0006666666666666666,
       "training_time": 1552.6109828948975,
+      "convergence_episode": null
+    },
+    "Distillation FedDQN": {
+      "final_avg_reward": 144.44,
+      "final_avg_success": 0.02,
+      "training_time": 856.9457640647888,
+      "convergence_episode": null
+    },
+    "Truncate FedAvg-QHD": {
+      "final_avg_reward": 193.174,
+      "final_avg_success": 0.13199999999999998,
+      "training_time": 209.78321266174316,
       "convergence_episode": null
     }
   }

@@ -6,11 +6,13 @@
 \toprule
 Method & Avg Reward & Avg Success Rate & Training Time (s) \\
 \midrule
-FedAvg-DQN & -84.90 & 0.000 & 1450.99 \\
-FedQHD (Homogeneous) & -118.38 & 0.000 & 277.38 \\
-Independent QHD & -181.21 & 0.000 & 220.95 \\
-Oracle DQN & -146.28 & 0.000 & 1347.43 \\
-Oracle QHD & -103.35 & 0.000 & 1240.26 \\
+Distillation FedDQN (Homogeneous) & 116.11 & 0.504 & 4149.99 \\
+FedAvg-DQN & 225.44 & 0.806 & 4369.58 \\
+FedQHD (Homogeneous) & 236.26 & 0.908 & 1216.41 \\
+Independent QHD & -179.99 & 0.000 & 333.16 \\
+Oracle DQN (Homogeneous) & 183.45 & 0.704 & 3780.97 \\
+Oracle QHD (Homogeneous) & 83.84 & 0.380 & 919.82 \\
+Truncate FedAvg-QHD (Homogeneous) & 70.44 & 0.328 & 1582.70 \\
 \bottomrule
 \end{tabular}
 \end{table}

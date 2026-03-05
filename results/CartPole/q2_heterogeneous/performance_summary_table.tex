@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\caption{Final Performance Comparison (Last 100 Episodes)}
+\label{tab:performance_summary}
+\begin{tabular}{lccc}
+\toprule
+Method & Avg Reward & Avg Success Rate & Training Time (s) \\
+\midrule
+Distillation FedDQN (Heterogeneous) & 176.82 & 0.040 & 1333.12 \\
+FedQHD (Heterogeneous) & 422.53 & 0.630 & 98.53 \\
+Oracle DQN (Heterogeneous) & 215.48 & 0.116 & 4895.87 \\
+Oracle QHD (Heterogeneous) & 500.00 & 1.000 & 614.62 \\
+Truncate FedAvg-QHD (Heterogeneous) & 51.30 & 0.008 & 18.66 \\
+\bottomrule
+\end{tabular}
+\end{table}

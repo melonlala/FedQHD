@@ -1,0 +1,51 @@
+{
+  "configuration": {
+    "episodes": 600,
+    "num_agents": 5,
+    "aggregation_interval": 50,
+    "qhd_lr": 0.1,
+    "dqn_lr": 0.001,
+    "hyperdimension": 10000,
+    "environment": "Acrobot",
+    "qhd_agg_interval": 25,
+    "dqn_agg_interval": 25
+  },
+  "methods": {
+    "FedQHD (Heterogeneous)": {
+      "final_avg_reward": -101.18,
+      "final_avg_success": 0.0,
+      "training_time": 98.22091460227966,
+      "convergence_episode": null
+    },
+    "Truncate FedAvg-QHD": {
+      "final_avg_reward": -106.97200000000001,
+      "final_avg_success": 0.0,
+      "training_time": 150.76744985580444,
+      "convergence_episode": null
+    },
+    "Oracle QHD (Heterogeneous)": {
+      "final_avg_reward": -97.77600000000001,
+      "final_avg_success": 0.0,
+      "training_time": 352.0278353691101,
+      "convergence_episode": null
+    },
+    "Distillation FedDQN (Hetero)": {
+      "final_avg_reward": -88.06400000000004,
+      "final_avg_success": 0.0,
+      "training_time": 2836.1489536762238,
+      "convergence_episode": null
+    },
+    "Oracle DQN (Heterogeneous)": {
+      "final_avg_reward": -80.49799999999999,
+      "final_avg_success": 0.0,
+      "training_time": 5182.054754972458,
+      "convergence_episode": null
+    },
+    "Independent QHD (Heterogeneous)": {
+      "final_avg_reward": -493.926,
+      "final_avg_success": 0.0,
+      "training_time": 269.32419204711914,
+      "convergence_episode": null
+    }
+  }
+}

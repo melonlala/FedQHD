@@ -71,7 +71,8 @@ def run_scalability_analysis(
 
 def plot_scalability_results(
     all_results: Dict[int, Dict[str, ExperimentResults]],
-    output_dir: str
+    output_dir: str,
+    window_size: int = 10
 ):
     """
     Create scalability plots showing performance vs. number of clients.
@@ -154,6 +155,7 @@ def plot_scalability_results(
 
     # Plot 4: Learning curves for different N (combined)
     # draw curves in one plot with different colors and labels
+    # Smooth the curves using a moving average for better visualization, 
 
     fig = plt.figure(figsize=(12, 8))
     for N in client_counts:
@@ -190,8 +192,8 @@ def save_scalability_results(
             'client_counts': sorted(all_results.keys()),
             'episodes': args.episodes,
             'environment': args.env,
-            'aggregation_interval': args.aggregation_interval,
-            'learning_rate': args.learning_rate,
+            'aggregation_interval': args.qhd_agg_interval,
+            'learning_rate': args.qhd_lr,
             'hyperdimension': args.hyperdimension
         },
         'results': {}
