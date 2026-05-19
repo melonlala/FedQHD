@@ -1,0 +1,333 @@
+FedQHD Ablation Experiments  (CartPole-v1)
+Metric   : all
+Episodes=500  Seeds=3  AggInterval=50
+D grid      : [16, 32, 64, 128, 256, 512, 1024, 2048]
+m grid      : [128, 256, 512, 1024, 1536, 2048]
+lambda grid : [0.1, 1, 10, 100, 1000, 10000, 100000]
+D_FIXED=1024  M_FIXED=1000
+
+Collecting 8192 anchor states …  (A1 needs up to 8192, A2 needs 2048)
+Collecting 400 held-out eval anchor states …
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+  [Q*] Reference agent loaded ← results/ablation/ref_agent.npz  (D=2048, ε=0.010)
+
+  [RefCheck] V(π_ref) = 39.3  (threshold ≥ 480.0)  → NOT CONVERGED ✗
+  WARNING: Reference agent has not converged.  Re-run with --force_recompute_qstar or increase --n_ref_episodes.
+
+Computing / loading Q_star for 8192 anchors …
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m8192_nmc5.npz)
+
+Computing Q_star at 400 held-out eval anchors …
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m400_nmc5.npz)
+
+Computing oracle policy value …
+  Oracle V(π*) = 40.80
+
+============================================================
+Ablation 1: Vary D  [16, 32, 64, 128, 256, 512, 1024, 2048]  (m=4D, λ=1e-04, RL)
+  Oracle policy value: 40.80
+============================================================
+Ablation 1:   0%|          | 0/8 [00:00<?, ?it/s]RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+  D=   16  m=    64  fed_gap=19.9207 ± 1.5065  pv=92.59 ± 40.40
+Ablation 1:  12%|█▎        | 1/8 [00:16<01:53, 16.19s/it]RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+  D=   32  m=   128  fed_gap=16.3612 ± 2.3722  pv=169.58 ± 126.15
+Ablation 1:  25%|██▌       | 2/8 [00:36<01:52, 18.81s/it]RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+  D=   64  m=   256  fed_gap=23.7002 ± 6.8580  pv=120.20 ± 29.62
+Ablation 1:  38%|███▊      | 3/8 [01:02<01:49, 21.85s/it]RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+  D=  128  m=   512  fed_gap=28.8085 ± 4.7649  pv=148.29 ± 72.98
+Ablation 1:  50%|█████     | 4/8 [01:29<01:36, 24.03s/it]RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+  D=  256  m=  1024  fed_gap=29.3928 ± 7.9142  pv=141.07 ± 33.64
+Ablation 1:  62%|██████▎   | 5/8 [02:01<01:20, 26.69s/it]RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+  D=  512  m=  2048  fed_gap=29.8979 ± 6.1223  pv=127.93 ± 15.21
+Ablation 1:  75%|███████▌  | 6/8 [02:38<01:00, 30.25s/it]RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+  D= 1024  m=  4096  fed_gap=28.3511 ± 6.3339  pv=306.05 ± 111.14
+Ablation 1:  88%|████████▊ | 7/8 [03:29<00:37, 37.16s/it]RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+  D= 2048  m=  8192  fed_gap=25.1089 ± 8.7162  pv=93.57 ± 43.88
+Ablation 1: 100%|██████████| 8/8 [04:49<00:00, 50.63s/it]Ablation 1: 100%|██████████| 8/8 [04:49<00:00, 36.14s/it]
+Saved: results/ablation/ablation1_vary_D_all.json
+Saved: results/figures/ablation1_vary_D_all.{pdf,png}  (slope=0.087)
+  (Skipping full consistency check — not all ablations ran)
+
+Total time: 290.7s

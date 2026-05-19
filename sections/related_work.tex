@@ -5,36 +5,50 @@
  \label{sec:related_work}
 
 \paragraph{Federated Reinforcement Learning with Shared Parameterizations.}
-The dominant line of work in federated RL extends FedAvg~\cite{mcmahan2017communication} to the Q-learning or actor-critic setting by periodically averaging the parameters of identically structured neural networks across clients.
-\cite{jin2022federated} propose Fed-DQN, the direct application of parameter averaging to deep Q-networks, and study its convergence under environment heterogeneity.
+The dominant line of work in federated RL extends FedAvg~\citep{mcmahan2017communication} to the Q-learning or actor-critic setting by periodically averaging the parameters of identically structured neural networks across clients.
+\citet{jin2022federated} propose Fed-DQN, the direct application of parameter averaging to deep Q-networks, and study its convergence under environment heterogeneity.
 Because all clients share the same network architecture, the server can form a global model by a weighted mean of weight tensors, and each client resumes local training from this shared initialization.
 This parameter-space paradigm is simple and communication-efficient, but it fundamentally requires \emph{identical architectures}: averaging weight matrices of different shapes is algebraically undefined, so the approach cannot be applied when clients hold encoders of different dimensionality or type.
 
 \paragraph{Distillation-Based Federated RL for Heterogeneous Agents.}
 To accommodate structural heterogeneity, a parallel line of work abandons parameter-space averaging in favour of knowledge transfer in \emph{policy} or \emph{Q-value} space.
-\cite{rusu2016policydistillation} introduce policy distillation for single-agent compression: a large teacher network generates soft Q-value targets
+\citet{rusu2016policydistillation} introduce policy distillation for single-agent compression: a large teacher network generates soft Q-value targets
 $T(s) = \operatorname{softmax}(Q_{\text{teacher}}(s)/\tau)$,
 and a student of arbitrary architecture is trained to minimise the KL divergence
 $\mathcal{L}_{\mathrm{KD}} = \mathrm{KL}\!\left(T(s)\;\big\|\;\operatorname{softmax}(Q_{\text{student}}(s)/\tau)\right)$
 over a set of distillation states.
 Because the loss operates on Q-value outputs rather than weights, the teacher and student may have entirely different network widths or depths.
 
-\cite{teh2017distral} extend this idea to the multi-task setting with \emph{Distral}: each worker $i$ maintains a task-specific policy $\pi_i$ and a shared distilled policy $\pi_0$ that captures common behaviour across tasks.
+\citet{teh2017distral} extend this idea to the multi-task setting with \emph{Distral}: each worker $i$ maintains a task-specific policy $\pi_i$ and a shared distilled policy $\pi_0$ that captures common behaviour across tasks.
 Workers are regularised to stay close to $\pi_0$ via a KL penalty, and $\pi_0$ is updated as the softmax of the arithmetic mean of workers' Q-values---equivalent to a function-space average.
 Distral's key insight is that aggregating in Q-value space decouples knowledge sharing from parameter structure, enabling heterogeneous worker architectures.
 
-\cite{shen2023fedhpd} combine these ideas in FedHPD, a federated heterogeneous policy distillation framework.
+\citet{shen2023fedhpd} combine these ideas in FedHPD, a federated heterogeneous policy distillation framework.
 Clients with different DQN architectures evaluate their Q-functions on a shared distillation dataset; the server computes a teacher policy as the softmax of the mean Q-values; and each client performs several gradient steps to minimise the KL loss against this teacher.
 The approach is architecture-agnostic, but federation requires \emph{iterative distillation steps} per round, incurring repeated forward and backward passes on each client that scale with the distillation dataset size and the number of gradient steps.
 
 \paragraph{Black-Box and Query-Based Federated Q-Learning.}
+\citet{fan2023fedhql} propose FedHQL, a federated heterogeneous Q-learning framework in which clients with different Q-network architectures evaluate their Q-functions on a shared query set and the server aggregates the resulting Q-value matrices.
+Like FedQHD, FedHQL operates in function space and requires no assumptions on architecture compatibility.
+However, FedHQL employs a model-free server estimator that requires multiple query rounds and does not admit a closed-form update; furthermore, it lacks a theoretical characterization of the information loss induced by client heterogeneity.
+FedQHD achieves what FedHQL does in one aggregation round via ridge regression, and our federation gap bound directly quantifies the heterogeneity cost as a function of encoder dimension and anchor count.
 
 \paragraph{Heterogeneous Environments and Tasks in Federated RL.}
 Several works study heterogeneity in the \emph{reward or transition dynamics} rather than in the model structure.
-\cite{jin2022federated} propose FRL-EH to handle clients with differing environment dynamics under a shared architecture.
-\cite{hwang2025fed} extend this by introducing a regularisation term in the local update that penalises deviation from the global model, improving stability under non-i.i.d.\ environment distributions.
-\cite{ye2023fedfm} propose anchor-based feature matching across clients with diverse observation spaces.
+\citet{jin2022federated} propose FRL-EH to handle clients with differing environment dynamics under a shared architecture.
+\citet{hwang2025fed} extend this by introducing a regularisation term in the local update that penalises deviation from the global model, improving stability under non-i.i.d.\ environment distributions.
+\citet{ye2023fedfm} propose anchor-based feature matching across clients with diverse observation spaces.
 These methods still presuppose a shared parameter space and cannot handle clients whose Q-functions live in feature spaces of different dimensionality.
+
+\paragraph{HDC for Reinforcement Learning.}
+\citet{ni2022qhd} introduced QHD, the single-agent HDC Q-learning algorithm that forms the computational backbone of FedQHD. QHD encodes continuous states as hypervectors and maintains linear Q-function parameters updated by semi-gradient TD, achieving competitive performance on classic control tasks with significantly lower memory and training time than deep Q-networks. FedQHD inherits QHD's linear-in-parameters structure and extends it to the multi-agent federated setting, where this linearity enables provably exact function-space aggregation.
+HDC has also been applied to other RL problems and broader machine learning tasks; the key property exploited here—that random feature methods yield finite-dimensional RKHS approximations with $O(D^{-1/2})$ uniform error \citep{rahimi2007random,rudi2017generalization}—is well established in the kernel learning literature \citep{bach2015equivalence}.
+
+\paragraph{Linear Function Approximation in Federated RL Theory.}
+The closest theoretical precursors to our analysis are results on federated temporal-difference learning with linear function approximation \citep{wang2024federated,khodadadian2022federated}.
+These works study convergence rates for federated TD under shared feature representations, establishing linear speedup in the number of clients.
+\citet{tsitsiklis1997analysis} and \citet{bhandari2018finite} provide the foundational single-agent convergence results for linear TD from which federated extensions depart.
+FedQHD differs from this line of work in two respects: (i)~it targets the heterogeneous encoder regime where clients use different feature maps, and (ii)~it provides a static federation gap bound rather than a convergence rate, characterizing the quality of the aggregated Q-function in terms of geometric quantities (principal angles, Gram matrix eigenvalues) rather than stochastic approximation error terms.
 
 \paragraph{Proposed FedQHD.}
 FedQHD addresses a strictly more general form of heterogeneity than any of the above.

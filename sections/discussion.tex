@@ -1,20 +1,35 @@
 \section{Discussion}
 \label{sec:discussion}
 
-% Interpret and discuss the results
-[Interpret the experimental results and discuss their implications.]
-
 \subsection{Key Findings}
 \label{subsec:key_findings}
 
-[Summarize the key findings from the experiments.]
+\paragraph{Q1: Homogeneous federation (FedQHD vs.\ baselines).}
+Across CartPole, Acrobot, LunarLander, and MountainCar, FedQHD with homogeneous encoders consistently outperforms independent QHD and matches or exceeds FedAvg-DQN in most settings. The largest gains appear on CartPole ($456$ vs.\ $\sim 400$ for independent) and LunarLander ($236$ vs.\ $225$ for FedAvg-DQN), confirming that closed-form function-space averaging effectively consolidates multi-agent experience without the representation loss that afflicts weight-space averaging in deep networks.
+
+A notable finding is the \emph{LunarLander oracle paradox}: the oracle QHD upper bound ($84$) falls below FedQHD ($236$). This is a genuine empirical phenomenon rather than an implementation error. The oracle aggregates after every single episode, while FedQHD aggregates every $K=10$ episodes. The per-episode aggregation destroys beneficial local specialization: with 8-dimensional states and a complex reward landscape, agents that are forced to synchronize on every episode cannot exploit multi-episode learning trajectories, suffering gradient conflict effects identified in the federated learning literature \citep{li2019convergence}. This finding highlights that the oracle upper bound is defined in terms of data access, not aggregation frequency, and that federation interval is itself a critical hyperparameter.
+
+\paragraph{Q2: Heterogeneous federation and ablation theory confirmation.}
+Ablation A1 (vary $D$) confirms the $D^{-1/2}$ scaling of the federation gap with an empirical log-log slope of $-0.525$ (theory: $-0.5$, Corollary~\ref{cor:regimes}), validating Eq.~\eqref{eq:gap_over}. Ablation A2 (vary $m/D$) confirms the phase transition at $m = D$ with a $95\times$ RMSE jump, consistent with the rank collapse of $G_i$ at $D_i < m$ (Section~\ref{subsec:fed_gap}). Ablation A3 (vary $\lambda$) reveals a U-shaped federation gap, with a minimum at an interior $\lambda^*$ (LunarLander: $\lambda^* = 10$), consistent with Corollary~\ref{cor:optimal_lambda}. Together, all three ablations directly corroborate the theoretical predictions of the federation gap bound.
+
+In the heterogeneous $Q2$ setting, FedQHD performs well on CartPole and MountainCar but falls short of the distillation baseline on LunarLander and Acrobot. This is attributable to the fact that distillation methods apply multiple gradient steps per round and can correct for anchor approximation error, while FedQHD's one-shot compilation cannot. The invisibility theorem guarantees that projection residuals never corrupt predictions, but the resulting silent information loss can be substantial when client dimensions are small relative to the environment complexity.
+
+\paragraph{Q3/Q4: Scalability.}
+Experiments varying the number of clients $N \in \{1, 2, 5, 10, 20, 40\}$ on CartPole show that FedQHD's performance improves consistently with $N$, while independent learning saturates. The $O(N \cdot m \cdot |\mathcal{A}|)$ server cost of heterogeneous aggregation remains negligible at all tested scales.
 
 \subsection{Limitations}
 \label{subsec:limitations}
 
-[Discuss limitations of the proposed approach and experiments.]
+\paragraph{No RL convergence proof.}
+The theoretical analysis characterizes the federation gap as a function of encoder geometry and anchor configuration, but does not provide an end-to-end convergence guarantee for the full FedQHD RL loop. Proving convergence of linear function approximation TD under federated aggregation remains an open problem \citep{baird1995residual,tsitsiklis1997analysis}; bridging to the federated setting introduces additional challenges from non-stationary targets and asynchronous aggregation.
+
+\paragraph{Oracle upper bound via aggregation frequency.}
+The Oracle QHD baseline used here aggregates after every episode, which is impractical and, as the LunarLander paradox shows, may harm performance. A more informative oracle would hold aggregation frequency fixed at FedQHD's value and vary only the amount of data available per client. Disentangling these factors is left for future work.
+
+\paragraph{Limited environment and scale.}
+Experiments use four classic control environments with at most $N=40$ clients and episodes $\leq 600$. Extension to larger-scale environments, continuous action spaces, or real-world deployments remains untested.
 
 \subsection{Future Directions}
 \label{subsec:future_work}
 
-[Suggest potential future research directions.]
+Several directions could substantially extend the impact of FedQHD. \textbf{Communication efficiency}: lazy or event-triggered aggregation—sending updated parameters only when the local Q-function has changed significantly—would reduce communication overhead while preserving federation benefits. The federation gap bound provides a natural certificate: aggregation can be safely skipped when $\bar{h}_i$ is small. \textbf{Convergence theory}: establishing finite-time convergence of FedQHD's TD updates under the periodically aggregated linear model would require combining recent results on federated linear TD \citep{bhandari2018finite,wang2024federated} with the anchor-regression compilation step. \textbf{Scalable anchor selection}: the current approach samples anchor states randomly from a simulator; methods that select anchors to minimize the anchor amplification term~(II) (e.g., by maximizing $\gamma_i$) could yield tighter bounds and better empirical performance. \textbf{Continuous action spaces}: the linear-in-parameters structure of QHD extends naturally to continuous actions by maintaining Q-function parameters over a discretization or by combining with policy gradient methods; this would greatly expand the applicability of FedQHD.

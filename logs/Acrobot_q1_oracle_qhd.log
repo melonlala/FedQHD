@@ -1,0 +1,32 @@
+
+======================================================================
+METHOD  : Oracle QHD (Homogeneous)
+ENV     : Acrobot   QUESTION: Q1
+EPISODES: 600   AGENTS: 5   RUNS: 1
+QHD     : lr=0.1  discount=0.99  eps=1.0  decay=0.995
+DQN     : lr=0.001  agg_interval=25  discount=0.99  eps=1.0  decay=0.995
+OUTPUT  : results/Acrobot/q1_homogeneous
+======================================================================
+
+
+============================================================
+Training Oracle QHD (homogeneous)
+Server: Trains N separate Q-functions on pooled data
+============================================================
+RFF kernel parameters:
+OMEGA: (10000, 6)
+B: (10000,)
+RFF kernel parameters:
+OMEGA: (10000, 6)
+B: (10000,)
+RFF kernel parameters:
+OMEGA: (10000, 6)
+B: (10000,)
+RFF kernel parameters:
+OMEGA: (10000, 6)
+B: (10000,)
+RFF kernel parameters:
+OMEGA: (10000, 6)
+B: (10000,)
+Using 5 oracle agents with shared encoder, oracle_lr=0.0200
+Oracle QHD (Homo):   0%|          | 0/600 [00:00<?, ?it/s]Oracle QHD (Homo):   0%|          | 1/600 [00:07<1:11:38,  7.18s/it]Oracle QHD (Homo):   0%|          | 2/600 [00:14<1:11:15,  7.15s/it]Oracle QHD (Homo):   0%|          | 3/600 [00:21<1:10:46,  7.11s/it]Oracle QHD (Homo):   1%|          | 4/600 [00:28<1:10:34,  7.10s/it]Oracle QHD (Homo):   1%|          | 5/600 [00:35<1:10:24,  7.10s/it]Oracle QHD (Homo):   1%|          | 6/600 [00:42<1:10:14,  7.10s/it]Oracle QHD (Homo):   1%|          | 7/600 [00:49<1:10:05,  7.09s/it]Oracle QHD (Homo):   1%|▏         | 8/600 [00:56<1:10:01,  7.10s/it]Oracle QHD (Homo):   2%|▏         | 9/600 [01:03<1:08:56,  7.00s/it]Oracle QHD (Homo):   2%|▏         | 10/600 [01:10<1:09:09,  7.03s/it]Oracle QHD (Homo):   2%|▏         | 11/600 [01:17<1:09:21,  7.07s/it]Oracle QHD (Homo):   2%|▏         | 12/600 [01:25<1:09:33,  7.10s/it]Oracle QHD (Homo):   2%|▏         | 13/600 [01:32<1:09:33,  7.11s/it]Oracle QHD (Homo):   2%|▏         | 14/600 [01:39<1:09:25,  7.11s/it]Oracle QHD (Homo):   2%|▎         | 15/600 [01:46<1:09:17,  7.11s/it]Oracle QHD (Homo):   3%|▎         | 16/600 [01:53<1:08:45,  7.06s/it]Oracle QHD (Homo):   3%|▎         | 17/600 [02:00<1:08:46,  7.08s/it]Oracle QHD (Homo):   3%|▎         | 18/600 [02:07<1:07:04,  6.92s/it]Oracle QHD (Homo):   3%|▎         | 19/600 [02:14<1:07:29,  6.97s/it]Oracle QHD (Homo):   3%|▎         | 20/600 [02:21<1:07:44,  7.01s/it]Oracle QHD (Homo):   4%|▎         | 21/600 [02:28<1:07:44,  7.02s/it]Oracle QHD (Homo):   4%|▎         | 22/600 [02:34<1:06:11,  6.87s/it]Oracle QHD (Homo):   4%|▍         | 23/600 [02:41<1:05:48,  6.84s/it]Oracle QHD (Homo):   4%|▍         | 24/600 [02:48<1:05:03,  6.78s/it]Oracle QHD (Homo):   4%|▍         | 25/600 [02:54<1:03:53,  6.67s/it]Oracle QHD (Homo):   4%|▍         | 26/600 [03:01<1:04:53,  6.78s/it]

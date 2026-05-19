@@ -1,0 +1,308 @@
+FedQHD Ablation Experiments  (CartPole-v1)
+Metric   : all
+Episodes=500  Seeds=3  AggInterval=50
+D grid      : [128, 256, 512, 1024, 2048, 4096, 8192]
+m grid      : [128, 256, 512, 1024, 1536, 2048]
+lambda grid : [0.1, 1, 10, 100, 1000, 10000, 100000]
+D_FIXED=1024  M_FIXED=1000
+
+Collecting 32768 anchor states …  (A1 needs up to 32768, A2 needs 2048)
+Collecting 400 held-out eval anchor states …
+
+  [Ref] Training reference agent  D=2048, 1000 episodes …
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+  [Ref] training:   0%|          | 0/1000 [00:00<?, ?it/s]  [Ref] training:   4%|▎         | 36/1000 [00:00<00:02, 357.70it/s]  [Ref] training:   7%|▋         | 72/1000 [00:00<00:03, 262.14it/s]  [Ref] training:  10%|█         | 100/1000 [00:00<00:03, 249.32it/s]  [Ref] training:  13%|█▎        | 126/1000 [00:00<00:03, 226.76it/s]  [Ref] training:  15%|█▌        | 150/1000 [00:00<00:03, 215.80it/s]  [Ref] training:  17%|█▋        | 173/1000 [00:00<00:03, 218.14it/s]  [Ref] training:  20%|█▉        | 196/1000 [00:00<00:03, 206.97it/s]  [Ref] training:  22%|██▏       | 217/1000 [00:00<00:03, 197.47it/s]  [Ref] training:  24%|██▎       | 237/1000 [00:01<00:04, 189.58it/s]  [Ref] training:  26%|██▌       | 257/1000 [00:01<00:03, 187.41it/s]  [Ref] training:  28%|██▊       | 277/1000 [00:01<00:03, 188.95it/s]  [Ref] training:  30%|██▉       | 296/1000 [00:01<00:03, 189.18it/s]  [Ref] training:  32%|███▏      | 320/1000 [00:01<00:03, 201.08it/s]  [Ref] training:  34%|███▍      | 341/1000 [00:01<00:03, 181.25it/s]  [Ref] training:  36%|███▌      | 360/1000 [00:01<00:03, 164.38it/s]  [Ref] training:  38%|███▊      | 377/1000 [00:01<00:03, 158.40it/s]  [Ref] training:  39%|███▉      | 394/1000 [00:02<00:05, 106.62it/s]  [Ref] training:  41%|████      | 407/1000 [00:02<00:05, 107.38it/s]  [Ref] training:  42%|████▏     | 420/1000 [00:02<00:05, 105.57it/s]  [Ref] training:  43%|████▎     | 432/1000 [00:02<00:05, 103.16it/s]  [Ref] training:  44%|████▍     | 444/1000 [00:02<00:05, 96.84it/s]   [Ref] training:  46%|████▌     | 462/1000 [00:02<00:04, 115.36it/s]  [Ref] training:  48%|████▊     | 475/1000 [00:03<00:05, 104.05it/s]  [Ref] training:  49%|████▊     | 487/1000 [00:03<00:06, 83.17it/s]   [Ref] training:  50%|████▉     | 497/1000 [00:03<00:07, 70.65it/s]  [Ref] training:  51%|█████     | 508/1000 [00:03<00:06, 78.24it/s]  [Ref] training:  52%|█████▏    | 517/1000 [00:03<00:06, 72.92it/s]  [Ref] training:  53%|█████▎    | 532/1000 [00:03<00:05, 89.47it/s]  [Ref] training:  54%|█████▍    | 543/1000 [00:03<00:05, 88.39it/s]  [Ref] training:  55%|█████▌    | 553/1000 [00:04<00:05, 85.31it/s]  [Ref] training:  56%|█████▋    | 563/1000 [00:04<00:05, 76.86it/s]  [Ref] training:  58%|█████▊    | 576/1000 [00:04<00:04, 88.40it/s]  [Ref] training:  59%|█████▊    | 586/1000 [00:04<00:04, 85.13it/s]  [Ref] training:  60%|█████▉    | 596/1000 [00:04<00:04, 86.84it/s]  [Ref] training:  61%|██████    | 606/1000 [00:04<00:04, 86.56it/s]  [Ref] training:  62%|██████▏   | 619/1000 [00:04<00:03, 97.39it/s]  [Ref] training:  63%|██████▎   | 630/1000 [00:04<00:04, 79.94it/s]  [Ref] training:  64%|██████▍   | 639/1000 [00:05<00:06, 57.62it/s]  [Ref] training:  65%|██████▍   | 647/1000 [00:05<00:05, 59.80it/s]  [Ref] training:  65%|██████▌   | 654/1000 [00:05<00:07, 49.32it/s]  [Ref] training:  66%|██████▌   | 660/1000 [00:05<00:07, 43.64it/s]  [Ref] training:  67%|██████▋   | 669/1000 [00:05<00:06, 51.40it/s]  [Ref] training:  68%|██████▊   | 677/1000 [00:06<00:05, 56.49it/s]  [Ref] training:  68%|██████▊   | 684/1000 [00:06<00:06, 47.70it/s]  [Ref] training:  69%|██████▉   | 692/1000 [00:06<00:05, 53.91it/s]  [Ref] training:  70%|██████▉   | 699/1000 [00:06<00:05, 51.17it/s]  [Ref] training:  70%|███████   | 705/1000 [00:06<00:06, 47.60it/s]  [Ref] training:  71%|███████   | 711/1000 [00:06<00:05, 48.19it/s]  [Ref] training:  72%|███████▏  | 717/1000 [00:06<00:05, 48.82it/s]  [Ref] training:  72%|███████▏  | 724/1000 [00:07<00:05, 48.04it/s]  [Ref] training:  73%|███████▎  | 729/1000 [00:07<00:05, 47.99it/s]  [Ref] training:  74%|███████▎  | 736/1000 [00:07<00:04, 53.10it/s]  [Ref] training:  74%|███████▍  | 742/1000 [00:07<00:05, 51.02it/s]  [Ref] training:  75%|███████▍  | 749/1000 [00:07<00:05, 46.91it/s]  [Ref] training:  75%|███████▌  | 754/1000 [00:07<00:05, 44.18it/s]  [Ref] training:  76%|███████▌  | 759/1000 [00:07<00:05, 42.49it/s]  [Ref] training:  77%|███████▋  | 768/1000 [00:07<00:04, 52.81it/s]  [Ref] training:  77%|███████▋  | 774/1000 [00:08<00:04, 54.10it/s]  [Ref] training:  78%|███████▊  | 780/1000 [00:08<00:04, 50.14it/s]  [Ref] training:  79%|███████▉  | 788/1000 [00:08<00:03, 55.45it/s]  [Ref] training:  79%|███████▉  | 794/1000 [00:08<00:06, 34.19it/s]  [Ref] training:  80%|████████  | 801/1000 [00:08<00:05, 39.42it/s]  [Ref] training:  81%|████████  | 806/1000 [00:08<00:05, 32.51it/s]  [Ref] training:  81%|████████  | 811/1000 [00:09<00:07, 26.28it/s]  [Ref] training:  82%|████████▏ | 819/1000 [00:09<00:05, 33.93it/s]  [Ref] training:  82%|████████▎ | 825/1000 [00:09<00:04, 38.11it/s]  [Ref] training:  83%|████████▎ | 830/1000 [00:09<00:06, 27.11it/s]  [Ref] training:  83%|████████▎ | 834/1000 [00:09<00:05, 28.94it/s]  [Ref] training:  84%|████████▍ | 838/1000 [00:10<00:07, 22.95it/s]  [Ref] training:  84%|████████▍ | 843/1000 [00:10<00:05, 26.51it/s]  [Ref] training:  85%|████████▍ | 847/1000 [00:10<00:06, 22.10it/s]  [Ref] training:  85%|████████▌ | 852/1000 [00:10<00:05, 26.55it/s]  [Ref] training:  86%|████████▌ | 856/1000 [00:11<00:06, 21.31it/s]  [Ref] training:  86%|████████▌ | 859/1000 [00:11<00:06, 21.72it/s]  [Ref] training:  86%|████████▋ | 863/1000 [00:11<00:06, 19.93it/s]  [Ref] training:  87%|████████▋ | 869/1000 [00:11<00:04, 26.42it/s]  [Ref] training:  87%|████████▋ | 873/1000 [00:11<00:04, 26.61it/s]  [Ref] training:  88%|████████▊ | 877/1000 [00:11<00:04, 25.86it/s]  [Ref] training:  88%|████████▊ | 882/1000 [00:11<00:04, 27.11it/s]  [Ref] training:  89%|████████▉ | 888/1000 [00:12<00:03, 31.11it/s]  [Ref] training:  89%|████████▉ | 892/1000 [00:12<00:03, 31.95it/s]  [Ref] training:  90%|████████▉ | 897/1000 [00:12<00:02, 35.29it/s]  [Ref] training:  90%|█████████ | 901/1000 [00:12<00:03, 26.71it/s]  [Ref] training:  90%|█████████ | 905/1000 [00:12<00:04, 21.72it/s]  [Ref] training:  91%|█████████ | 911/1000 [00:13<00:03, 23.50it/s]  [Ref] training:  92%|█████████▏| 916/1000 [00:13<00:03, 23.86it/s]  [Ref] training:  92%|█████████▏| 923/1000 [00:13<00:02, 31.75it/s]  [Ref] training:  93%|█████████▎| 927/1000 [00:13<00:02, 27.99it/s]  [Ref] training:  93%|█████████▎| 932/1000 [00:13<00:02, 27.04it/s]  [Ref] training:  94%|█████████▎| 936/1000 [00:14<00:02, 24.22it/s]  [Ref] training:  94%|█████████▍| 939/1000 [00:14<00:02, 21.15it/s]  [Ref] training:  94%|█████████▍| 942/1000 [00:14<00:03, 19.09it/s]  [Ref] training:  95%|█████████▍| 947/1000 [00:14<00:02, 22.71it/s]  [Ref] training:  95%|█████████▌| 950/1000 [00:14<00:02, 20.08it/s]  [Ref] training:  95%|█████████▌| 954/1000 [00:14<00:01, 23.01it/s]  [Ref] training:  96%|█████████▌| 958/1000 [00:15<00:02, 20.29it/s]  [Ref] training:  96%|█████████▋| 963/1000 [00:15<00:01, 23.56it/s]  [Ref] training:  97%|█████████▋| 966/1000 [00:15<00:01, 20.88it/s]  [Ref] training:  97%|█████████▋| 972/1000 [00:15<00:01, 27.74it/s]  [Ref] training:  98%|█████████▊| 976/1000 [00:15<00:00, 27.23it/s]  [Ref] training:  98%|█████████▊| 980/1000 [00:16<00:00, 21.95it/s]  [Ref] training:  98%|█████████▊| 984/1000 [00:16<00:00, 24.94it/s]  [Ref] training:  99%|█████████▊| 987/1000 [00:16<00:00, 19.06it/s]  [Ref] training:  99%|█████████▉| 990/1000 [00:16<00:00, 14.94it/s]  [Ref] training:  99%|█████████▉| 994/1000 [00:16<00:00, 17.73it/s]  [Ref] training: 100%|█████████▉| 997/1000 [00:17<00:00, 15.61it/s]  [Ref] training: 100%|█████████▉| 999/1000 [00:17<00:00, 14.54it/s]                                                                      [Q*] Reference agent saved → results/ablation/ref_agent.npz
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+  [Q*] Reference agent loaded ← results/ablation/ref_agent.npz  (D=2048, ε=0.010)
+
+Computing / loading Q_star for 32768 anchors …
+  [Q*] Vectorised MC rollouts: m=32768, n_mc=5 …
+  [Q*]   action 0 done, Q range [1.00, 93.50]
+  [Q*]   action 1 done, Q range [1.00, 94.41]
+  [Q*] Done. Q* range: [1.000, 94.411]
+  [Q*] Q_star saved → results/ablation/Q_star_m32768_nmc5.npz
+
+Computing Q_star at 400 held-out eval anchors …
+  [Q*] Cache anchor mismatch – recomputing …
+  [Q*] Vectorised MC rollouts: m=400, n_mc=5 …
+  [Q*]   action 0 done, Q range [1.00, 84.73]
+  [Q*]   action 1 done, Q range [1.00, 84.88]
+  [Q*] Done. Q* range: [1.000, 84.885]
+  [Q*] Q_star saved → results/ablation/Q_star_m400_nmc5.npz
+
+Computing oracle policy value …
+  Oracle V(π*) = 42.23
+
+============================================================
+Ablation 3: Vary λ  [0.1, 1, 10, 100, 1000, 10000, 100000]  (D=1024, m=1000)
+  Theory: α* ≈ 32.38, λ* ≈ 32381.7
+============================================================
+Ablation 3:   0%|          | 0/7 [00:00<?, ?it/s]RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+  λ=1e-01  α=1.00e-04  fed_gap=24.2196 ± 4.1424  pv=113.19 ± 29.51
+Ablation 3:  14%|█▍        | 1/7 [01:47<10:42, 107.16s/it]RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+  λ=1e+00  α=1.00e-03  fed_gap=22.0292 ± 2.4703  pv=110.80 ± 20.79
+Ablation 3:  29%|██▊       | 2/7 [02:42<06:24, 76.83s/it] RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+  λ=1e+01  α=1.00e-02  fed_gap=17.2086 ± 0.6598  pv=135.62 ± 96.41
+Ablation 3:  43%|████▎     | 3/7 [03:04<03:26, 51.68s/it]RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+  λ=1e+02  α=1.00e-01  fed_gap=19.7228 ± 0.5405  pv=42.97 ± 25.28
+Ablation 3:  57%|█████▋    | 4/7 [03:21<01:54, 38.04s/it]RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+  λ=1e+03  α=1.00e+00  fed_gap=28.0885 ± 1.9122  pv=34.84 ± 27.56
+Ablation 3:  71%|███████▏  | 5/7 [03:37<01:00, 30.06s/it]RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+  λ=1e+04  α=1.00e+01  fed_gap=36.5998 ± 0.0442  pv=9.39 ± 0.07
+Ablation 3:  86%|████████▌ | 6/7 [03:45<00:22, 22.66s/it]RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+  λ=1e+05  α=1.00e+02  fed_gap=36.8765 ± 0.0405  pv=9.33 ± 0.12
+Ablation 3: 100%|██████████| 7/7 [03:53<00:00, 17.83s/it]Ablation 3: 100%|██████████| 7/7 [03:53<00:00, 33.39s/it]
+Saved: results/ablation/ablation3_vary_lambda_all.json
+Saved: results/figures/ablation3_vary_lambda_all.{pdf,png}  (best λ=1e+01)
+  (Skipping full consistency check — not all ablations ran)
+
+Total time: 757.8s

@@ -1,0 +1,43 @@
+{
+  "episodes": 600,
+  "agent_num": 5,
+  "runs": 3,
+  "random_seed": 42,
+  "qhd_lr": 0.2,
+  "qhd_discount": 0.9,
+  "qhd_exploration_rate": 0.8,
+  "qhd_exploration_decay": 0.9,
+  "qhd_exploration_min": 0.01,
+  "qhd_agg_interval": 50,
+  "dqn_lr": 0.001,
+  "dqn_discount": 0.99,
+  "dqn_exploration_rate": 1.0,
+  "dqn_exploration_decay": 0.995,
+  "dqn_exploration_min": 0.001,
+  "dqn_agg_interval": 25,
+  "hyperdimension": 10000,
+  "rff_gamma": 1.0,
+  "anchor_set_size": 200,
+  "hetero_dims": null,
+  "output_dir": "results",
+  "grid_size": [
+    8,
+    8
+  ],
+  "method_key": "fedqhd_homo",
+  "method_name": "FedQHD (Homogeneous)",
+  "question": "q1",
+  "env": "CartPole",
+  "learning_rate": 0.001,
+  "discount_factor": 0.99,
+  "exploration_min": 0.01,
+  "aggregation_interval": 50,
+  "timestamp": "2026-02-19 22:44:33",
+  "method": "fedqhd_homo",
+  "source_params": "results/CartPole/q1_homogeneous/params_fedqhd_homo.json",
+  "seeds": [
+    42,
+    43,
+    44
+  ]
+}

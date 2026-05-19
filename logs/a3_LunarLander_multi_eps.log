@@ -1,0 +1,1542 @@
+/home/yuchen/miniconda3/envs/hdc_fedrl/lib/python3.10/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+Collecting 512 anchor states …
+RFF kernel parameters:
+OMEGA: (8192, 8)
+B: (8192,)
+  [Q*] Reference agent loaded ← results/ablation/LunarLander_ref_agent.npz  (D=8192, ε=0.010)
+  Ref V=150.6  (threshold 150.0)
+  [Q*] Computing Q* from ref agent (m=256) …
+  [Q*] Done. Q* range: [-22.930, 84.980]
+  [Q*] Q_star saved → results/ablation/LunarLander_Q_star_m256_agent.npz
+
+  [run] eps=30 …
+
+============================================================
+Ablation 3: Vary λ  [0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]  (D=1024, m=256)
+  Theory: α* ≈ 64.00, λ* ≈ 16384.0
+============================================================
+Ablation 3:   0%|          | 0/8 [00:00<?, ?it/s]Ablation 3:  12%|█▎        | 1/8 [00:05<00:39,  5.66s/it]Ablation 3:  25%|██▌       | 2/8 [00:10<00:32,  5.45s/it]Ablation 3:  38%|███▊      | 3/8 [00:16<00:26,  5.33s/it]Ablation 3:  50%|█████     | 4/8 [00:21<00:21,  5.32s/it]Ablation 3:  62%|██████▎   | 5/8 [00:26<00:16,  5.36s/it]Ablation 3:  75%|███████▌  | 6/8 [00:32<00:10,  5.36s/it]Ablation 3:  88%|████████▊ | 7/8 [00:37<00:05,  5.26s/it]Ablation 3: 100%|██████████| 8/8 [00:42<00:00,  5.23s/it]Ablation 3: 100%|██████████| 8/8 [00:42<00:00,  5.31s/it]
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-03  α=3.91e-06  fed_gap=22.8346 ± 0.1895
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-02  α=3.91e-05  fed_gap=23.0787 ± 0.0996
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-01  α=3.91e-04  fed_gap=22.6548 ± 1.2923
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+00  α=3.91e-03  fed_gap=23.3760 ± 1.1706
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+01  α=3.91e-02  fed_gap=25.0459 ± 1.6960
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+02  α=3.91e-01  fed_gap=31.0794 ± 0.2062
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+03  α=3.91e+00  fed_gap=33.5522 ± 0.0642
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+04  α=3.91e+01  fed_gap=33.7738 ± 0.0039
+  [saved] results/ablation/a3_ll_eps30.json
+  eps=  30  best_lam=1e-01  gap_min=22.655  gap_0=22.835  variance_arm=+0.180
+
+  [run] eps=60 …
+
+============================================================
+Ablation 3: Vary λ  [0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]  (D=1024, m=256)
+  Theory: α* ≈ 64.00, λ* ≈ 16384.0
+============================================================
+Ablation 3:   0%|          | 0/8 [00:00<?, ?it/s]Ablation 3:  12%|█▎        | 1/8 [00:12<01:27, 12.45s/it]Ablation 3:  25%|██▌       | 2/8 [00:24<01:12, 12.01s/it]Ablation 3:  38%|███▊      | 3/8 [00:36<01:00, 12.00s/it]Ablation 3:  50%|█████     | 4/8 [00:47<00:47, 11.81s/it]Ablation 3:  62%|██████▎   | 5/8 [00:59<00:35, 11.83s/it]Ablation 3:  75%|███████▌  | 6/8 [01:11<00:23, 11.85s/it]Ablation 3:  88%|████████▊ | 7/8 [01:23<00:11, 11.85s/it]Ablation 3: 100%|██████████| 8/8 [01:35<00:00, 12.01s/it]Ablation 3: 100%|██████████| 8/8 [01:35<00:00, 11.95s/it]
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-03  α=3.91e-06  fed_gap=24.4181 ± 0.7741
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-02  α=3.91e-05  fed_gap=23.8385 ± 0.6789
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-01  α=3.91e-04  fed_gap=23.1393 ± 0.5463
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+00  α=3.91e-03  fed_gap=23.5410 ± 0.5373
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+01  α=3.91e-02  fed_gap=23.4302 ± 0.6745
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+02  α=3.91e-01  fed_gap=30.6323 ± 0.8031
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+03  α=3.91e+00  fed_gap=33.5582 ± 0.0773
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+04  α=3.91e+01  fed_gap=33.7678 ± 0.0044
+  [saved] results/ablation/a3_ll_eps60.json
+  eps=  60  best_lam=1e-01  gap_min=23.139  gap_0=24.418  variance_arm=+1.279
+
+  [run] eps=120 …
+
+============================================================
+Ablation 3: Vary λ  [0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]  (D=1024, m=256)
+  Theory: α* ≈ 64.00, λ* ≈ 16384.0
+============================================================
+Ablation 3:   0%|          | 0/8 [00:00<?, ?it/s]Ablation 3:  12%|█▎        | 1/8 [00:37<04:20, 37.26s/it]Ablation 3:  25%|██▌       | 2/8 [01:11<03:32, 35.44s/it]Ablation 3:  38%|███▊      | 3/8 [01:45<02:54, 34.98s/it]Ablation 3:  50%|█████     | 4/8 [02:18<02:16, 34.16s/it]Ablation 3:  62%|██████▎   | 5/8 [02:49<01:39, 33.02s/it]Ablation 3:  75%|███████▌  | 6/8 [03:18<01:03, 31.53s/it]Ablation 3:  88%|████████▊ | 7/8 [03:46<00:30, 30.54s/it]Ablation 3: 100%|██████████| 8/8 [04:15<00:00, 29.91s/it]Ablation 3: 100%|██████████| 8/8 [04:15<00:00, 31.93s/it]
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-03  α=3.91e-06  fed_gap=22.2834 ± 0.8501
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-02  α=3.91e-05  fed_gap=22.0801 ± 0.8490
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-01  α=3.91e-04  fed_gap=22.8467 ± 0.4813
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+00  α=3.91e-03  fed_gap=21.7800 ± 0.4664
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+01  α=3.91e-02  fed_gap=25.3302 ± 0.5385
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+02  α=3.91e-01  fed_gap=33.0419 ± 0.1305
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+03  α=3.91e+00  fed_gap=33.7325 ± 0.0159
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+04  α=3.91e+01  fed_gap=33.7956 ± 0.0017
+  [saved] results/ablation/a3_ll_eps120.json
+  eps= 120  best_lam=1e+00  gap_min=21.780  gap_0=22.283  variance_arm=+0.503
+
+  [run] eps=240 …
+
+============================================================
+Ablation 3: Vary λ  [0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]  (D=1024, m=256)
+  Theory: α* ≈ 64.00, λ* ≈ 16384.0
+============================================================
+Ablation 3:   0%|          | 0/8 [00:00<?, ?it/s]Ablation 3:  12%|█▎        | 1/8 [01:28<10:16, 88.02s/it]Ablation 3:  25%|██▌       | 2/8 [02:49<08:24, 84.03s/it]Ablation 3:  38%|███▊      | 3/8 [04:04<06:40, 80.18s/it]Ablation 3:  50%|█████     | 4/8 [05:17<05:09, 77.38s/it]Ablation 3:  62%|██████▎   | 5/8 [06:22<03:38, 72.78s/it]Ablation 3:  75%|███████▌  | 6/8 [07:22<02:16, 68.24s/it]Ablation 3:  88%|████████▊ | 7/8 [08:20<01:04, 64.89s/it]Ablation 3: 100%|██████████| 8/8 [09:16<00:00, 62.34s/it]Ablation 3: 100%|██████████| 8/8 [09:16<00:00, 69.61s/it]
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-03  α=3.91e-06  fed_gap=22.1262 ± 1.9560
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-02  α=3.91e-05  fed_gap=24.8605 ± 1.6443
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-01  α=3.91e-04  fed_gap=27.4957 ± 1.7244
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+00  α=3.91e-03  fed_gap=30.1879 ± 0.2404
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+01  α=3.91e-02  fed_gap=35.2968 ± 0.9250
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+02  α=3.91e-01  fed_gap=34.3856 ± 0.1836
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+03  α=3.91e+00  fed_gap=33.8695 ± 0.0319
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+04  α=3.91e+01  fed_gap=33.8079 ± 0.0043
+  [saved] results/ablation/a3_ll_eps240.json
+  eps= 240  best_lam=1e-03  gap_min=22.126  gap_0=22.126  variance_arm=+0.000
+
+  [run] eps=480 …
+
+============================================================
+Ablation 3: Vary λ  [0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]  (D=1024, m=256)
+  Theory: α* ≈ 64.00, λ* ≈ 16384.0
+============================================================
+Ablation 3:   0%|          | 0/8 [00:00<?, ?it/s]Ablation 3:  12%|█▎        | 1/8 [04:09<29:04, 249.28s/it]Ablation 3:  25%|██▌       | 2/8 [07:17<21:20, 213.38s/it]Ablation 3:  38%|███▊      | 3/8 [09:54<15:37, 187.55s/it]Ablation 3:  50%|█████     | 4/8 [12:23<11:28, 172.23s/it]Ablation 3:  62%|██████▎   | 5/8 [14:23<07:40, 153.49s/it]Ablation 3:  75%|███████▌  | 6/8 [16:15<04:39, 139.54s/it]Ablation 3:  88%|████████▊ | 7/8 [18:04<02:09, 129.58s/it]Ablation 3: 100%|██████████| 8/8 [19:53<00:00, 122.82s/it]Ablation 3: 100%|██████████| 8/8 [19:53<00:00, 149.15s/it]
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-03  α=3.91e-06  fed_gap=29.5228 ± 3.4099
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-02  α=3.91e-05  fed_gap=36.3973 ± 2.1408
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-01  α=3.91e-04  fed_gap=42.8759 ± 3.8168
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+00  α=3.91e-03  fed_gap=45.4911 ± 1.6690
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+01  α=3.91e-02  fed_gap=40.1256 ± 2.0616
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+02  α=3.91e-01  fed_gap=34.6444 ± 0.3071
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+03  α=3.91e+00  fed_gap=33.8924 ± 0.0357
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+04  α=3.91e+01  fed_gap=33.8108 ± 0.0041
+  [saved] results/ablation/a3_ll_eps480.json
+  eps= 480  best_lam=1e-03  gap_min=29.523  gap_0=29.523  variance_arm=+0.000
+Saved: results/figures/a3_LunarLander_multi_episodes.{pdf,png}

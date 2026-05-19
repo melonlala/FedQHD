@@ -1,0 +1,223 @@
+/home/yuchen/miniconda3/envs/hdc_fedrl/lib/python3.10/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+FedQHD Ablation Experiments  (LunarLander)
+Metric   : Q_error
+Episodes=200  Seeds=2  AggInterval=10
+D grid      : [128, 256, 512, 1024, 2048, 4096, 8192]
+m grid      : [128, 256, 512, 1024, 1536, 2048]
+lambda grid : [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
+D_FIXED=1024  M_FIXED=256
+
+Collecting 2048 anchor states …  (A1 needs up to 0, A2 needs 2048)
+Collecting 400 held-out eval anchor states …
+  [Ref] training params: lr=0.0500  discount=0.99  eps_decay=0.995  n_eps=600
+
+  [Ref] Training reference agent  D=4096, 600 episodes …
+RFF kernel parameters:
+OMEGA: (4096, 8)
+B: (4096,)
+  [Ref] training:   0%|          | 0/600 [00:00<?, ?it/s]  [Ref] training:   1%|          | 5/600 [00:00<00:15, 37.96it/s]  [Ref] training:   2%|▏         | 9/600 [00:00<00:17, 33.88it/s]  [Ref] training:   2%|▏         | 13/600 [00:00<00:17, 34.36it/s]  [Ref] training:   3%|▎         | 17/600 [00:00<00:16, 36.08it/s]  [Ref] training:   4%|▎         | 21/600 [00:00<00:15, 36.48it/s]  [Ref] training:   4%|▍         | 26/600 [00:00<00:14, 39.35it/s]  [Ref] training:   5%|▌         | 30/600 [00:00<00:15, 36.44it/s]  [Ref] training:   6%|▌         | 34/600 [00:00<00:15, 36.52it/s]  [Ref] training:   6%|▋         | 38/600 [00:01<00:15, 35.31it/s]  [Ref] training:   7%|▋         | 42/600 [00:01<00:16, 34.43it/s]  [Ref] training:   8%|▊         | 46/600 [00:01<00:16, 34.11it/s]  [Ref] training:   8%|▊         | 50/600 [00:01<00:16, 33.42it/s]  [Ref] training:   9%|▉         | 54/600 [00:01<00:16, 32.57it/s]  [Ref] training:  10%|▉         | 59/600 [00:01<00:15, 34.81it/s]  [Ref] training:  10%|█         | 63/600 [00:01<00:16, 33.19it/s]  [Ref] training:  11%|█         | 67/600 [00:01<00:16, 32.89it/s]  [Ref] training:  12%|█▏        | 71/600 [00:02<00:16, 32.45it/s]  [Ref] training:  12%|█▎        | 75/600 [00:02<00:17, 30.27it/s]  [Ref] training:  13%|█▎        | 79/600 [00:02<00:17, 29.39it/s]  [Ref] training:  14%|█▍        | 83/600 [00:02<00:17, 30.40it/s]  [Ref] training:  14%|█▍        | 87/600 [00:02<00:17, 29.21it/s]  [Ref] training:  15%|█▌        | 90/600 [00:02<00:18, 27.13it/s]  [Ref] training:  16%|█▌        | 93/600 [00:02<00:19, 26.40it/s]  [Ref] training:  16%|█▌        | 96/600 [00:03<00:19, 25.43it/s]  [Ref] training:  16%|█▋        | 99/600 [00:03<00:19, 26.03it/s]  [Ref] training:  17%|█▋        | 102/600 [00:03<00:18, 26.66it/s]  [Ref] training:  18%|█▊        | 106/600 [00:03<00:17, 27.81it/s]  [Ref] training:  18%|█▊        | 110/600 [00:03<00:16, 30.44it/s]  [Ref] training:  19%|█▉        | 114/600 [00:03<00:19, 25.29it/s]  [Ref] training:  20%|█▉        | 117/600 [00:03<00:20, 23.93it/s]  [Ref] training:  20%|██        | 120/600 [00:03<00:20, 23.73it/s]  [Ref] training:  20%|██        | 123/600 [00:04<00:21, 22.19it/s]  [Ref] training:  21%|██        | 126/600 [00:04<00:20, 22.68it/s]  [Ref] training:  22%|██▏       | 129/600 [00:04<00:19, 24.32it/s]  [Ref] training:  22%|██▏       | 132/600 [00:04<00:19, 24.42it/s]  [Ref] training:  22%|██▎       | 135/600 [00:04<00:18, 24.63it/s]  [Ref] training:  23%|██▎       | 138/600 [00:04<00:19, 23.84it/s]  [Ref] training:  24%|██▎       | 141/600 [00:04<00:19, 23.62it/s]  [Ref] training:  24%|██▍       | 144/600 [00:04<00:18, 24.64it/s]  [Ref] training:  24%|██▍       | 147/600 [00:05<00:28, 15.86it/s]  [Ref] training:  25%|██▌       | 150/600 [00:05<00:38, 11.65it/s]  [Ref] training:  25%|██▌       | 152/600 [00:06<00:44, 10.00it/s]  [Ref] training:  26%|██▌       | 154/600 [00:06<00:40, 11.11it/s]  [Ref] training:  26%|██▌       | 156/600 [00:06<00:36, 12.31it/s]  [Ref] training:  26%|██▋       | 158/600 [00:06<00:34, 12.94it/s]  [Ref] training:  27%|██▋       | 160/600 [00:06<00:30, 14.29it/s]  [Ref] training:  27%|██▋       | 163/600 [00:06<00:27, 15.79it/s]  [Ref] training:  28%|██▊       | 166/600 [00:06<00:25, 16.88it/s]  [Ref] training:  28%|██▊       | 168/600 [00:06<00:26, 16.15it/s]  [Ref] training:  28%|██▊       | 170/600 [00:07<00:25, 16.66it/s]  [Ref] training:  29%|██▉       | 173/600 [00:07<00:24, 17.34it/s]  [Ref] training:  29%|██▉       | 175/600 [00:07<00:36, 11.66it/s]  [Ref] training:  30%|██▉       | 178/600 [00:07<00:40, 10.32it/s]  [Ref] training:  30%|███       | 180/600 [00:08<00:37, 11.22it/s]  [Ref] training:  30%|███       | 182/600 [00:08<00:57,  7.26it/s]  [Ref] training:  31%|███       | 184/600 [00:08<00:49,  8.38it/s]  [Ref] training:  31%|███       | 186/600 [00:08<00:41,  9.91it/s]  [Ref] training:  31%|███▏      | 188/600 [00:09<00:47,  8.63it/s]  [Ref] training:  32%|███▏      | 191/600 [00:09<00:36, 11.30it/s]  [Ref] training:  32%|███▏      | 194/600 [00:09<00:29, 13.63it/s]  [Ref] training:  33%|███▎      | 196/600 [00:09<00:30, 13.16it/s]  [Ref] training:  33%|███▎      | 198/600 [00:09<00:28, 14.09it/s]  [Ref] training:  33%|███▎      | 200/600 [00:09<00:26, 15.24it/s]  [Ref] training:  34%|███▎      | 202/600 [00:09<00:29, 13.36it/s]  [Ref] training:  34%|███▍      | 204/600 [00:10<00:39, 10.05it/s]  [Ref] training:  34%|███▍      | 206/600 [00:10<00:38, 10.33it/s]  [Ref] training:  35%|███▍      | 208/600 [00:10<00:34, 11.52it/s]  [Ref] training:  35%|███▌      | 210/600 [00:10<00:43,  8.94it/s]  [Ref] training:  35%|███▌      | 212/600 [00:11<00:38, 10.02it/s]  [Ref] training:  36%|███▌      | 214/600 [00:11<00:45,  8.55it/s]  [Ref] training:  36%|███▌      | 217/600 [00:11<00:34, 11.09it/s]  [Ref] training:  36%|███▋      | 219/600 [00:11<00:42,  8.93it/s]  [Ref] training:  37%|███▋      | 221/600 [00:11<00:36, 10.50it/s]  [Ref] training:  37%|███▋      | 223/600 [00:12<00:31, 12.05it/s]  [Ref] training:  38%|███▊      | 225/600 [00:12<00:39,  9.56it/s]  [Ref] training:  38%|███▊      | 227/600 [00:12<00:49,  7.51it/s]  [Ref] training:  38%|███▊      | 229/600 [00:12<00:43,  8.55it/s]  [Ref] training:  38%|███▊      | 231/600 [00:13<00:48,  7.57it/s]  [Ref] training:  39%|███▉      | 234/600 [00:13<00:36, 10.02it/s]  [Ref] training:  39%|███▉      | 236/600 [00:13<00:52,  6.89it/s]  [Ref] training:  40%|███▉      | 238/600 [00:14<00:44,  8.12it/s]  [Ref] training:  40%|████      | 240/600 [00:14<00:48,  7.46it/s]  [Ref] training:  40%|████      | 241/600 [00:14<00:56,  6.32it/s]  [Ref] training:  40%|████      | 243/600 [00:15<00:57,  6.19it/s]  [Ref] training:  41%|████      | 245/600 [00:15<00:44,  7.91it/s]  [Ref] training:  41%|████      | 247/600 [00:15<00:47,  7.39it/s]  [Ref] training:  41%|████▏     | 248/600 [00:15<00:56,  6.25it/s]  [Ref] training:  42%|████▏     | 250/600 [00:15<00:46,  7.47it/s]  [Ref] training:  42%|████▏     | 252/600 [00:16<00:39,  8.88it/s]  [Ref] training:  42%|████▏     | 254/600 [00:16<00:38,  8.96it/s]  [Ref] training:  43%|████▎     | 256/600 [00:16<00:32, 10.56it/s]  [Ref] training:  43%|████▎     | 258/600 [00:16<00:39,  8.72it/s]  [Ref] training:  43%|████▎     | 260/600 [00:16<00:33, 10.29it/s]  [Ref] training:  44%|████▎     | 262/600 [00:17<00:39,  8.66it/s]  [Ref] training:  44%|████▍     | 264/600 [00:17<00:33,  9.91it/s]  [Ref] training:  44%|████▍     | 266/600 [00:17<00:37,  8.95it/s]  [Ref] training:  45%|████▍     | 268/600 [00:17<00:31, 10.43it/s]  [Ref] training:  45%|████▌     | 270/600 [00:17<00:36,  9.08it/s]  [Ref] training:  45%|████▌     | 272/600 [00:18<00:31, 10.51it/s]  [Ref] training:  46%|████▌     | 274/600 [00:18<00:33,  9.86it/s]  [Ref] training:  46%|████▌     | 276/600 [00:18<00:31, 10.14it/s]  [Ref] training:  46%|████▋     | 278/600 [00:18<00:27, 11.83it/s]  [Ref] training:  47%|████▋     | 280/600 [00:18<00:24, 13.09it/s]  [Ref] training:  47%|████▋     | 282/600 [00:19<00:42,  7.45it/s]  [Ref] training:  47%|████▋     | 284/600 [00:19<00:45,  7.00it/s]  [Ref] training:  48%|████▊     | 286/600 [00:19<00:37,  8.30it/s]  [Ref] training:  48%|████▊     | 288/600 [00:19<00:31,  9.87it/s]  [Ref] training:  48%|████▊     | 290/600 [00:20<00:37,  8.25it/s]  [Ref] training:  49%|████▊     | 292/600 [00:20<00:47,  6.53it/s]  [Ref] training:  49%|████▉     | 294/600 [00:20<00:47,  6.45it/s]  [Ref] training:  49%|████▉     | 296/600 [00:21<00:43,  6.99it/s]  [Ref] training:  50%|████▉     | 297/600 [00:21<00:42,  7.14it/s]  [Ref] training:  50%|████▉     | 299/600 [00:21<00:33,  8.99it/s]  [Ref] training:  50%|█████     | 301/600 [00:21<00:34,  8.58it/s]  [Ref] training:  50%|█████     | 303/600 [00:21<00:28, 10.28it/s]  [Ref] training:  51%|█████     | 305/600 [00:22<00:34,  8.53it/s]  [Ref] training:  51%|█████▏    | 308/600 [00:22<00:32,  8.91it/s]  [Ref] training:  52%|█████▏    | 310/600 [00:22<00:43,  6.62it/s]  [Ref] training:  52%|█████▏    | 311/600 [00:23<00:49,  5.87it/s]  [Ref] training:  52%|█████▏    | 312/600 [00:23<00:46,  6.24it/s]  [Ref] training:  52%|█████▏    | 313/600 [00:23<00:52,  5.48it/s]  [Ref] training:  52%|█████▎    | 315/600 [00:23<00:49,  5.70it/s]  [Ref] training:  53%|█████▎    | 316/600 [00:24<00:52,  5.38it/s]  [Ref] training:  53%|█████▎    | 317/600 [00:24<00:47,  5.92it/s]  [Ref] training:  53%|█████▎    | 318/600 [00:24<00:52,  5.42it/s]  [Ref] training:  53%|█████▎    | 319/600 [00:24<00:49,  5.64it/s]  [Ref] training:  54%|█████▎    | 321/600 [00:24<00:36,  7.59it/s]  [Ref] training:  54%|█████▎    | 322/600 [00:24<00:37,  7.48it/s]  [Ref] training:  54%|█████▍    | 324/600 [00:25<00:34,  7.95it/s]  [Ref] training:  54%|█████▍    | 326/600 [00:25<00:37,  7.25it/s]  [Ref] training:  55%|█████▍    | 327/600 [00:25<00:45,  6.05it/s]  [Ref] training:  55%|█████▍    | 329/600 [00:25<00:33,  8.15it/s]  [Ref] training:  55%|█████▌    | 331/600 [00:26<00:33,  7.98it/s]  [Ref] training:  56%|█████▌    | 333/600 [00:26<00:29,  9.10it/s]  [Ref] training:  56%|█████▌    | 335/600 [00:26<00:32,  8.10it/s]  [Ref] training:  56%|█████▌    | 336/600 [00:26<00:33,  7.80it/s]  [Ref] training:  56%|█████▋    | 339/600 [00:26<00:24, 10.46it/s]  [Ref] training:  57%|█████▋    | 341/600 [00:27<00:31,  8.17it/s]  [Ref] training:  57%|█████▋    | 342/600 [00:27<00:38,  6.72it/s]  [Ref] training:  57%|█████▋    | 343/600 [00:27<00:44,  5.76it/s]  [Ref] training:  57%|█████▋    | 344/600 [00:27<00:44,  5.78it/s]  [Ref] training:  58%|█████▊    | 346/600 [00:28<00:33,  7.50it/s]  [Ref] training:  58%|█████▊    | 348/600 [00:28<00:27,  9.23it/s]  [Ref] training:  58%|█████▊    | 350/600 [00:28<00:36,  6.76it/s]  [Ref] training:  59%|█████▊    | 352/600 [00:28<00:30,  8.02it/s]  [Ref] training:  59%|█████▉    | 354/600 [00:29<00:28,  8.59it/s]  [Ref] training:  59%|█████▉    | 356/600 [00:29<00:32,  7.49it/s]  [Ref] training:  60%|█████▉    | 357/600 [00:29<00:35,  6.86it/s]  [Ref] training:  60%|█████▉    | 359/600 [00:29<00:28,  8.60it/s]  [Ref] training:  60%|██████    | 361/600 [00:30<00:32,  7.34it/s]  [Ref] training:  60%|██████    | 363/600 [00:30<00:26,  9.10it/s]  [Ref] training:  61%|██████    | 365/600 [00:30<00:32,  7.28it/s]  [Ref] training:  61%|██████    | 366/600 [00:30<00:37,  6.21it/s]  [Ref] training:  61%|██████    | 367/600 [00:30<00:36,  6.36it/s]  [Ref] training:  61%|██████▏   | 368/600 [00:31<00:37,  6.22it/s]  [Ref] training:  62%|██████▏   | 370/600 [00:31<00:33,  6.95it/s]  [Ref] training:  62%|██████▏   | 372/600 [00:31<00:28,  7.93it/s]  [Ref] training:  62%|██████▏   | 373/600 [00:31<00:34,  6.57it/s]  [Ref] training:  62%|██████▏   | 374/600 [00:32<00:37,  5.96it/s]  [Ref] training:  63%|██████▎   | 376/600 [00:32<00:27,  8.23it/s]  [Ref] training:  63%|██████▎   | 378/600 [00:32<00:28,  7.79it/s]  [Ref] training:  63%|██████▎   | 379/600 [00:32<00:31,  6.95it/s]  [Ref] training:  63%|██████▎   | 380/600 [00:32<00:35,  6.26it/s]  [Ref] training:  64%|██████▎   | 381/600 [00:32<00:32,  6.65it/s]  [Ref] training:  64%|██████▎   | 382/600 [00:33<00:39,  5.56it/s]  [Ref] training:  64%|██████▍   | 384/600 [00:33<00:30,  7.03it/s]  [Ref] training:  64%|██████▍   | 385/600 [00:33<00:36,  5.86it/s]  [Ref] training:  64%|██████▍   | 386/600 [00:33<00:36,  5.94it/s]  [Ref] training:  65%|██████▍   | 388/600 [00:34<00:35,  6.03it/s]  [Ref] training:  65%|██████▍   | 389/600 [00:34<00:40,  5.27it/s]  [Ref] training:  65%|██████▌   | 390/600 [00:34<00:43,  4.79it/s]  [Ref] training:  65%|██████▌   | 392/600 [00:34<00:30,  6.83it/s]  [Ref] training:  66%|██████▌   | 393/600 [00:35<00:36,  5.74it/s]  [Ref] training:  66%|██████▌   | 395/600 [00:35<00:28,  7.20it/s]  [Ref] training:  66%|██████▌   | 396/600 [00:35<00:30,  6.73it/s]  [Ref] training:  66%|██████▋   | 398/600 [00:35<00:30,  6.63it/s]  [Ref] training:  66%|██████▋   | 399/600 [00:35<00:35,  5.67it/s]  [Ref] training:  67%|██████▋   | 400/600 [00:36<00:39,  5.05it/s]  [Ref] training:  67%|██████▋   | 401/600 [00:36<00:37,  5.33it/s]  [Ref] training:  67%|██████▋   | 403/600 [00:36<00:31,  6.28it/s]  [Ref] training:  67%|██████▋   | 404/600 [00:36<00:35,  5.58it/s]  [Ref] training:  68%|██████▊   | 405/600 [00:37<00:34,  5.62it/s]  [Ref] training:  68%|██████▊   | 406/600 [00:37<00:37,  5.19it/s]  [Ref] training:  68%|██████▊   | 407/600 [00:37<00:40,  4.77it/s]  [Ref] training:  68%|██████▊   | 409/600 [00:37<00:36,  5.19it/s]  [Ref] training:  68%|██████▊   | 411/600 [00:38<00:32,  5.81it/s]  [Ref] training:  69%|██████▊   | 412/600 [00:38<00:31,  5.90it/s]  [Ref] training:  69%|██████▉   | 413/600 [00:38<00:28,  6.49it/s]  [Ref] training:  69%|██████▉   | 415/600 [00:38<00:29,  6.30it/s]  [Ref] training:  69%|██████▉   | 416/600 [00:38<00:30,  6.11it/s]  [Ref] training:  70%|██████▉   | 417/600 [00:39<00:27,  6.61it/s]  [Ref] training:  70%|██████▉   | 418/600 [00:39<00:32,  5.53it/s]  [Ref] training:  70%|██████▉   | 419/600 [00:39<00:36,  4.93it/s]  [Ref] training:  70%|███████   | 420/600 [00:39<00:39,  4.56it/s]  [Ref] training:  70%|███████   | 422/600 [00:40<00:32,  5.56it/s]  [Ref] training:  70%|███████   | 423/600 [00:40<00:35,  4.99it/s]  [Ref] training:  71%|███████   | 425/600 [00:40<00:26,  6.64it/s]  [Ref] training:  71%|███████   | 426/600 [00:40<00:29,  5.96it/s]  [Ref] training:  71%|███████   | 427/600 [00:41<00:33,  5.18it/s]  [Ref] training:  71%|███████▏  | 428/600 [00:41<00:31,  5.39it/s]  [Ref] training:  72%|███████▏  | 430/600 [00:41<00:29,  5.80it/s]  [Ref] training:  72%|███████▏  | 432/600 [00:41<00:26,  6.44it/s]  [Ref] training:  72%|███████▏  | 434/600 [00:42<00:26,  6.18it/s]  [Ref] training:  73%|███████▎  | 436/600 [00:42<00:26,  6.10it/s]  [Ref] training:  73%|███████▎  | 437/600 [00:42<00:26,  6.20it/s]  [Ref] training:  73%|███████▎  | 439/600 [00:42<00:19,  8.12it/s]  [Ref] training:  74%|███████▎  | 441/600 [00:43<00:22,  7.19it/s]  [Ref] training:  74%|███████▎  | 442/600 [00:43<00:25,  6.12it/s]  [Ref] training:  74%|███████▍  | 443/600 [00:43<00:25,  6.14it/s]  [Ref] training:  74%|███████▍  | 444/600 [00:43<00:29,  5.36it/s]  [Ref] training:  74%|███████▍  | 445/600 [00:43<00:31,  4.86it/s]  [Ref] training:  74%|███████▍  | 446/600 [00:44<00:34,  4.52it/s]  [Ref] training:  74%|███████▍  | 447/600 [00:44<00:35,  4.31it/s]  [Ref] training:  75%|███████▍  | 448/600 [00:44<00:36,  4.15it/s]  [Ref] training:  75%|███████▌  | 450/600 [00:45<00:30,  4.91it/s]  [Ref] training:  75%|███████▌  | 451/600 [00:45<00:32,  4.57it/s]  [Ref] training:  75%|███████▌  | 452/600 [00:45<00:34,  4.31it/s]  [Ref] training:  76%|███████▌  | 453/600 [00:45<00:35,  4.14it/s]  [Ref] training:  76%|███████▌  | 454/600 [00:46<00:34,  4.21it/s]  [Ref] training:  76%|███████▌  | 455/600 [00:46<00:35,  4.07it/s]  [Ref] training:  76%|███████▌  | 456/600 [00:46<00:31,  4.58it/s]  [Ref] training:  76%|███████▋  | 458/600 [00:46<00:20,  6.99it/s]  [Ref] training:  76%|███████▋  | 459/600 [00:46<00:24,  5.82it/s]  [Ref] training:  77%|███████▋  | 460/600 [00:47<00:26,  5.37it/s]  [Ref] training:  77%|███████▋  | 462/600 [00:47<00:20,  6.87it/s]  [Ref] training:  77%|███████▋  | 463/600 [00:47<00:23,  5.80it/s]  [Ref] training:  77%|███████▋  | 464/600 [00:47<00:26,  5.14it/s]  [Ref] training:  78%|███████▊  | 466/600 [00:47<00:19,  6.85it/s]  [Ref] training:  78%|███████▊  | 467/600 [00:48<00:23,  5.78it/s]  [Ref] training:  78%|███████▊  | 469/600 [00:48<00:22,  5.74it/s]  [Ref] training:  78%|███████▊  | 470/600 [00:48<00:25,  5.16it/s]  [Ref] training:  78%|███████▊  | 471/600 [00:49<00:27,  4.77it/s]  [Ref] training:  79%|███████▊  | 472/600 [00:49<00:28,  4.48it/s]  [Ref] training:  79%|███████▉  | 473/600 [00:49<00:29,  4.27it/s]  [Ref] training:  79%|███████▉  | 475/600 [00:50<00:25,  4.82it/s]  [Ref] training:  80%|███████▉  | 477/600 [00:50<00:23,  5.23it/s]  [Ref] training:  80%|███████▉  | 478/600 [00:50<00:25,  4.84it/s]  [Ref] training:  80%|███████▉  | 479/600 [00:50<00:26,  4.55it/s]  [Ref] training:  80%|████████  | 480/600 [00:51<00:27,  4.34it/s]  [Ref] training:  80%|████████  | 481/600 [00:51<00:24,  4.89it/s]  [Ref] training:  80%|████████  | 482/600 [00:51<00:26,  4.54it/s]  [Ref] training:  80%|████████  | 483/600 [00:51<00:25,  4.56it/s]  [Ref] training:  81%|████████  | 484/600 [00:51<00:22,  5.14it/s]  [Ref] training:  81%|████████  | 486/600 [00:52<00:16,  6.82it/s]  [Ref] training:  81%|████████  | 487/600 [00:52<00:19,  5.70it/s]  [Ref] training:  82%|████████▏ | 489/600 [00:52<00:19,  5.83it/s]  [Ref] training:  82%|████████▏ | 490/600 [00:52<00:21,  5.22it/s]  [Ref] training:  82%|████████▏ | 491/600 [00:53<00:22,  4.77it/s]  [Ref] training:  82%|████████▏ | 492/600 [00:53<00:24,  4.47it/s]  [Ref] training:  82%|████████▏ | 493/600 [00:53<00:22,  4.74it/s]  [Ref] training:  82%|████████▏ | 494/600 [00:53<00:23,  4.43it/s]  [Ref] training:  82%|████████▎ | 495/600 [00:54<00:24,  4.22it/s]  [Ref] training:  83%|████████▎ | 496/600 [00:54<00:25,  4.07it/s]  [Ref] training:  83%|████████▎ | 497/600 [00:54<00:25,  3.98it/s]  [Ref] training:  83%|████████▎ | 498/600 [00:54<00:25,  3.98it/s]  [Ref] training:  83%|████████▎ | 499/600 [00:55<00:25,  3.92it/s]  [Ref] training:  83%|████████▎ | 500/600 [00:55<00:25,  3.87it/s]  [Ref] training:  84%|████████▎ | 501/600 [00:55<00:25,  3.85it/s]  [Ref] training:  84%|████████▎ | 502/600 [00:55<00:25,  3.83it/s]  [Ref] training:  84%|████████▍ | 504/600 [00:56<00:20,  4.61it/s]  [Ref] training:  84%|████████▍ | 505/600 [00:56<00:21,  4.38it/s]  [Ref] training:  84%|████████▍ | 507/600 [00:56<00:16,  5.74it/s]  [Ref] training:  85%|████████▍ | 509/600 [00:57<00:15,  5.82it/s]  [Ref] training:  85%|████████▌ | 510/600 [00:57<00:17,  5.24it/s]  [Ref] training:  85%|████████▌ | 511/600 [00:57<00:16,  5.33it/s]  [Ref] training:  86%|████████▌ | 513/600 [00:57<00:15,  5.50it/s]  [Ref] training:  86%|████████▌ | 515/600 [00:58<00:15,  5.50it/s]  [Ref] training:  86%|████████▌ | 516/600 [00:58<00:16,  5.04it/s]  [Ref] training:  86%|████████▌ | 517/600 [00:58<00:17,  4.67it/s]  [Ref] training:  86%|████████▋ | 518/600 [00:59<00:18,  4.38it/s]  [Ref] training:  86%|████████▋ | 519/600 [00:59<00:19,  4.20it/s]  [Ref] training:  87%|████████▋ | 520/600 [00:59<00:19,  4.09it/s]  [Ref] training:  87%|████████▋ | 521/600 [00:59<00:19,  3.99it/s]  [Ref] training:  87%|████████▋ | 522/600 [01:00<00:19,  3.93it/s]  [Ref] training:  87%|████████▋ | 523/600 [01:00<00:19,  3.88it/s]  [Ref] training:  88%|████████▊ | 525/600 [01:00<00:16,  4.59it/s]  [Ref] training:  88%|████████▊ | 526/600 [01:00<00:16,  4.36it/s]  [Ref] training:  88%|████████▊ | 528/600 [01:01<00:14,  4.80it/s]  [Ref] training:  88%|████████▊ | 529/600 [01:01<00:15,  4.51it/s]  [Ref] training:  88%|████████▊ | 530/600 [01:01<00:16,  4.30it/s]  [Ref] training:  89%|████████▊ | 532/600 [01:02<00:14,  4.80it/s]  [Ref] training:  89%|████████▉ | 533/600 [01:02<00:14,  4.51it/s]  [Ref] training:  89%|████████▉ | 535/600 [01:02<00:12,  5.02it/s]  [Ref] training:  89%|████████▉ | 536/600 [01:03<00:13,  4.72it/s]  [Ref] training:  90%|████████▉ | 538/600 [01:03<00:12,  5.09it/s]  [Ref] training:  90%|████████▉ | 539/600 [01:03<00:12,  4.75it/s]  [Ref] training:  90%|█████████ | 540/600 [01:03<00:13,  4.48it/s]  [Ref] training:  90%|█████████ | 541/600 [01:04<00:13,  4.26it/s]  [Ref] training:  90%|█████████ | 543/600 [01:04<00:10,  5.55it/s]  [Ref] training:  91%|█████████ | 544/600 [01:04<00:11,  5.01it/s]  [Ref] training:  91%|█████████ | 545/600 [01:04<00:11,  4.63it/s]  [Ref] training:  91%|█████████ | 546/600 [01:05<00:12,  4.36it/s]  [Ref] training:  91%|█████████ | 547/600 [01:05<00:12,  4.19it/s]  [Ref] training:  92%|█████████▏| 549/600 [01:05<00:08,  6.23it/s]  [Ref] training:  92%|█████████▏| 550/600 [01:05<00:09,  5.38it/s]  [Ref] training:  92%|█████████▏| 551/600 [01:05<00:08,  5.78it/s]  [Ref] training:  92%|█████████▏| 552/600 [01:06<00:09,  5.07it/s]  [Ref] training:  92%|█████████▏| 553/600 [01:06<00:10,  4.62it/s]  [Ref] training:  92%|█████████▏| 554/600 [01:06<00:10,  4.32it/s]  [Ref] training:  92%|█████████▎| 555/600 [01:07<00:10,  4.16it/s]  [Ref] training:  93%|█████████▎| 557/600 [01:07<00:09,  4.72it/s]  [Ref] training:  93%|█████████▎| 558/600 [01:07<00:09,  4.42it/s]  [Ref] training:  93%|█████████▎| 559/600 [01:07<00:09,  4.23it/s]  [Ref] training:  93%|█████████▎| 560/600 [01:08<00:09,  4.07it/s]  [Ref] training:  94%|█████████▎| 561/600 [01:08<00:09,  4.00it/s]  [Ref] training:  94%|█████████▎| 562/600 [01:08<00:09,  3.92it/s]  [Ref] training:  94%|█████████▍| 563/600 [01:09<00:09,  3.87it/s]  [Ref] training:  94%|█████████▍| 564/600 [01:09<00:09,  3.84it/s]  [Ref] training:  94%|█████████▍| 565/600 [01:09<00:09,  3.83it/s]  [Ref] training:  94%|█████████▍| 566/600 [01:09<00:08,  3.82it/s]  [Ref] training:  95%|█████████▍| 568/600 [01:10<00:06,  4.65it/s]  [Ref] training:  95%|█████████▍| 569/600 [01:10<00:07,  4.41it/s]  [Ref] training:  95%|█████████▌| 571/600 [01:10<00:05,  4.92it/s]  [Ref] training:  95%|█████████▌| 572/600 [01:10<00:06,  4.61it/s]  [Ref] training:  96%|█████████▌| 574/600 [01:11<00:05,  5.08it/s]  [Ref] training:  96%|█████████▌| 575/600 [01:11<00:04,  5.60it/s]  [Ref] training:  96%|█████████▌| 576/600 [01:11<00:04,  5.02it/s]  [Ref] training:  96%|█████████▋| 578/600 [01:12<00:04,  5.37it/s]  [Ref] training:  96%|█████████▋| 579/600 [01:12<00:04,  4.93it/s]  [Ref] training:  97%|█████████▋| 580/600 [01:12<00:04,  4.56it/s]  [Ref] training:  97%|█████████▋| 581/600 [01:12<00:04,  4.34it/s]  [Ref] training:  97%|█████████▋| 582/600 [01:13<00:04,  4.40it/s]  [Ref] training:  97%|█████████▋| 583/600 [01:13<00:04,  4.22it/s]  [Ref] training:  97%|█████████▋| 584/600 [01:13<00:03,  4.10it/s]  [Ref] training:  98%|█████████▊| 585/600 [01:13<00:03,  4.01it/s]  [Ref] training:  98%|█████████▊| 586/600 [01:13<00:03,  4.62it/s]  [Ref] training:  98%|█████████▊| 587/600 [01:14<00:03,  4.33it/s]  [Ref] training:  98%|█████████▊| 588/600 [01:14<00:02,  4.16it/s]  [Ref] training:  98%|█████████▊| 589/600 [01:14<00:02,  4.02it/s]  [Ref] training:  98%|█████████▊| 590/600 [01:15<00:02,  3.95it/s]  [Ref] training:  98%|█████████▊| 591/600 [01:15<00:02,  3.89it/s]  [Ref] training:  99%|█████████▊| 592/600 [01:15<00:02,  3.86it/s]  [Ref] training:  99%|█████████▉| 593/600 [01:15<00:01,  3.84it/s]  [Ref] training:  99%|█████████▉| 594/600 [01:16<00:01,  3.81it/s]  [Ref] training:  99%|█████████▉| 595/600 [01:16<00:01,  3.80it/s]  [Ref] training:  99%|█████████▉| 596/600 [01:16<00:01,  3.76it/s]  [Ref] training: 100%|█████████▉| 598/600 [01:16<00:00,  4.42it/s]  [Ref] training: 100%|█████████▉| 599/600 [01:17<00:00,  4.26it/s]  [Ref] training: 100%|██████████| 600/600 [01:17<00:00,  4.11it/s]                                                                     [Q*] Reference agent saved → results/ablation/LunarLander_ref_agent.npz
+RFF kernel parameters:
+OMEGA: (4096, 8)
+B: (4096,)
+  [Q*] Reference agent loaded ← results/ablation/LunarLander_ref_agent.npz  (D=4096, ε=0.049)
+
+  [RefCheck] V(π_ref) = -104.3  (threshold ≥ 150.0)  → NOT CONVERGED ✗
+  WARNING: Reference agent has not converged.  Re-run with --force_recompute_qstar or increase --n_ref_episodes.
+
+Computing / loading Q_star for 2048 anchors …
+  [Q*] Computing Q* from ref agent (m=2048) …
+  [Q*] Done. Q* range: [-15.726, 85.048]
+  [Q*] Q_star saved → results/ablation/LunarLander_Q_star_m2048_agent.npz
+
+Computing Q_star at 400 held-out eval anchors …
+  [Q*] Computing Q* from ref agent (m=400) …
+  [Q*] Done. Q* range: [-15.168, 59.098]
+  [Q*] Q_star saved → results/ablation/LunarLander_Q_star_m400_eval_agent.npz
+Q* discount=0.99  RL discount=0.99  lr=0.1  eps_decay=0.99
+
+============================================================
+Ablation 3: Vary λ  [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]  (D=1024, m=256)
+  Theory: α* ≈ 64.00, λ* ≈ 16384.0
+============================================================
+Ablation 3:   0%|          | 0/7 [00:00<?, ?it/s]Ablation 3:  14%|█▍        | 1/7 [00:43<04:23, 43.96s/it]Ablation 3:  29%|██▊       | 2/7 [01:23<03:26, 41.40s/it]Ablation 3:  43%|████▎     | 3/7 [01:59<02:35, 38.95s/it]Ablation 3:  57%|█████▋    | 4/7 [02:31<01:48, 36.30s/it]Ablation 3:  71%|███████▏  | 5/7 [03:03<01:09, 34.80s/it]Ablation 3:  86%|████████▌ | 6/7 [03:35<00:33, 33.74s/it]Ablation 3: 100%|██████████| 7/7 [04:07<00:00, 33.28s/it]Ablation 3: 100%|██████████| 7/7 [04:07<00:00, 35.43s/it]
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e-01  α=3.91e-04  fed_gap=17.6935 ± 0.0357
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+00  α=3.91e-03  fed_gap=17.7897 ± 0.3245
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+01  α=3.91e-02  fed_gap=21.2283 ± 0.6806
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+02  α=3.91e-01  fed_gap=21.8663 ± 0.2425
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+03  α=3.91e+00  fed_gap=21.3726 ± 0.0450
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+04  α=3.91e+01  fed_gap=21.3114 ± 0.0012
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 8)
+B: (1024,)
+  λ=1e+05  α=3.91e+02  fed_gap=21.3055 ± 0.0004
+Saved: results/ablation/ablation3_vary_lambda_LunarLander_Q_error.json
+Saved: results/figures/ablation3_vary_lambda_LunarLander_Q_error.{pdf,png}  (best λ=1e-01)
+  (Skipping full consistency check — not all ablations ran)
+
+Total time: 331.4s

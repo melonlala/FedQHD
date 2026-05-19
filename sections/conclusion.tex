@@ -1,11 +1,10 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-% Summarize the paper
-[Summarize the main contributions and findings of the paper.]
+We presented FedQHD, a federated Q-learning framework that enables closed-form federation in both homogeneous and heterogeneous encoder regimes. By leveraging the linear-in-parameters structure of hyperdimensional computing, FedQHD reduces federation to either parameter averaging (homogeneous case) or a single one-shot ridge regression step on a shared anchor set (heterogeneous case), requiring no iterative optimization at the server or client beyond standard TD updates.
 
-[Restate the importance of the problem and how your approach addresses it.]
+On the theoretical side, we proved a non-asymptotic federation gap bound that decomposes into three interpretable terms: encoder heterogeneity ($O(D^{-1/2})$), anchor amplification ($O(\sqrt{m}/\sqrt{\gamma_i})$), and ridge shrinkage ($O(\lambda/(\gamma_i + \lambda))$). The invisibility theorem establishes that projection residuals—the component of the global teacher outside a client's representational subspace—are exactly annihilated by the ridge regression and never distort the compiled Q-function. The phase transition at $D_i = m$ provides a concrete design rule: dimensionality must exceed the anchor count for the Gram matrix to be full-rank and for regularization to be effective.
 
-[Highlight the key experimental results that support your claims.]
+Empirically, FedQHD outperforms independent learning and FedAvg-DQN in the majority of tested environments. The $D^{-1/2}$ scaling prediction is confirmed with an empirical slope of $-0.525$ (theory: $-0.5$), the phase transition is confirmed with a $95\times$ RMSE jump at $m=D$, and the U-shaped optimal regularization is confirmed with an interior minimum at $\lambda^* = 10$ on LunarLander. The LunarLander oracle paradox—where the per-episode oracle underperforms FedQHD—highlights that federation frequency is itself a consequential design choice that the theory does not yet capture.
 
-[Conclude with the broader impact or significance of this work.]
+Broadly, FedQHD demonstrates that closed-form, function-space federation is achievable for heterogeneous reinforcement learning agents without iterative distillation or raw data sharing. The approach is particularly attractive for autonomous systems operating under communication and privacy constraints, where the ability to federate agents with different computational capacities is a practical necessity rather than a theoretical luxury.

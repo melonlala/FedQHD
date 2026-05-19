@@ -1,0 +1,17 @@
+FedQHD Ablation Experiments  (CartPole-v1)
+Episodes=500  Seeds=3  AggInterval=10
+D grid     : [128, 256, 512, 1024, 2048, 4096]
+m grid     : [200, 500, 1000, 2000, 5000, 8000]
+lambda grid: [1e-06, 0.0001, 0.01, 0.1, 1.0, 10.0]
+Q* ref     : D=8192, 1000 eps, 30 MC rollouts/anchor
+
+Collecting 8000 anchor states ...
+Estimating Q* ...
+
+  [Q*] Loading cached reference agent from results/ablation/ref_agent.npz ...
+RFF kernel parameters:
+OMEGA: (8192, 4)
+B: (8192,)
+  [Q*] Reference agent loaded ← results/ablation/ref_agent.npz  (D=8192, ε=0.010)
+  [Q*] MC rollouts: 8000 anchors × 2 actions × 30 runs ...
+  [Q*] MC rollouts:   0%|          | 0/8000 [00:00<?, ?it/s]

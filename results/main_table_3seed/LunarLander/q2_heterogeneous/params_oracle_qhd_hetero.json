@@ -1,0 +1,39 @@
+{
+  "episodes": 600,
+  "agent_num": 5,
+  "runs": 3,
+  "random_seed": 42,
+  "qhd_lr": 0.5,
+  "qhd_discount": 0.99,
+  "qhd_exploration_rate": 1.0,
+  "qhd_exploration_decay": 0.9,
+  "qhd_exploration_min": 0.001,
+  "qhd_agg_interval": 100000,
+  "dqn_lr": 0.001,
+  "dqn_discount": 0.99,
+  "dqn_exploration_rate": 1.0,
+  "dqn_exploration_decay": 0.995,
+  "dqn_exploration_min": 0.001,
+  "dqn_agg_interval": 25,
+  "hyperdimension": 10000,
+  "rff_gamma": 1.0,
+  "anchor_set_size": 200,
+  "hetero_dims": null,
+  "output_dir": "results",
+  "grid_size": [
+    8,
+    8
+  ],
+  "method_key": "oracle_qhd_hetero",
+  "method_name": "Oracle QHD (Heterogeneous)",
+  "question": "q2",
+  "env": "LunarLander",
+  "timestamp": "2026-02-28 02:11:23",
+  "method": "oracle_qhd_hetero",
+  "source_params": "results/LunarLander/q2_heterogeneous/params_oracle_qhd_hetero.json",
+  "seeds": [
+    42,
+    43,
+    44
+  ]
+}

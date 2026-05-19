@@ -43,6 +43,8 @@ class QHDAgent:
             self.model_vectors[i] = np.random.randn(self.hd_dim)
             self.model_vectors[i] /= np.linalg.norm(self.model_vectors[i])
 
+        self._cached_state_hv = None  # Cache from choose_action, consumed by update_model
+
         # # Target network (for stability)
         # self.target_model_vectors = self.model_vectors.copy()
         # self.target_update_freq = 100
@@ -128,29 +130,30 @@ class QHDAgent:
         # action = np.random.choice(self.action_dim, p=action_probs)
         # return action
 
-        # epsilon-greedy
+        # Always encode and cache so update_model can reuse it
+        self._cached_state_hv = self.encode_state(state)
         if np.random.random() < self.epsilon:
             return np.random.randint(self.action_dim)
-        else:
-            q_values = self.get_q_values(state)
-            return np.argmax(q_values)
+        return np.argmax(self.model_vectors @ self._cached_state_hv)
 
     def update_model(self, state: np.ndarray, action: int, reward: float, 
                     next_state: np.ndarray, done: bool):
         """Update the QHD model using the Bellman equation"""
         
-        # Encode current state
-        state_hv = self.encode_state(state)
-        
+        # Reuse encoding produced by choose_action; fall back to encoding fresh
+        # (e.g. when update_model is called without a prior choose_action call)
+        state_hv = self._cached_state_hv if self._cached_state_hv is not None else self.encode_state(state)
+        self._cached_state_hv = None
+
         # Predicted Q-value
         q_pred = np.dot(state_hv, self.model_vectors[action])
-        
+
         # Target Q-value using Bellman equation
-        if done:    
+        if done:
             q_target = reward
         else:
-            next_q_values = self.get_q_values(next_state, use_target=True)
-            q_target = reward + self.gamma * np.max(next_q_values)
+            next_state_hv = self.encode_state(next_state)
+            q_target = reward + self.gamma * np.max(self.model_vectors @ next_state_hv)
         
         # Update rule from paper: M_A = M_A + β(q_true - q_pred) * S
         error = q_target - q_pred

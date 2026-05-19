@@ -1,30 +1,23 @@
 \section{Introduction}
 \label{sec:intro}
 
-% Motivation: Why is this problem important?
-Federated reinforcement learning (FRL) enables multiple agents to collaboratively learn policies while preserving data locality and privacy. In this paradigm, agents interact with their local environments and periodically share knowledge through a central aggregation mechanism, avoiding the need to transmit raw interaction data. This approach is particularly valuable in domains where data privacy is critical or communication costs are prohibitive, such as mobile robotics, personalized recommendation systems, and healthcare applications.
+Federated reinforcement learning (FRL) enables multiple autonomous agents to collaborate on policy learning while keeping interaction data local, a critical requirement in privacy-sensitive or bandwidth-constrained deployments such as mobile robotics, personalized recommendation, and healthcare monitoring \citep{zhuo2019federated,khodadadian2022federated}. In this paradigm, agents periodically upload learned model representations to a central server, which aggregates them and redistributes a global model—without ever transmitting raw trajectories. As RL is increasingly deployed on heterogeneous edge hardware, the ability to federate agents with \emph{different} model architectures or encoding dimensions becomes essential.
 
-However, extending federated learning principles to reinforcement learning presents unique challenges:
+Existing federated RL methods rely on FedAvg-style parameter averaging \citep{mcmahan2017communication,jin2022federated}, which operates directly on weight tensors. This creates two fundamental obstacles. First, for deep nonlinear Q-networks, weight averaging does not correspond to averaging in function space: the aggregated network may represent a value function quite different from the weighted mean of the clients' Q-functions, a problem amplified by the nonstationary TD targets of RL \citep{baird1995residual,van_hasselt2018deep}. Second, and more fundamentally, parameter averaging is \emph{algebraically undefined} when clients use models of different sizes or architectures—an increasingly common scenario in heterogeneous edge deployments. Distillation-based alternatives \citep{rusu2016policydistillation,shen2023fedhpd} support architecture heterogeneity but require iterative gradient steps per round, making each federation round as expensive as local training.
 
+We propose \textbf{FedQHD}, a federated Q-learning framework that sidesteps both obstacles by exploiting the structure of hyperdimensional computing (HDC) \citep{kanerva2009hyperdimensional}. HDC encodes states as high-dimensional random feature vectors, producing Q-functions that are \emph{nonlinear in state} but \emph{linear in parameters}. This linearity is the key: function-space averaging of QHD Q-functions is equivalent to parameter averaging when clients share the same encoder, and reduces to a single closed-form ridge regression step on a small shared anchor set when encoders differ. No iterative optimization is required at any stage—federation is a one-shot algebraic operation.
 
-
-% Gap: What is missing in current approaches?
-Existing federated learning approaches, particularly those employing FedAvg-style aggregation, face significant limitations when applied to deep reinforcement learning. First, deep neural network representations lose expressiveness during the linear averaging process, as the aggregation operates on weight space rather than the learned feature representations. This representation-agnostic aggregation can degrade the quality of the learned Q-functions. Second, standard federated averaging requires all participating agents to maintain identical model architectures, preventing heterogeneous deployment scenarios where agents may have different computational capabilities or environmental complexities.
-
-
-% Our approach: What do we propose?
-To address these limitations, we propose FedQHD, a federated Q-learning framework that employs hyperdimensional computing for function approximation. By representing Q-functions through high-dimensional vector spaces, our approach enables linear aggregation of learned models while preserving the expressiveness of the approximated value functions. The use of hyperdimensional regression provides a principled method for combining decentralized learning experiences through simple averaging operations.
-
-
-
-
-% Contributions: What are the main contributions?
 The main contributions of this work are:
-\begin{itemize}
-    \item \textbf{Aggregation-aware Q-learning}: We demonstrate that hyperdimensional function approximation maintains expressiveness under linear averaging, enabling effective aggregation of decentralized interaction data without degrading the learned representations.
-    \item \textbf{Model heterogeneity support}: Our framework naturally accommodates agents with different model configurations, allowing federated learning across heterogeneous computational environments.
-\end{itemize}
+\begin{enumerate}
+    \item \textbf{FedQHD framework with closed-form federation in both regimes.} For homogeneous encoders, we prove that parameter averaging \emph{exactly} realizes function-space averaging, independent of the anchor distribution. For heterogeneous encoders with client-specific dimensions $D_i$, we derive a one-shot ridge regression aggregation step
+    $W^{\mathrm{glob}}_i = (X_i^{\mathrm{H}} X_i + \lambda I)^{-1} X_i^{\mathrm{H}} Q^{\mathrm{glob}}_{\mathrm{ref}}$
+    that requires no gradient computation on the client.
 
+    \item \textbf{Non-asymptotic federation gap bound with three-term decomposition.} We prove a pointwise bound on the gap between the oracle best-approximation Q-function and the FedQHD output, decomposing it into (I)~encoder heterogeneity $\bar{h}_i = O(D^{-1/2})$, (II)~anchor amplification $(\sqrt{m}/\sqrt{\gamma_i+\lambda})\bar{h}_i$, and (III)~ridge shrinkage $(\lambda/(\gamma_i+\lambda))\hat{B}_i$. The bound reveals a phase transition at $D_i = m$: below this threshold, Term~(III) saturates regardless of $\lambda$; above it, $\gamma_i > 0$ and the gap reduces to the irreducible heterogeneity floor.
 
-% Organization: How is the paper structured?
-The rest of this paper is organized as follows. Section~\ref{sec:related_work} reviews related work. Section~\ref{sec:preliminaries} provides background on federated learning, Q-learning, and hyperdimensional computing. Section~\ref{sec:methodology} describes our proposed FedQHD approach. Section~\ref{sec:experiments} details our experimental setup. Section~\ref{sec:results} presents our experimental results. Section~\ref{sec:discussion} discusses the implications of our findings. Finally, Section~\ref{sec:conclusion} concludes the paper.
+    \item \textbf{Invisibility theorem for projection residuals.} We prove that the component of the global teacher lying outside client $i$'s representation subspace is \emph{invisible}—it is exactly annihilated by the ridge regression and never corrupts the compiled Q-function. Heterogeneity causes only silent information loss, not distortion, providing a precise geometric characterization of the cost of encoder mismatch.
+
+    \item \textbf{Empirical validation across four environments and two settings.} Experiments on CartPole, Acrobot, LunarLander, and MountainCar with $N=5$ clients confirm the $D^{-1/2}$ scaling prediction (observed log-log slope $-0.525$ vs.\ theory $-0.5$) and the $95\times$ error jump at the $m=D$ phase transition. FedQHD achieves strong performance relative to independent learning and FedAvg-DQN in five out of eight environment--setting combinations.
+\end{enumerate}
+
+The rest of this paper is organized as follows. Section~\ref{sec:related_work} reviews related work. Section~\ref{sec:preliminaries} provides background on Q-learning and HDC. Section~\ref{sec:methodology} presents FedQHD and the theoretical analysis. Section~\ref{sec:experiments} details experiments and results. Section~\ref{sec:discussion} discusses implications, and Section~\ref{sec:conclusion} concludes.

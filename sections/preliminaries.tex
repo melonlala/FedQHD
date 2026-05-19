@@ -3,17 +3,17 @@
 
 \subsection{Markov decision processes and off-policy value learning}
 
+We model each agent's environment as a Markov decision process (MDP) $\mathcal{M} = (\mathcal{S}, \mathcal{A}, P, r, \gamma)$, where $\mathcal{S}$ is a continuous state space, $\mathcal{A}$ is a finite action set, $P(s'|s,a)$ is the transition kernel, $r(s,a) \in \mathbb{R}$ is the reward function, and $\gamma \in [0,1)$ is the discount factor. The optimal action-value function $Q^*$ satisfies the Bellman optimality equation:
 \begin{equation}
 Q^\star(s,a)= r(s,a) + \gamma\,\mathbb{E}_{s'\sim P(\cdot|s,a)}
 \left[\max_{a'\in\mathcal{A}} Q^\star(s',a')\right].
 \label{eq:bellman}
 \end{equation}
-Keep the RL background minimal here and focus to have space in the next section to talk about federation
+Q-learning \citep{watkins1992q} estimates $Q^*$ from off-policy interaction by iteratively applying bootstrapped TD updates; deep Q-networks (DQN) \citep{mnih2015human} extend this to continuous state spaces using neural function approximation.
 
 \subsection{Hyperdimensional computing (HDC)}
 
 \label{subsec:hdc_background}
-{\color{red} DESCRIBE ONLY GENERAL HDC HERE COMPACT. }
 Hyperdimensional computing (HDC) is a brain-inspired computational paradigm in which symbols and structured entities are represented as high-dimensional vectors---called \emph{hypervectors}---with components drawn independently from simple distributions~\cite{kanerva2009hyperdimensional}. In such spaces, independently sampled hypervectors are nearly orthogonal with high probability, a geometric property that underlies classical HDC operations such as \emph{bundling} (superposition via addition), \emph{binding} (association via elementwise multiplication or permutation), and \emph{permutation} (role shifting). Because information is distributed holographically across all dimensions, HDC representations exhibit strong robustness to noise, quantization, and partial corruption.
 
 Given an input $x$, an HDC encoder produces a bounded hypervector $h=\phi(x)\in\mathbb{R}^D$ (or $\mathbb{C}^D$) using random projections or compositional schemes built from a small set of base hypervectors. These encoders admit a precise random-feature interpretation: the empirical kernel

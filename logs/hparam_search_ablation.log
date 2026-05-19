@@ -1,0 +1,1447 @@
+============================================================
+FedQHD Ablation Parameter Search
+============================================================
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+  [Q*] Reference agent loaded ← results/ablation/ref_agent.npz  (D=2048, ε=0.010)
+
+Collecting 8192 training anchors …
+Collecting 400 eval anchors …
+
+============================================================
+Searching A1 (Vary D) configurations …
+============================================================
+
+  [n_mc=ref, d_min=8]
+RFF kernel parameters:
+OMEGA: (8, 4)
+B: (8,)
+RFF kernel parameters:
+OMEGA: (8, 4)
+B: (8,)
+RFF kernel parameters:
+OMEGA: (8, 4)
+B: (8,)
+    D=    8  m=    32  RMSE=8.0522 ± 1.4466
+RFF kernel parameters:
+OMEGA: (18, 4)
+B: (18,)
+RFF kernel parameters:
+OMEGA: (18, 4)
+B: (18,)
+RFF kernel parameters:
+OMEGA: (18, 4)
+B: (18,)
+    D=   18  m=    72  RMSE=3.5512 ± 2.0423
+RFF kernel parameters:
+OMEGA: (39, 4)
+B: (39,)
+RFF kernel parameters:
+OMEGA: (39, 4)
+B: (39,)
+RFF kernel parameters:
+OMEGA: (39, 4)
+B: (39,)
+    D=   39  m=   156  RMSE=0.3596 ± 0.1332
+RFF kernel parameters:
+OMEGA: (86, 4)
+B: (86,)
+RFF kernel parameters:
+OMEGA: (86, 4)
+B: (86,)
+RFF kernel parameters:
+OMEGA: (86, 4)
+B: (86,)
+    D=   86  m=   344  RMSE=0.1085 ± 0.0460
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+    D=  190  m=   760  RMSE=0.0030 ± 0.0007
+RFF kernel parameters:
+OMEGA: (420, 4)
+B: (420,)
+RFF kernel parameters:
+OMEGA: (420, 4)
+B: (420,)
+RFF kernel parameters:
+OMEGA: (420, 4)
+B: (420,)
+    D=  420  m=  1680  RMSE=0.0003 ± 0.0001
+RFF kernel parameters:
+OMEGA: (927, 4)
+B: (927,)
+RFF kernel parameters:
+OMEGA: (927, 4)
+B: (927,)
+RFF kernel parameters:
+OMEGA: (927, 4)
+B: (927,)
+    D=  927  m=  3708  RMSE=0.0001 ± 0.0000
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+    D= 2048  m=  8192  RMSE=0.0000 ± 0.0000
+  → slope = -2.555  (theory -0.50)
+
+  [n_mc=ref, d_min=16]
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+    D=   16  m=    64  RMSE=3.5161 ± 0.9331
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+    D=   32  m=   128  RMSE=0.5661 ± 0.2025
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+    D=   64  m=   256  RMSE=0.1341 ± 0.0623
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    D=  128  m=   512  RMSE=0.0165 ± 0.0053
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    D=  256  m=  1024  RMSE=0.0013 ± 0.0004
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    D=  512  m=  2048  RMSE=0.0002 ± 0.0001
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+    D= 1024  m=  4096  RMSE=0.0001 ± 0.0000
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+    D= 2048  m=  8192  RMSE=0.0000 ± 0.0000
+  → slope = -2.640  (theory -0.50)
+
+  [n_mc=ref, d_min=32]
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+    D=   32  m=   128  RMSE=0.5661 ± 0.2025
+RFF kernel parameters:
+OMEGA: (58, 4)
+B: (58,)
+RFF kernel parameters:
+OMEGA: (58, 4)
+B: (58,)
+RFF kernel parameters:
+OMEGA: (58, 4)
+B: (58,)
+    D=   58  m=   232  RMSE=0.1582 ± 0.0700
+RFF kernel parameters:
+OMEGA: (105, 4)
+B: (105,)
+RFF kernel parameters:
+OMEGA: (105, 4)
+B: (105,)
+RFF kernel parameters:
+OMEGA: (105, 4)
+B: (105,)
+    D=  105  m=   420  RMSE=0.0318 ± 0.0157
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+    D=  190  m=   760  RMSE=0.0030 ± 0.0007
+RFF kernel parameters:
+OMEGA: (345, 4)
+B: (345,)
+RFF kernel parameters:
+OMEGA: (345, 4)
+B: (345,)
+RFF kernel parameters:
+OMEGA: (345, 4)
+B: (345,)
+    D=  345  m=  1380  RMSE=0.0006 ± 0.0001
+RFF kernel parameters:
+OMEGA: (624, 4)
+B: (624,)
+RFF kernel parameters:
+OMEGA: (624, 4)
+B: (624,)
+RFF kernel parameters:
+OMEGA: (624, 4)
+B: (624,)
+    D=  624  m=  2496  RMSE=0.0002 ± 0.0001
+RFF kernel parameters:
+OMEGA: (1131, 4)
+B: (1131,)
+RFF kernel parameters:
+OMEGA: (1131, 4)
+B: (1131,)
+RFF kernel parameters:
+OMEGA: (1131, 4)
+B: (1131,)
+    D= 1131  m=  4524  RMSE=0.0000 ± 0.0000
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+    D= 2048  m=  8192  RMSE=0.0000 ± 0.0000
+  → slope = -2.594  (theory -0.50)
+
+  [n_mc=5, d_min=8]
+  [Q*] Vectorised MC rollouts: m=8192, n_mc=5 …
+  [Q*]   action 0 done, Q range [1.00, 89.89]
+  [Q*]   action 1 done, Q range [1.00, 93.44]
+  [Q*] Done. Q* range: [1.000, 93.436]
+  [Q*] Q_star saved → results/ablation/Q_star_m8192_nmc5.npz
+  [Q*] Cache anchor mismatch – recomputing …
+  [Q*] Vectorised MC rollouts: m=400, n_mc=5 …
+  [Q*]   action 0 done, Q range [1.00, 73.20]
+  [Q*]   action 1 done, Q range [1.00, 87.26]
+  [Q*] Done. Q* range: [1.000, 87.259]
+  [Q*] Q_star saved → results/ablation/Q_star_m400_nmc5.npz
+RFF kernel parameters:
+OMEGA: (8, 4)
+B: (8,)
+RFF kernel parameters:
+OMEGA: (8, 4)
+B: (8,)
+RFF kernel parameters:
+OMEGA: (8, 4)
+B: (8,)
+    D=    8  m=    32  RMSE=52.6508 ± 4.7808
+RFF kernel parameters:
+OMEGA: (18, 4)
+B: (18,)
+RFF kernel parameters:
+OMEGA: (18, 4)
+B: (18,)
+RFF kernel parameters:
+OMEGA: (18, 4)
+B: (18,)
+    D=   18  m=    72  RMSE=100.7811 ± 10.5490
+RFF kernel parameters:
+OMEGA: (39, 4)
+B: (39,)
+RFF kernel parameters:
+OMEGA: (39, 4)
+B: (39,)
+RFF kernel parameters:
+OMEGA: (39, 4)
+B: (39,)
+    D=   39  m=   156  RMSE=27.4899 ± 3.7834
+RFF kernel parameters:
+OMEGA: (86, 4)
+B: (86,)
+RFF kernel parameters:
+OMEGA: (86, 4)
+B: (86,)
+RFF kernel parameters:
+OMEGA: (86, 4)
+B: (86,)
+    D=   86  m=   344  RMSE=38.5936 ± 4.1299
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+    D=  190  m=   760  RMSE=11.2721 ± 1.5398
+RFF kernel parameters:
+OMEGA: (420, 4)
+B: (420,)
+RFF kernel parameters:
+OMEGA: (420, 4)
+B: (420,)
+RFF kernel parameters:
+OMEGA: (420, 4)
+B: (420,)
+    D=  420  m=  1680  RMSE=8.2726 ± 0.2064
+RFF kernel parameters:
+OMEGA: (927, 4)
+B: (927,)
+RFF kernel parameters:
+OMEGA: (927, 4)
+B: (927,)
+RFF kernel parameters:
+OMEGA: (927, 4)
+B: (927,)
+    D=  927  m=  3708  RMSE=6.1224 ± 0.1100
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+    D= 2048  m=  8192  RMSE=5.6979 ± 0.0763
+  → slope = -0.517  (theory -0.50)
+
+  [n_mc=5, d_min=16]
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m8192_nmc5.npz)
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m400_nmc5.npz)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+    D=   16  m=    64  RMSE=93.6420 ± 8.0713
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+    D=   32  m=   128  RMSE=34.9785 ± 10.5863
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+    D=   64  m=   256  RMSE=43.2621 ± 7.8785
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    D=  128  m=   512  RMSE=35.1039 ± 8.3540
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    D=  256  m=  1024  RMSE=10.0251 ± 0.1812
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    D=  512  m=  2048  RMSE=7.5620 ± 0.2302
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+    D= 1024  m=  4096  RMSE=5.9916 ± 0.0623
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+    D= 2048  m=  8192  RMSE=5.6979 ± 0.0763
+  → slope = -0.599  (theory -0.50)
+
+  [n_mc=5, d_min=32]
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m8192_nmc5.npz)
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m400_nmc5.npz)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+    D=   32  m=   128  RMSE=34.9785 ± 10.5863
+RFF kernel parameters:
+OMEGA: (58, 4)
+B: (58,)
+RFF kernel parameters:
+OMEGA: (58, 4)
+B: (58,)
+RFF kernel parameters:
+OMEGA: (58, 4)
+B: (58,)
+    D=   58  m=   232  RMSE=38.7256 ± 0.9159
+RFF kernel parameters:
+OMEGA: (105, 4)
+B: (105,)
+RFF kernel parameters:
+OMEGA: (105, 4)
+B: (105,)
+RFF kernel parameters:
+OMEGA: (105, 4)
+B: (105,)
+    D=  105  m=   420  RMSE=28.3726 ± 3.7662
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+    D=  190  m=   760  RMSE=11.2721 ± 1.5398
+RFF kernel parameters:
+OMEGA: (345, 4)
+B: (345,)
+RFF kernel parameters:
+OMEGA: (345, 4)
+B: (345,)
+RFF kernel parameters:
+OMEGA: (345, 4)
+B: (345,)
+    D=  345  m=  1380  RMSE=8.4822 ± 0.3408
+RFF kernel parameters:
+OMEGA: (624, 4)
+B: (624,)
+RFF kernel parameters:
+OMEGA: (624, 4)
+B: (624,)
+RFF kernel parameters:
+OMEGA: (624, 4)
+B: (624,)
+    D=  624  m=  2496  RMSE=7.2757 ± 0.3389
+RFF kernel parameters:
+OMEGA: (1131, 4)
+B: (1131,)
+RFF kernel parameters:
+OMEGA: (1131, 4)
+B: (1131,)
+RFF kernel parameters:
+OMEGA: (1131, 4)
+B: (1131,)
+    D= 1131  m=  4524  RMSE=5.9218 ± 0.0692
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+    D= 2048  m=  8192  RMSE=5.6979 ± 0.0763
+  → slope = -0.530  (theory -0.50)
+
+  [n_mc=30, d_min=8]
+  [Q*] Vectorised MC rollouts: m=8192, n_mc=30 …
+  [Q*]   action 0 done, Q range [1.00, 89.89]
+  [Q*]   action 1 done, Q range [1.00, 93.44]
+  [Q*] Done. Q* range: [1.000, 93.436]
+  [Q*] Q_star saved → results/ablation/Q_star_m8192_nmc30.npz
+  [Q*] Vectorised MC rollouts: m=400, n_mc=30 …
+  [Q*]   action 0 done, Q range [1.00, 73.20]
+  [Q*]   action 1 done, Q range [1.00, 87.26]
+  [Q*] Done. Q* range: [1.000, 87.259]
+  [Q*] Q_star saved → results/ablation/Q_star_m400_nmc30.npz
+RFF kernel parameters:
+OMEGA: (8, 4)
+B: (8,)
+RFF kernel parameters:
+OMEGA: (8, 4)
+B: (8,)
+RFF kernel parameters:
+OMEGA: (8, 4)
+B: (8,)
+    D=    8  m=    32  RMSE=52.6508 ± 4.7808
+RFF kernel parameters:
+OMEGA: (18, 4)
+B: (18,)
+RFF kernel parameters:
+OMEGA: (18, 4)
+B: (18,)
+RFF kernel parameters:
+OMEGA: (18, 4)
+B: (18,)
+    D=   18  m=    72  RMSE=100.7811 ± 10.5490
+RFF kernel parameters:
+OMEGA: (39, 4)
+B: (39,)
+RFF kernel parameters:
+OMEGA: (39, 4)
+B: (39,)
+RFF kernel parameters:
+OMEGA: (39, 4)
+B: (39,)
+    D=   39  m=   156  RMSE=27.4899 ± 3.7834
+RFF kernel parameters:
+OMEGA: (86, 4)
+B: (86,)
+RFF kernel parameters:
+OMEGA: (86, 4)
+B: (86,)
+RFF kernel parameters:
+OMEGA: (86, 4)
+B: (86,)
+    D=   86  m=   344  RMSE=38.5936 ± 4.1299
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+    D=  190  m=   760  RMSE=11.2721 ± 1.5398
+RFF kernel parameters:
+OMEGA: (420, 4)
+B: (420,)
+RFF kernel parameters:
+OMEGA: (420, 4)
+B: (420,)
+RFF kernel parameters:
+OMEGA: (420, 4)
+B: (420,)
+    D=  420  m=  1680  RMSE=8.2726 ± 0.2064
+RFF kernel parameters:
+OMEGA: (927, 4)
+B: (927,)
+RFF kernel parameters:
+OMEGA: (927, 4)
+B: (927,)
+RFF kernel parameters:
+OMEGA: (927, 4)
+B: (927,)
+    D=  927  m=  3708  RMSE=6.1224 ± 0.1100
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+    D= 2048  m=  8192  RMSE=5.6979 ± 0.0763
+  → slope = -0.517  (theory -0.50)
+
+  [n_mc=30, d_min=16]
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m8192_nmc30.npz)
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m400_nmc30.npz)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+    D=   16  m=    64  RMSE=93.6420 ± 8.0713
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+    D=   32  m=   128  RMSE=34.9785 ± 10.5863
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+    D=   64  m=   256  RMSE=43.2621 ± 7.8785
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    D=  128  m=   512  RMSE=35.1039 ± 8.3540
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    D=  256  m=  1024  RMSE=10.0251 ± 0.1812
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    D=  512  m=  2048  RMSE=7.5620 ± 0.2302
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+    D= 1024  m=  4096  RMSE=5.9916 ± 0.0623
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+    D= 2048  m=  8192  RMSE=5.6979 ± 0.0763
+  → slope = -0.599  (theory -0.50)
+
+  [n_mc=30, d_min=32]
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m8192_nmc30.npz)
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m400_nmc30.npz)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+    D=   32  m=   128  RMSE=34.9785 ± 10.5863
+RFF kernel parameters:
+OMEGA: (58, 4)
+B: (58,)
+RFF kernel parameters:
+OMEGA: (58, 4)
+B: (58,)
+RFF kernel parameters:
+OMEGA: (58, 4)
+B: (58,)
+    D=   58  m=   232  RMSE=38.7256 ± 0.9159
+RFF kernel parameters:
+OMEGA: (105, 4)
+B: (105,)
+RFF kernel parameters:
+OMEGA: (105, 4)
+B: (105,)
+RFF kernel parameters:
+OMEGA: (105, 4)
+B: (105,)
+    D=  105  m=   420  RMSE=28.3726 ± 3.7662
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+RFF kernel parameters:
+OMEGA: (190, 4)
+B: (190,)
+    D=  190  m=   760  RMSE=11.2721 ± 1.5398
+RFF kernel parameters:
+OMEGA: (345, 4)
+B: (345,)
+RFF kernel parameters:
+OMEGA: (345, 4)
+B: (345,)
+RFF kernel parameters:
+OMEGA: (345, 4)
+B: (345,)
+    D=  345  m=  1380  RMSE=8.4822 ± 0.3408
+RFF kernel parameters:
+OMEGA: (624, 4)
+B: (624,)
+RFF kernel parameters:
+OMEGA: (624, 4)
+B: (624,)
+RFF kernel parameters:
+OMEGA: (624, 4)
+B: (624,)
+    D=  624  m=  2496  RMSE=7.2757 ± 0.3389
+RFF kernel parameters:
+OMEGA: (1131, 4)
+B: (1131,)
+RFF kernel parameters:
+OMEGA: (1131, 4)
+B: (1131,)
+RFF kernel parameters:
+OMEGA: (1131, 4)
+B: (1131,)
+    D= 1131  m=  4524  RMSE=5.9218 ± 0.0692
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+    D= 2048  m=  8192  RMSE=5.6979 ± 0.0763
+  → slope = -0.530  (theory -0.50)
+
+============================================================
+Searching A2 (Vary m/D) configurations …
+============================================================
+
+  [n_mc=ref, D=128]
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=   13  m/D=0.10  RMSE=3.0827 ± 1.0096
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=   26  m/D=0.20  RMSE=0.8589 ± 0.2090
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=   64  m/D=0.50  RMSE=0.5088 ± 0.2494
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=  128  m/D=1.00  RMSE=0.1202 ± 0.0534
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=  256  m/D=2.00  RMSE=0.0352 ± 0.0166
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=  512  m/D=4.00  RMSE=0.0165 ± 0.0053
+  → under-param mean=1.4835, over-param mean=0.0573, ratio=25.87×  (want > 3)
+
+  [n_mc=ref, D=256]
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=   26  m/D=0.10  RMSE=0.3932 ± 0.2028
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=   51  m/D=0.20  RMSE=0.2469 ± 0.1653
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=  128  m/D=0.50  RMSE=0.0569 ± 0.0267
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=  256  m/D=1.00  RMSE=0.0093 ± 0.0024
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=  512  m/D=2.00  RMSE=0.0076 ± 0.0009
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m= 1024  m/D=4.00  RMSE=0.0013 ± 0.0004
+  → under-param mean=0.2323, over-param mean=0.0061, ratio=38.24×  (want > 3)
+
+  [n_mc=ref, D=512]
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m=   51  m/D=0.10  RMSE=0.3112 ± 0.1788
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m=  102  m/D=0.20  RMSE=0.0477 ± 0.0345
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m=  256  m/D=0.50  RMSE=0.0055 ± 0.0020
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m=  512  m/D=1.00  RMSE=0.0017 ± 0.0003
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m= 1024  m/D=2.00  RMSE=0.0004 ± 0.0002
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m= 2048  m/D=4.00  RMSE=0.0002 ± 0.0001
+  → under-param mean=0.1215, over-param mean=0.0008, ratio=157.90×  (want > 3)
+
+  [n_mc=5, D=128]
+  [Q*] Vectorised MC rollouts: m=512, n_mc=5 …
+  [Q*]   action 0 done, Q range [1.00, 89.37]
+  [Q*]   action 1 done, Q range [1.00, 89.26]
+  [Q*] Done. Q* range: [1.000, 89.367]
+  [Q*] Q_star saved → results/ablation/Q_star_m512_nmc5.npz
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m400_nmc5.npz)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=   13  m/D=0.10  RMSE=3177.1222 ± 364.1564
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=   26  m/D=0.20  RMSE=2389.0088 ± 1594.0878
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=   64  m/D=0.50  RMSE=1111.7311 ± 563.1673
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=  128  m/D=1.00  RMSE=187.3994 ± 31.4458
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=  256  m/D=2.00  RMSE=44.1160 ± 4.7168
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=  512  m/D=4.00  RMSE=35.1039 ± 8.3540
+  → under-param mean=2225.9540, over-param mean=88.8731, ratio=25.05×  (want > 3)
+
+  [n_mc=5, D=256]
+  [Q*] Vectorised MC rollouts: m=1024, n_mc=5 …
+  [Q*]   action 0 done, Q range [1.00, 89.37]
+  [Q*]   action 1 done, Q range [1.00, 89.26]
+  [Q*] Done. Q* range: [1.000, 89.367]
+  [Q*] Q_star saved → results/ablation/Q_star_m1024_nmc5.npz
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m400_nmc5.npz)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=   26  m/D=0.10  RMSE=2240.4951 ± 1031.7479
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=   51  m/D=0.20  RMSE=1258.2277 ± 307.6072
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=  128  m/D=0.50  RMSE=304.1720 ± 1.7566
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=  256  m/D=1.00  RMSE=74.5713 ± 13.7051
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=  512  m/D=2.00  RMSE=43.0519 ± 1.2480
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m= 1024  m/D=4.00  RMSE=10.0251 ± 0.1812
+  → under-param mean=1267.6316, over-param mean=42.5494, ratio=29.79×  (want > 3)
+
+  [n_mc=5, D=512]
+  [Q*] Vectorised MC rollouts: m=2048, n_mc=5 …
+  [Q*]   action 0 done, Q range [1.00, 89.37]
+  [Q*]   action 1 done, Q range [1.00, 89.26]
+  [Q*] Done. Q* range: [1.000, 89.367]
+  [Q*] Q_star saved → results/ablation/Q_star_m2048_nmc5.npz
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m400_nmc5.npz)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m=   51  m/D=0.10  RMSE=1517.6217 ± 231.2123
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m=  102  m/D=0.20  RMSE=1106.6252 ± 207.8183
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m=  256  m/D=0.50  RMSE=98.8580 ± 13.2125
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m=  512  m/D=1.00  RMSE=55.5759 ± 6.7741
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m= 1024  m/D=2.00  RMSE=10.5140 ± 0.0824
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m= 2048  m/D=4.00  RMSE=7.5620 ± 0.2302
+  → under-param mean=907.7017, over-param mean=24.5506, ratio=36.97×  (want > 3)
+
+  [n_mc=30, D=128]
+  [Q*] Vectorised MC rollouts: m=512, n_mc=30 …
+  [Q*]   action 0 done, Q range [1.00, 89.37]
+  [Q*]   action 1 done, Q range [1.00, 89.26]
+  [Q*] Done. Q* range: [1.000, 89.367]
+  [Q*] Q_star saved → results/ablation/Q_star_m512_nmc30.npz
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m400_nmc30.npz)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=   13  m/D=0.10  RMSE=3177.1222 ± 364.1564
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=   26  m/D=0.20  RMSE=2389.0088 ± 1594.0878
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=   64  m/D=0.50  RMSE=1111.7311 ± 563.1673
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=  128  m/D=1.00  RMSE=187.3994 ± 31.4458
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=  256  m/D=2.00  RMSE=44.1160 ± 4.7168
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+    m=  512  m/D=4.00  RMSE=35.1039 ± 8.3540
+  → under-param mean=2225.9540, over-param mean=88.8731, ratio=25.05×  (want > 3)
+
+  [n_mc=30, D=256]
+  [Q*] Vectorised MC rollouts: m=1024, n_mc=30 …
+  [Q*]   action 0 done, Q range [1.00, 89.37]
+  [Q*]   action 1 done, Q range [1.00, 89.26]
+  [Q*] Done. Q* range: [1.000, 89.367]
+  [Q*] Q_star saved → results/ablation/Q_star_m1024_nmc30.npz
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m400_nmc30.npz)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=   26  m/D=0.10  RMSE=2240.4951 ± 1031.7479
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=   51  m/D=0.20  RMSE=1258.2277 ± 307.6072
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=  128  m/D=0.50  RMSE=304.1720 ± 1.7566
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=  256  m/D=1.00  RMSE=74.5713 ± 13.7051
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m=  512  m/D=2.00  RMSE=43.0519 ± 1.2480
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+    m= 1024  m/D=4.00  RMSE=10.0251 ± 0.1812
+  → under-param mean=1267.6316, over-param mean=42.5494, ratio=29.79×  (want > 3)
+
+  [n_mc=30, D=512]
+  [Q*] Vectorised MC rollouts: m=2048, n_mc=30 …
+  [Q*]   action 0 done, Q range [1.00, 89.37]
+  [Q*]   action 1 done, Q range [1.00, 89.26]
+  [Q*] Done. Q* range: [1.000, 89.367]
+  [Q*] Q_star saved → results/ablation/Q_star_m2048_nmc30.npz
+  [Q*] Q_star loaded from cache (results/ablation/Q_star_m400_nmc30.npz)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m=   51  m/D=0.10  RMSE=1517.6217 ± 231.2123
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m=  102  m/D=0.20  RMSE=1106.6252 ± 207.8183
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m=  256  m/D=0.50  RMSE=98.8580 ± 13.2125
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m=  512  m/D=1.00  RMSE=55.5759 ± 6.7741
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m= 1024  m/D=2.00  RMSE=10.5140 ± 0.0824
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+    m= 2048  m/D=4.00  RMSE=7.5620 ± 0.2302
+  → under-param mean=907.7017, over-param mean=24.5506, ratio=36.97×  (want > 3)
+
+============================================================
+RESULTS SUMMARY
+============================================================
+
+A1 (slope, want < -0.15):
+  n_mc=ref, d_min=16                        slope=-2.640  PASS ✓
+  n_mc=ref, d_min=32                        slope=-2.594  PASS ✓
+  n_mc=ref, d_min=8                         slope=-2.555  PASS ✓
+  n_mc=5, d_min=16                          slope=-0.599  PASS ✓
+  n_mc=30, d_min=16                         slope=-0.599  PASS ✓
+  n_mc=5, d_min=32                          slope=-0.530  PASS ✓
+  n_mc=30, d_min=32                         slope=-0.530  PASS ✓
+  n_mc=30, d_min=8                          slope=-0.517  PASS ✓
+  n_mc=5, d_min=8                           slope=-0.517  PASS ✓
+
+A2 (transition ratio, want > 3):
+  n_mc=ref, D=512                           ratio= 157.9×  PASS ✓
+  n_mc=ref, D=256                           ratio=  38.2×  PASS ✓
+  n_mc=30, D=512                            ratio=  37.0×  PASS ✓
+  n_mc=5, D=512                             ratio=  37.0×  PASS ✓
+  n_mc=5, D=256                             ratio=  29.8×  PASS ✓
+  n_mc=30, D=256                            ratio=  29.8×  PASS ✓
+  n_mc=ref, D=128                           ratio=  25.9×  PASS ✓
+  n_mc=30, D=128                            ratio=  25.0×  PASS ✓
+  n_mc=5, D=128                             ratio=  25.0×  PASS ✓
+
+============================================================
+RECOMMENDATION
+============================================================
+
+  Best A1: n_mc=ref, d_min=16
+    slope = -2.640
+    Command: python ablation_experiments.py --metric Q_error --which A1 \
+      --d_grid 16 32 64 128 256 512 1024 2048 \
+      # use n_mc=0 (reference Q) — see search_ablation_hparams.py
+
+  Best A2: n_mc=ref, D=512
+    transition ratio = 157.9×
+    Command: python ablation_experiments.py --metric Q_error --which A2 \
+      --d_fixed 512 --m_grid 51 102 256 512 1024 2048 \
+      # use n_mc=0 (reference Q) — see search_ablation_hparams.py
+
+Generating figures …
+  Saved: results/figures/hparam_search_a1.{pdf,png}
+  Saved: results/figures/hparam_search_a2.{pdf,png}
+  Saved: results/figures/ablation_best_config.{pdf,png}
+  Search results saved: results/ablation/hparam_search_ablation/search_results.json
+
+Total time: 193.4s

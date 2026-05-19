@@ -1,0 +1,535 @@
+{
+  "source_log": "/home/yuchen/projects/FedQHD/logs/main_table_3seed_variance_nohup.log",
+  "records": [
+    {
+      "env": "Acrobot",
+      "condition": "hetero",
+      "method_key": "distillation_dqn_hetero",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        1253.93,
+        1024.22,
+        1276.25
+      ],
+      "mean_s": 1184.8,
+      "std_s": 139.51343268660548,
+      "variance_s2": 19463.9979,
+      "n_seeds": 3
+    },
+    {
+      "env": "Acrobot",
+      "condition": "hetero",
+      "method_key": "fedqhd_hetero",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        111.67,
+        111.65,
+        110.74
+      ],
+      "mean_s": 111.35333333333334,
+      "std_s": 0.5312563725108045,
+      "variance_s2": 0.2822333333333387,
+      "n_seeds": 3
+    },
+    {
+      "env": "Acrobot",
+      "condition": "hetero",
+      "method_key": "independent_qhd_hetero",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        298.16,
+        298.94,
+        299.61
+      ],
+      "mean_s": 298.90333333333336,
+      "std_s": 0.7256950691118993,
+      "variance_s2": 0.5266333333333243,
+      "n_seeds": 3
+    },
+    {
+      "env": "Acrobot",
+      "condition": "hetero",
+      "method_key": "oracle_dqn_hetero",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        4104.89,
+        4823.31,
+        4980.16
+      ],
+      "mean_s": 4636.12,
+      "std_s": 466.69525956452554,
+      "variance_s2": 217804.46529999987,
+      "n_seeds": 3
+    },
+    {
+      "env": "Acrobot",
+      "condition": "hetero",
+      "method_key": "oracle_qhd_hetero",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        371.75,
+        378.24,
+        376.8
+      ],
+      "mean_s": 375.5966666666667,
+      "std_s": 3.408230234789512,
+      "variance_s2": 11.616033333333371,
+      "n_seeds": 3
+    },
+    {
+      "env": "Acrobot",
+      "condition": "hetero",
+      "method_key": "truncate_fedavg_qhd_hetero",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        142.67,
+        113.16,
+        117.5
+      ],
+      "mean_s": 124.44333333333333,
+      "std_s": 15.933217921478798,
+      "variance_s2": 253.86743333333314,
+      "n_seeds": 3
+    },
+    {
+      "env": "Acrobot",
+      "condition": "homo",
+      "method_key": "distillation_dqn",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        1288.91,
+        1289.6,
+        1302.74
+      ],
+      "mean_s": 1293.75,
+      "std_s": 7.793208581835858,
+      "variance_s2": 60.73410000000006,
+      "n_seeds": 3
+    },
+    {
+      "env": "Acrobot",
+      "condition": "homo",
+      "method_key": "fedavg_dqn",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        1393.14,
+        1397.84,
+        1320.34
+      ],
+      "mean_s": 1370.44,
+      "std_s": 43.45146717891128,
+      "variance_s2": 1888.030000000004,
+      "n_seeds": 3
+    },
+    {
+      "env": "Acrobot",
+      "condition": "homo",
+      "method_key": "fedqhd_homo",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        332.16,
+        337.28,
+        333.97
+      ],
+      "mean_s": 334.47,
+      "std_s": 2.5963628405906314,
+      "variance_s2": 6.741099999999852,
+      "n_seeds": 3
+    },
+    {
+      "env": "Acrobot",
+      "condition": "homo",
+      "method_key": "independent_qhd",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        583.52,
+        576.74,
+        574.73
+      ],
+      "mean_s": 578.33,
+      "std_s": 4.605659561886856,
+      "variance_s2": 21.212099999999825,
+      "n_seeds": 3
+    },
+    {
+      "env": "Acrobot",
+      "condition": "homo",
+      "method_key": "oracle_dqn",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        851.31,
+        839.19,
+        1038.46
+      ],
+      "mean_s": 909.6533333333333,
+      "std_s": 111.71433047435471,
+      "variance_s2": 12480.091633333337,
+      "n_seeds": 3
+    },
+    {
+      "env": "Acrobot",
+      "condition": "homo",
+      "method_key": "oracle_qhd",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        293.67,
+        295.16,
+        295.46
+      ],
+      "mean_s": 294.7633333333333,
+      "std_s": 0.9586622623913552,
+      "variance_s2": 0.9190333333333116,
+      "n_seeds": 3
+    },
+    {
+      "env": "Acrobot",
+      "condition": "homo",
+      "method_key": "truncate_fedavg_qhd",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        331.79,
+        333.67,
+        334.13
+      ],
+      "mean_s": 333.19666666666666,
+      "std_s": 1.239731153651189,
+      "variance_s2": 1.5369333333333077,
+      "n_seeds": 3
+    },
+    {
+      "env": "CartPole",
+      "condition": "hetero",
+      "method_key": "distillation_dqn_hetero",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        693.29,
+        526.45,
+        635.63
+      ],
+      "mean_s": 618.4566666666667,
+      "std_s": 84.7354054296864,
+      "variance_s2": 7180.088933333326,
+      "n_seeds": 3
+    },
+    {
+      "env": "CartPole",
+      "condition": "hetero",
+      "method_key": "oracle_dqn_hetero",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        3605.62,
+        4036.49,
+        3899.59
+      ],
+      "mean_s": 3847.233333333333,
+      "std_s": 220.1548424026447,
+      "variance_s2": 48468.154633333324,
+      "n_seeds": 3
+    },
+    {
+      "env": "CartPole",
+      "condition": "hetero",
+      "method_key": "oracle_qhd_hetero",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        320.12,
+        388.62,
+        390.54
+      ],
+      "mean_s": 366.4266666666667,
+      "std_s": 40.114238536127466,
+      "variance_s2": 1609.1521333333337,
+      "n_seeds": 3
+    },
+    {
+      "env": "CartPole",
+      "condition": "homo",
+      "method_key": "distillation_dqn",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        772.03,
+        702.7,
+        758.52
+      ],
+      "mean_s": 744.4166666666666,
+      "std_s": 36.75377849056244,
+      "variance_s2": 1350.8402333333304,
+      "n_seeds": 3
+    },
+    {
+      "env": "CartPole",
+      "condition": "homo",
+      "method_key": "oracle_dqn",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        537.47,
+        556.03,
+        516.8
+      ],
+      "mean_s": 536.7666666666667,
+      "std_s": 19.624454981816278,
+      "variance_s2": 385.11923333333374,
+      "n_seeds": 3
+    },
+    {
+      "env": "LunarLander",
+      "condition": "hetero",
+      "method_key": "independent_qhd_hetero",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        49.48,
+        49.64,
+        49.53
+      ],
+      "mean_s": 49.55,
+      "std_s": 0.081853527718726,
+      "variance_s2": 0.006700000000000247,
+      "n_seeds": 3
+    },
+    {
+      "env": "LunarLander",
+      "condition": "hetero",
+      "method_key": "truncate_fedavg_qhd_hetero",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        168.74,
+        172.36,
+        180.34
+      ],
+      "mean_s": 173.81333333333333,
+      "std_s": 5.934992277445127,
+      "variance_s2": 35.22413333333329,
+      "n_seeds": 3
+    },
+    {
+      "env": "LunarLander",
+      "condition": "homo",
+      "method_key": "distillation_dqn",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        2247.11,
+        1777.04,
+        1611.08
+      ],
+      "mean_s": 1878.41,
+      "std_s": 329.90975720642166,
+      "variance_s2": 108840.44790000007,
+      "n_seeds": 3
+    },
+    {
+      "env": "LunarLander",
+      "condition": "homo",
+      "method_key": "fedavg_dqn",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        2205.82,
+        2174.81,
+        2250.24
+      ],
+      "mean_s": 2210.29,
+      "std_s": 37.913149433936404,
+      "variance_s2": 1437.4068999999924,
+      "n_seeds": 3
+    },
+    {
+      "env": "LunarLander",
+      "condition": "homo",
+      "method_key": "fedqhd_homo",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        928.51,
+        941.29,
+        920.66
+      ],
+      "mean_s": 930.1533333333333,
+      "std_s": 10.412714983775041,
+      "variance_s2": 108.42463333333325,
+      "n_seeds": 3
+    },
+    {
+      "env": "LunarLander",
+      "condition": "homo",
+      "method_key": "independent_qhd",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        169.95,
+        169.34,
+        168.74
+      ],
+      "mean_s": 169.34333333333333,
+      "std_s": 0.6050068870131322,
+      "variance_s2": 0.36603333333332094,
+      "n_seeds": 3
+    },
+    {
+      "env": "LunarLander",
+      "condition": "homo",
+      "method_key": "oracle_dqn",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        1492.47,
+        1424.9,
+        1565.64
+      ],
+      "mean_s": 1494.3366666666668,
+      "std_s": 70.38856606959212,
+      "variance_s2": 4954.550233333334,
+      "n_seeds": 3
+    },
+    {
+      "env": "LunarLander",
+      "condition": "homo",
+      "method_key": "oracle_qhd",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        927.25,
+        899.99,
+        930.07
+      ],
+      "mean_s": 919.1033333333334,
+      "std_s": 16.612577564403836,
+      "variance_s2": 275.97773333333373,
+      "n_seeds": 3
+    },
+    {
+      "env": "LunarLander",
+      "condition": "homo",
+      "method_key": "truncate_fedavg_qhd",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "seed_times_s": [
+        940.55,
+        933.24,
+        922.46
+      ],
+      "mean_s": 932.0833333333334,
+      "std_s": 9.100298529901787,
+      "variance_s2": 82.8154333333326,
+      "n_seeds": 3
+    }
+  ],
+  "unmatched_starts": [
+    {
+      "env": "LunarLander",
+      "condition": "hetero",
+      "method_key": "distillation_dqn_hetero",
+      "seed": 42,
+      "log_line": 56157
+    },
+    {
+      "env": "LunarLander",
+      "condition": "hetero",
+      "method_key": "fedqhd_hetero",
+      "seed": 42,
+      "log_line": 56803
+    }
+  ],
+  "unmatched_dones": []
+}

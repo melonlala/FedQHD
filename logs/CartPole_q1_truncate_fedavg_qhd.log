@@ -1,0 +1,42 @@
+
+======================================================================
+METHOD  : Truncate FedAvg-QHD
+ENV     : CartPole   QUESTION: Q1
+EPISODES: 600   AGENTS: 5   RUNS: 1
+QHD     : lr=0.2  discount=0.95  eps=1.0  decay=0.95
+DQN     : lr=0.001  agg_interval=25  discount=0.99  eps=1.0  decay=0.995
+OUTPUT  : results/CartPole/q1_homogeneous
+======================================================================
+
+
+============================================================
+Training Truncate/Pad FedAvg-QHD (homogeneous)
+============================================================
+RFF kernel parameters:
+OMEGA: (10000, 4)
+B: (10000,)
+RFF kernel parameters:
+OMEGA: (10000, 4)
+B: (10000,)
+RFF kernel parameters:
+OMEGA: (10000, 4)
+B: (10000,)
+RFF kernel parameters:
+OMEGA: (10000, 4)
+B: (10000,)
+RFF kernel parameters:
+OMEGA: (10000, 4)
+B: (10000,)
+Truncate FedAvg-QHD completed in 209.78s
+Final avg reward (last 100 eps): 193.17
+Result saved     → results/CartPole/q1_homogeneous/Truncate_FedAvg-QHD.json
+Summary updated  → results/CartPole/q1_homogeneous/summary.json
+Parameters saved → results/CartPole/q1_homogeneous/params_truncate_fedavg_qhd.json
+
+======================================================================
+DONE
+  Final avg reward : 193.17
+  Training time    : 209.78s
+  Output dir       : results/CartPole/q1_homogeneous
+======================================================================
+

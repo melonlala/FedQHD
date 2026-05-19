@@ -18,20 +18,45 @@ Q_i(s,a) \;\triangleq\; \Re\!\left(\langle \Phi_i(s),\,\mathbf{w}_{i,a}\rangle\r
 Stacking parameters across actions yields $W_i [\mathbf{w}_{i,a}]_{a\in\mathcal{A}}\in\mathbb{K}^{D_i\times|\mathcal{A}|}$ and $Q_i(s,\cdot)=\Re(\Phi_i(s)^{\mathrm{H}} W_i)$. Although the encoder $\Phi_i(\cdot)$ may be highly nonlinear in $s$,
 the model is \emph{linear in parameters}. This linearity is the key structural property we will exploit for federated learning.
 
-Given a replayed transition $(s,a,r,s')$ and a stabilized target estimate (e.g., Double Q-learning with a delayed target copy $Q_i^{-}$), define
-\begin{equation}
-y = r + \gamma\, Q_i^{-}\!\left(s',\,\arg\max_{a'\in\mathcal{A}} Q_i(s',a')\right).
-\label{eq:target}
-\end{equation}
-QHD performs a lightweight rank-one update
-\begin{equation}
-\mathbf{w}_{i,a} \leftarrow \mathbf{w}_{i,a} + \eta\,\big(y - Q_i(s,a)\big)\,\Phi_i(s),
-\label{eq:qhd_update}
-\end{equation}
-where $\eta>0$ is a step size...
 
-{\color{red} explain the updates}
+To stabilize training, QHD uses a delayed target model
+$Q_i^-$ with parameters $W_i^-$, copied from $W_i$ every
+$\tau$ episodes \citep{ni2022qhd}. Given a replayed transition
+$(s,a,r,s')$ sampled from the local replay buffer, the
+bootstrapped TD target is:
+\begin{equation}
+    y
+    \;=\;
+    r \;+\; \gamma\,
+    \Re\!\Bigl(\Phi_i(s')^{\mathrm{H}}
+    \mathbf{w}^-_{i,\,a^*}\Bigr),
+    \qquad
+    a^* = \arg\max_{a'\in\mathcal{A}} Q_i(s',a'),
+    \label{eq:target}
+\end{equation}
+where the greedy action $a^*$ is selected by the \emph{current}
+model $W_i$ while its value is evaluated by the \emph{delayed}
+model $W_i^-$. This decoupling prevents the overestimation
+bias inherent in single-model Q-learning.
 
+
+The update in \eqref{eq:qhd_update} is a semi-gradient
+stochastic approximation to the Bellman optimality equation.
+Because the model is linear in parameters,
+the gradient of $Q_i(s,a)$ with respect to $\mathbf w_{i,a}$ is
+$\nabla_{\mathbf w_{i,a}} Q_i(s,a) = \Phi_i(s)$.
+Therefore, minimizing the squared TD error
+$\tfrac12 (y - Q_i(s,a))^2$
+by stochastic gradient descent yields:
+\begin{equation}
+    \mathbf{w}_{i,a}
+    \;\leftarrow\;
+    \mathbf{w}_{i,a}
+    \;+\;
+    \eta\,\delta\,\Phi_i(s),
+    \label{eq:qhd_update}
+\end{equation}
+where $\delta = y - Q_i(s,a)$
 
 
 
@@ -84,10 +109,9 @@ where $\eta>0$ is a step size...
 
 
 \subsection{Federated value learning as a global objective}
-We consider $N$ agents learning concurrently, each interacting with its own environment and collecting a private replay buffer $\mathcal{D}_i$. ... 
+We consider $N$ agents learning concurrently, each with a private replay buffer $\mathcal{D}_i$.
 
-
-Federated reinforcement learning seeks to aggregate local value knowledge into a global representation without centralizing data, data sharing is impossible due to privacy, communication limitations, latency, etc. 
+Federated reinforcement learning seeks to aggregate local value knowledge into a global representation without centralizing data, as data sharing is impossible due to privacy constraints, communication limitations, or latency.
 
 
 
@@ -105,10 +129,7 @@ Q^{\mathrm{glob}}(s,a) \;=\; \sum_{i=1}^N \pi_i\,Q_i(s,a) \qquad (\mu\text{-a.e.
 \label{eq:qglob_avg}
 \end{equation}
 
-{\color{red} introduce the general problem of function space Q Learning, which can be implied to tabular or continuous state-action setting, to linear or non-linear paprameter averaging in reinforcement learning methond. claim the obstacless}
-
-
-For TABLUAR, THE solution on top is like hsaring their Q-table, which leads to the exact function-sapce soltuions knowln asn Federated Q-Learning.  FEDERATED AVERAGING HOLDS THE EXACT FUNCTION SPACE, SIMILAR TO A LINEAR FORM LIKE QHD. BUT, FOR NONLINEAR, THEY RELY ON THE HEURISTIC PARAMETER AVERAGING. 
+The function-space synchronization objective in \eqref{eq:fed_sync} unifies several classical cases. In the tabular setting, sharing Q-tables achieves exact function-space agreement. In the linear-parameterization setting—of which QHD is the primary instance—parameter averaging coincides exactly with function-space averaging, enabling efficient closed-form federation. For nonlinear approximators such as deep Q-networks, however, parameter averaging is a heuristic that operates in weight space rather than function space, and is undefined when clients use different architectures or dimensions.
 
 
 
@@ -149,7 +170,16 @@ W^{\mathrm{glob}} = \sum_{i=1}^N \pi_i W_i.
 \label{eq:exact_avg}
 \end{equation}
 
-{\color{red} remind that $\Sigma_\mu$ doesn't explicitly appear in solution but involves the raw data sharing with homo encoders}
+Although the quadratic objective in
+\eqref{eq:fed_quad_cov} depends on the feature covariance
+$\Sigma_\mu = \mathbb E_\mu[\Phi(s)\Phi(s)^{\mathrm H}]$,
+the minimizer does not.
+Thus, in the homogeneous linear case,
+function-space averaging coincides exactly with
+parameter averaging,
+independently of the anchor distribution $\mu$.
+Importantly, the server never needs access to
+raw state samples or $\Sigma_\mu$ itself.
 
 
 \subsection{Fed-QHD with Heterogeneous Encoders}
@@ -166,8 +196,6 @@ $Q^{\mathrm{glob}}_{\mathrm{ref}}=\sum_{i=1}^N \pi_i\, Q^{\mathrm{ref}}_i, \sum_
 which is the unique minimizer of the anchor consensus objective
 $\min_{Q\in\mathbb{R}^{m\times|\mathcal{A}|}} \sum_i \pi_i \|Q^{\mathrm{ref}}_i - Q\|_F^2$.
 
-
-DEFINE AN ANCHOR FOR CLIENT I
 
 For each client $i$, define the \emph{anchor feature matrix} by stacking encoded anchor states:
 \begin{equation}
@@ -188,8 +216,6 @@ Q^{\mathrm{ref}}_i = \Re(X_i W_i),
 \label{eq:anchor_q_matrix_form}
 \end{equation}
 
-THEN WRITE THE REGULARIZED NONLINEAR EQUATIONS
-
 We seek a client-side parameter matrix $W^{\mathrm{glob}}_i\in\mathbb{K}^{D_i\times|\mathcal{A}|}$ that enables client $i$ to reproduce the global teacher $Q^{\mathrm{glob}}_{\mathrm{ref}}$ as closely as possible using its own encoder $\Phi_i$. This leads to the \emph{regularized least-squares compilation problem}:
 \begin{equation}
 W^{\mathrm{glob}}_i \;=\; \arg\min_{W \in \mathbb{K}^{D_i \times |\mathcal{A}|}} 
@@ -199,8 +225,6 @@ W^{\mathrm{glob}}_i \;=\; \arg\min_{W \in \mathbb{K}^{D_i \times |\mathcal{A}|}}
 \end{equation}
 where $\lambda \ge 0$ is a regularization parameter that controls model complexity and stabilizes the solution when the anchor set is small ($m < D_i$) or when $X_i$ is ill-conditioned.
 
-
-AND THE CONVEX SOLUTIUON FOR IT. 
 
 Problem~\eqref{eq:regularized_compilation} is a convex quadratic optimization problem in $W$ with a unique global minimizer. Taking the gradient with respect to $W$ and setting it to zero yields the regularized normal equations:
 \begin{equation}
@@ -222,11 +246,87 @@ provided $\mathrm{rank}(X_i) = \min(m, D_i)$.
 
 
 
-SEE IF YOU CAN CONNECT HERE WITH ONE EQUATION TO GRAM MATRIX
+Applying the Woodbury identity to
+\eqref{eq:ridge_solution} yields the equivalent
+dual representation:
+\begin{equation}
+W^{\mathrm{glob}}_i
+=
+X_i^{\mathrm H}
+(G_i + \lambda I_m)^{-1}
+Q^{\mathrm{glob}}_{\mathrm{ref}},
+\qquad
+G_i = X_i X_i^{\mathrm H}.
+\label{eq:dual_ridge}
+\end{equation}
+Thus, compilation depends only on the
+$m \times m$ Gram matrix $G_i$,
+whose entries are
+$[G_i]_{jk}
+=
+\langle \Phi_i(s_j), \Phi_i(s_k)\rangle$.
+This reveals that heterogeneous FedQHD
+operates as a kernel ridge regression step
+on the anchor set.
 
-
-PROCESS: CLIENT SHARE THEIR DATA, THE SERVER COMPUTES THE Q GLOBAL, AND RETURN THE .... 
-
+\begin{figure*}[t]
+\begin{minipage}[t]{0.48\textwidth}
+\begin{algorithm}[H]
+\caption{FedQHD: Homogeneous Protocol}
+\label{alg:fedqhd_shared}
+\begin{algorithmic}[1]
+\STATE \textbf{Init:} shared encoder
+       $\Phi:\mathcal{S}\to\mathbb{K}^D$;\;
+       $W^{\mathrm{glob}}_0 = \mathbf{0}$
+\FOR{round $k = 0, \ldots, T\!-\!1$}
+    \STATE Broadcast $W^{\mathrm{glob}}_k$ to all clients
+    \FOR{client $i = 1,\ldots,N$ \textbf{in parallel}}
+        \STATE $W_i, W_i^- \leftarrow W^{\mathrm{glob}}_k$
+        \FOR{$e = 1,\ldots,K$}
+            \STATE Run QHD episode
+                   \eqref{eq:qhd_update}--\eqref{eq:target}
+            \STATE Sync $W_i^-$ every $\tau$ eps; decay $\epsilon$
+        \ENDFOR
+        \STATE Upload $W_i$ to server
+    \ENDFOR
+    \STATE $W^{\mathrm{glob}}_{k+1} \leftarrow
+           \sum_{i} \pi_i W_i$
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\begin{algorithm}[H]
+\caption{FedQHD: Heterogeneous Protocol}
+\label{alg:fedqhd_heterogeneous}
+\begin{algorithmic}[1]
+\STATE \textbf{Init:} anchors
+       $\mathcal{S}_{\mathrm{ref}}\!=\!\{s_1,\ldots,s_m\}$;
+       each client $i$: encoder $\Phi_i$, $W_i\!=\!\mathbf{0}$
+\FOR{round $k = 0, \ldots, T\!-\!1$}
+    \FOR{client $i = 1,\ldots,N$ \textbf{in parallel}}
+        \STATE $W_i^- \leftarrow W_i$
+        \FOR{$e = 1,\ldots,K$}
+            \STATE Run QHD episode
+                   \eqref{eq:qhd_update}--\eqref{eq:target}
+            \STATE Sync $W_i^-$ every $\tau$ eps; decay $\epsilon$
+        \ENDFOR
+        \STATE Upload $Q^{\mathrm{ref}}_i\!=\!\Re(X_iW_i)$
+    \ENDFOR
+    \STATE \textbf{Server:}
+           $Q^{\mathrm{glob}}_{\mathrm{ref}} \leftarrow
+           \sum_{i} \pi_i Q^{\mathrm{ref}}_i$;
+    \FOR{client $i$ \textbf{in parallel}}
+        \STATE $W_i \leftarrow X_i^{\mathrm{H}}
+               (G_i\!+\!\lambda I)^{-1}
+               Q^{\mathrm{glob}}_{\mathrm{ref}}$ \eqref{eq:dual_ridge}
+    \ENDFOR
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+\end{minipage}
+\end{figure*}
 
 
 % While the shared encoder approach provides efficient aggregation through direct parameter
@@ -301,258 +401,806 @@ where $\theta_{ij}$ is the largest principal angle between the subspaces
 $\mathrm{col}(X_i)$ and $\mathrm{col}(X_j)$.
 \end{proposition}
 
-% \subsection{Federated Learning Protocol}
-% \label{subsec:federated_protocol}
 
-% With a shared encoder $\Phi$ across all agents, the linearity of HDC Q-functions in the
-% parameter space enables a simple and efficient federated aggregation strategy: direct
-% parameter averaging. This approach leverages the parameter-function equivalence property
-% (Theorem~\ref{thm:parameter_function_equivalence}), which guarantees that averaging
-% parameter vectors is equivalent to averaging Q-functions pointwise.
 
-% \subsection{Direct Parameter Averaging}
-% \label{subsec:federated_averaging}
-% FedQHD operates in synchronous communication rounds indexed by $k=0,1,2,\dots$. Each
-% round consists of three phases with $K$ local update steps, so the global iteration count and
-% round index are related by $t = kK + u$, where $u \in \{0,\dots,K-1\}$ denotes
-% the local step within round $k$.
 
-% \subsubsection{Broadcast}
-% The server maintains a global hypervector $\mathbf{M}_k$ and broadcasts it along with the
-% shared encoder $\Phi$ to all clients. Each client initializes its local parameter to $\mathbf{M}_k$.
+\subsection{Invisibility of the Projection Residual in Function Space}
+\label{subsec:residual_invisibility}
 
-% \subsubsection{Local Updates}
-% Agent $i$ executes $K$ on-policy HDC TD updates using the shared encoder $\Phi$,
-% generating
+In any heterogeneous federated learning system, aggregating models with
+mismatched representational capacity produces a projection residual: the
+component of the global teacher that falls outside a given client's
+function class. This residual is a universal structural artifact of model
+heterogeneity, arising whether the underlying approximators are linear,
+kernel-based, or neural. The central question is: \emph{does this
+residual propagate into the compiled model's predictions, or is it
+silently discarded?}
+
+The following theorem
+shows that the projection residual
+$R_{i,0} = (I - P_i)Q^{\mathrm{glob}}_{\mathrm{ref}}$ is
+\emph{completely invisible} to the compiled Q-function at every
+state---not just on the anchor set. The compiled solution
+$W^{\mathrm{glob}}_i(\lambda)$ encodes only the in-subspace component
+$P_i Q^{\mathrm{glob}}_{\mathrm{ref}}$, as if the residual had never
+existed.
+
+This has a dual interpretation:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{No corruption:} The residual does not distort
+    client~$i$'s predictions at any state $s \in \mathcal{S}$.
+    \item \textbf{Silent information loss:} Knowledge contributed by
+    other clients $j \neq i$, whose anchor predictions
+    $Q^{(j)}_{\mathrm{ref}}$ have components in
+    $\mathrm{col}(X_i)^{\perp}$, is irrecoverably discarded during
+    compilation. The global server faithfully aggregates all clients'
+    knowledge, but each client can only absorb the portion that lies
+    within its own representable subspace.
+\end{enumerate}
+
+\begin{theorem}[Invisibility of the projection residual]
+\label{thm:invisibility}
+Let $W^{\mathrm{glob}}_i(\lambda)$ be the ridge solution
+\eqref{eq:ridge_solution} for any $\lambda \geq 0$, and let
+$R_{i,0} = (I - P_i)Q^{\mathrm{glob}}_{\mathrm{ref}}$. Then for
+every $s \in \mathcal{S}$, $a \in \mathcal{A}$:
+\begin{equation}
+    Q_i\!\left(s, a;\, W^{\mathrm{glob}}_i(\lambda)\right)
+    \;=\;
+    \mathbf{k}_i(s)^{\!\top}
+    (G_i + \lambda I_m)^{-1}
+    P_i\, Q^{\mathrm{glob}}_{\mathrm{ref},a},
+    \label{eq:representer_visible}
+\end{equation}
+where $\mathbf{k}_i(s) = X_i\Phi_i(s) \in \mathrm{col}(X_i)$ and
+$G_i = X_i X_i^{\mathrm{H}}$. In particular,
+\begin{equation}
+    \mathbf{k}_i(s)^{\!\top}(G_i + \lambda I_m)^{-1} R_{i,0,a} = 0
+    \qquad \forall\, s \in \mathcal{S},\; \forall\, \lambda \geq 0.
+    \label{eq:residual_zero}
+\end{equation}
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+The key step is decomposing the global teacher into its in-subspace component
+($P_i Q^{\mathrm{glob}}_{\mathrm{ref},a} \in \mathrm{col}(X_i)$) and its residual
+($R_{i,0,a} \in \ker(G_i)$). Since $(G_i + \lambda I_m)^{-1}$ preserves the eigenspaces of $G_i$,
+the vector $(G_i+\lambda I_m)^{-1}R_{i,0,a}$ remains in $\ker(G_i)$,
+which is orthogonal to $\mathbf{k}_i(s) \in \mathrm{col}(X_i)$.
+Hence~\eqref{eq:residual_zero} holds. Full proof in Appendix~\ref{app:proof_invisibility}.
+\end{proof}
+
+\begin{remark}[From general heterogeneity to FedQHD]
+The projection residual  arises
+whenever a heterogeneous client must internalize a global model that
+exceeds its representational capacity. In general nonlinear DRL methods, quantifying this residual and understanding
+its effect on the compiled model requires iterative optimization and
+lacks closed-form characterization. The linearity-in-parameters
+structure of QHD is what makes the invisibility result exact and
+analytically tractable. Theorem~\ref{thm:invisibility} thus provides
+a precise lens through which to study the cost of heterogeneity: the
+compiled model is never \emph{corrupted}, but it may be
+\emph{incomplete}. The magnitude of this information loss is governed
+by the subspace misalignment $\sin(\theta_{ij})$ between client
+encoders (Proposition~\ref{prop:heterogeneity}), which we bound
+in the federation gap analysis of
+Section~\ref{subsec:fed_gap}.
+\end{remark}
+
+
+
+\subsection{Federated Representation Mismatch in Q-learning}
+\label{subsec:fed_gap}
+
+In federated reinforcement learning, each client performs value learning in its own representation space.
+When these representations differ, the global aggregation step implicitly performs cross-subspace distillation. To analysis how does representation heterogeneity distort the learned Q-functions in federated control, we characterise the gap between the \emph{best linear approximation
+of $Q^*$ achievable by client $i$'s encoder} and the compiled
+FedQHD output.  The analysis requires no assumption on the
+convergence of Q-learning with function approximation—an open
+problem in continuous state spaces \citep{baird1995residual,
+van_hasselt2018deep}—and instead relies entirely on the geometric
+properties of the encoder subspaces $\{\mathcal{F}_i\}$
+established in Section~\ref{sec:projection_residual}.
+
+%───────────────────────────────────────────────────────────────
+
+\subsubsection{Federation Gap Definitions and Assumptions}
+
+
+\begin{definition}[Principal angles in $\mathcal{H}$]
+\label{def:principal_angle}
+Let $\mathcal{F}_i,\mathcal{F}_j\subseteq\mathcal{H}$ be closed
+subspaces with $\mathcal{H}$-orthogonal projectors
+$\Pi_i,\Pi_j$.
+The $k$-th principal angle
+$\theta_{ij,k}\in[0,\pi/2]$ is:
+\begin{equation}
+    \cos(\theta_{ij,k})
+    =
+    \sup_{\substack{f\in\mathcal{F}_i,\;g\in\mathcal{F}_j\\
+    \|f\|_{\mathcal{H}}=\|g\|_{\mathcal{H}}=1,\\
+    f\perp_{\mathcal{H}} f_1,\ldots,\;
+    g\perp_{\mathcal{H}} g_1,\ldots}}
+    \langle f,g\rangle_{\mathcal{H}}.
+\end{equation}
+The largest principal angle
+$\theta_{ij}\defeq\max_k\theta_{ij,k}$ satisfies
+$\|(I-\Pi_i)\Pi_j\|_{\mathcal{H}\to\mathcal{H}}
+=\sin(\theta_{ij})$.
+Since $\mathcal{F}_i$ is spanned by $D_i$ feature functions,
+all angles are well-defined and the supremum is attained.
+Restricted to the anchor set $\mathcal{S}_{\mathrm{ref}}$,
+$\theta_{ij}$ reduces to the largest principal angle between
+$\mathrm{col}(X_i)$ and $\mathrm{col}(X_j)$ in
+$\mathbb{K}^m$ (Proposition~\ref{prop:heterogeneity}).
+\end{definition}
+
+\begin{definition}[RKHS regression oracle]
+\label{def:oracle}
+For each client $i$, define the \emph{oracle parameter}
+$\hat{W}_i$ and \emph{oracle Q-function} $\hat{Q}_i$ by:
+\begin{equation}
+    \hat{W}_i
+    \;\defeq\;
+    \arg\min_{W\in\mathbb{K}^{D_i\times|\mathcal{A}|}}
+    \sum_{a\in\mathcal{A}}
+    \bigl\|
+    \Re(\Phi_i(\cdot)^{\mathrm{H}}W_{:,a})
+    - Q^*(\cdot,a)
+    \bigr\|_{\mathcal{H}}^2,
+    \qquad
+    \hat{Q}_i(\cdot,a)
+    \;\defeq\;
+    \Re(\Phi_i(\cdot)^{\mathrm{H}}\hat{W}_{i,a}).
+    \label{eq:oracle_def}
+\end{equation}
+Since $\mathcal{F}_i
+=\{\Re(\Phi_i(\cdot)^{\mathrm{H}}w):w\in\mathbb{K}^{D_i}\}$
+is a finite-dimensional subspace of
+$\mathcal{H}$, the minimizer exists and is unique.
+By the Hilbert projection theorem, $\hat{Q}_i(\cdot,a)$ is
+the $\mathcal{H}$-orthogonal projection of $Q^*(\cdot,a)$
+onto $\mathcal{F}_i$:
+\begin{equation}
+    \hat{Q}_i(\cdot,a)
+    \;=\;
+    \Pi_i\,Q^*(\cdot,a),
+    \label{eq:oracle_is_proj}
+\end{equation}
+where $\Pi_i:\mathcal{H}\to\mathcal{F}_i$ is the
+$\mathcal{H}$-orthogonal projector.
+The \emph{representation error} of client $i$ is the
+minimum achievable regression loss:
+\begin{equation}
+    \varepsilon_i^{\mathrm{rep}}
+    \;\defeq\;
+    \max_{a\in\mathcal{A}}
+    \|Q^*(\cdot,a)-\hat{Q}_i(\cdot,a)\|_{\mathcal{H}}
+    \;=\;
+    \max_{a\in\mathcal{A}}
+    \|(I-\Pi_i)Q^*(\cdot,a)\|_{\mathcal{H}}.
+    \label{eq:rep_error}
+\end{equation}
+
+For HDC encoders with RBF kernels,
+$\mathbb{E}[\varepsilon_i^{\mathrm{rep},\infty}]
+=O(B/\sqrt{D_i})$ \citep{rudi2017generalization}.
+\end{definition}
+
+
+
+
+
+\begin{assumption}[Feature covariance]
+\label{assum:feature_cov}
+For each client $i$:
+\begin{enumerate}[label=(\roman*)]
+    \item \textup{(Positive definiteness)}
+    $\Sigma_i \defeq \mathbb{E}_{s\sim\nu_i}
+    [\Phi_i(s)\Phi_i(s)^{\mathrm{H}}]
+    \succ 0$;
+    \item \textup{(Boundedness)}
+    $\|\Phi_i(s)\|_2 \leq 1$
+    for all $s \in \mathcal{S}$.
+\end{enumerate}
+Condition~(i) is used in Lemma~\ref{lem:oracle_exist} to guarantee
+existence and uniqueness of $\hat{W}_i$
+(the Hessian of the regression objective is
+$\Sigma_i \otimes I_{|\mathcal{A}|} \succ 0$),
+and to bound
+$\|\hat{W}_i\|_F$ via
+$\|\Sigma_i^{-1}\|_{\mathrm{op}}
+= 1/\lambda_{\min}(\Sigma_i) < \infty$.
+Condition~(ii) is used to convert
+parameter norm bounds to function value bounds.
+Both conditions are standard in the linear
+function approximation literature \citep{tsitsiklis1997analysis,bhandari2018finite}.
+For HDC encoders with RBF random features,
+condition~(i) holds whenever $\nu_i$ has a
+Lebesgue density on $\mathcal{S}$
+\citep{rahimi2007random}, and condition~(ii)
+holds by normalising the feature vectors.
+
+\end{assumption}
+
+
+\begin{assumption}[Common RKHS]
+\label{assum:common_rkhs}
+There exists a continuous, symmetric, positive-definite kernel
+$\kappa:\mathcal{S}\times\mathcal{S}\to\mathbb{R}$ with
+$\kappa(s,s)\leq 1$ for all $s\in\mathcal{S}$, inducing a
+separable RKHS $\mathcal{H}$ that is dense in $L^2(\nu_i)$
+for all $i$, such that:
+\begin{enumerate}[label=\textup{(\roman*)}]
+    \item \textup{(RKHS norm bound)}
+    $\|Q^*(\cdot,a)\|_{\mathcal{H}}\leq B < \infty$
+    for all $a\in\mathcal{A}$;
+    \item \textup{(Common embedding)}
+    there exists $\gamma_0\leq\min_i\gamma_i$ such that
+    all client function classes embed as
+    $\mathcal{F}_i\hookrightarrow\mathcal{H}$,
+    with the reproducing property
+    $f(s)=\langle f,\kappa(\cdot,s)\rangle_{\mathcal{H}}$
+    holding for all $f\in\mathcal{H}$, $s\in\mathcal{S}$.
+\end{enumerate}
+\end{assumption}
+
+\begin{assumption}[Anchor set]
+\label{assum:anchor}
+The anchor set $\mathcal{S}_{\mathrm{ref}}=\{s_1,\ldots,s_m\}$
+is drawn i.i.d.\ from a distribution $\nu_{\mathrm{ref}}$ with
+$\nu_{\mathrm{ref}}\ll\nu_i$ for all $i$, and $\lambda>0$.
+\end{assumption}
+
+
+% \begin{assumption}[Regularity of $Q^*$]
+% \label{assum:qstar_l2}
+% For each client $i$, the optimal Q-function satisfies
+% $Q^*\in L^2(\nu_i)$, i.e.,
+% $\|Q^*\|_{\nu_i}^2
+% = \sum_a\mathbb{E}_{s\sim\nu_i}[Q^*(s,a)^2] < \infty$.
+% This holds whenever rewards are bounded
+% $|r|\leq r_{\max}$ and $\gamma\in(0,1)$,
+% since $\|Q^*\|_\infty\leq r_{\max}/(1-\gamma)<\infty$.
+% \end{assumption}
+
+
+\begin{assumption}[Regularity of $Q^*$]
+\label{assum:qstar_l2}
+$\|Q^*\|_\infty\leq r_{\max}/(1-\gamma)<\infty$,
+which holds whenever rewards are bounded
+and $\gamma\in(0,1)$.
+\end{assumption}
+
+
+
+
+    
+
+
+% \begin{lemma}[Oracle existence, uniqueness, and projection characterisation]
+% \label{lem:oracle_exist}
+% Under Assumption \ref{assum:feature_cov} and \ref{assum:qstar_l2},
+% \begin{enumerate}[label=\textup{(\roman*)}]
+%     \item \textup{(Existence and uniqueness)}
+%     $\hat{W}_i$ is the unique minimiser of $\mathcal{L}_i$:
+%     \begin{equation}
+%         \hat{W}_{i,a}
+%         = \Sigma_i^{-1}
+%         \mathbb{E}_{s\sim\nu_i}
+%         \bigl[\Phi_i(s)\,Q^*(s,a)\bigr]
+%         \quad\forall\,a.
+%         \label{eq:oracle_closed_form}
+%     \end{equation}
+%     \item \textup{(Projection characterisation)}
+%     $\hat{Q}_i = \Pi_i Q^*$, where $\Pi_i$ is the
+%     $L^2(\nu_i;\mathbb{R})$-orthogonal projector
+%     onto $\mathcal{F}_i$.
+%     \label{eq:oracle_is_proj}
+% \end{enumerate}
+% \end{lemma}
+
+% \begin{proof}
+% \textup{(i)} $\mathcal{L}_i$ in Definition \ref{def:oracle} is strongly convex with Hessian
+% $2\Sigma_i^{\mathbb{R}}\succ 0$ in each column $W_{:,a}$.
+% Setting $\nabla_{W_{:,a}}\mathcal{L}_i=0$ gives
+% \eqref{eq:oracle_closed_form}; 
+% finiteness uses $\|Q^*\|_\infty\leq Q_{\max}<\infty$
+% by Assumption \ref{assum:qstar_l2}).
+
+% \textup{(ii)} $\mathcal{F}_i$ consists of
+% real-valued functions and is finite-dimensional
+% (hence closed) in $L^2(\nu_i;\mathbb{R})$.
+% By the Hilbert space projection theorem, the
+% minimiser of $\|f-Q^*\|_{\nu_i}^2$ is $\Pi_iQ^*$.
+% Since $\hat{Q}_i$ is that minimiser by~(i),
+% $\hat{Q}_i=\Pi_iQ^*$.
+% \end{proof}
+
+\begin{definition}
+Given the regression oracle  $\hat{Q}_i(s,a)$ defined in Definition~\ref{def:oracle}, we 
+
+define the \emph{federation gap} at any state-action pair $(s,a)$:
+\begin{equation}
+    \Delta_i(s,a)
+    \;\defeq\;
+    \hat{Q}_i(s,a)
+    \;-\;
+    Q_i\!\left(s,a;\,W^{\mathrm{glob}}_i(\lambda)\right),
+    \label{eq:gap_def}
+\end{equation}
+where $Q_i(s,a;W^{\mathrm{glob}}_i(\lambda))
+= \Re(\Phi_i(s)^{\mathrm{H}}W^{\mathrm{glob}}_i(\lambda)_{:,a})$
+is the compiled FedQHD output.
+
+
+
+
+To analyze the federation gap, we introduce $\bar{Q}(s,a) \defeq \sum_{i=1}^N \pi_i\hat{Q}_i(s,a)$
+as the federation-weighted mean of the oracles, which serves as the global objective defined in~\ref{eq:qglob_avg}.
+
+
+By the triangle inequality:
+\begin{equation}
+    |\Delta_i(s,a)|
+    \;\leq\;
+    \underbrace{|\hat{Q}_i(s,a) - \bar{Q}(s,a)|}_{
+    \text{(A): Representation Bias}}
+    \;+\;
+    \underbrace{|\bar{Q}(s,a)
+    - Q_i(s,a;\,W^{\mathrm{glob}}_i(\lambda))|}_{
+    \text{(B): Aggregation Distortion}}.
+    \label{eq:master_decomp}
+\end{equation}
+Term~(A) is a purely geometric quantity depending only on the
+encoder subspaces and their principal angles.
+Term~(B) captures how accurately FedQHD's anchor-set ridge
+regression recovers the mean oracle; it is bounded through the
+projection residual machinery of
+Section~\ref{sec:projection_residual}.
+\end{definition}
+
+% \subsubsection{Main Theorem}
+% \label{thm:fed_gap}
+% \begin{theorem}[Federation gap bound]
+% \label{thm:fed_gap_main}
+% Under
+% Assumptions~\ref{assum:common_rkhs}--\ref{assum:qstar_l2},
+% with $\lambda>0$, the federation
+% gap~\eqref{eq:gap_def} satisfies for all $s\in\mathcal{S}$,
+% $a\in\mathcal{A}$:
 % \begin{equation}
-% \begin{split}
-%     \mathbf{M}^{(i)}_{k,0}=\mathbf{M}_k,
-%     \quad
-%      \mathbf{M}^{(i)}_{k,u+1}
-%     =
-%     \mathbf{M}^{(i)}_{k,u}
-%     + \alpha_{k,u}\, \delta_t^{(i)} \Phi(s_t^{(i)}, a_t^{(i)})
-% \end{split}
-%     \label{eq:local_update}
+% \begin{aligned}
+%     |\Delta_i(s,a)|
+%     \;\leq\;&
+%     \underbrace{
+%       2B\!\sum_{j\neq i}\!\pi_j\sin(\theta_{ij})
+%       \;+\;\sum_{j\neq i}\!\pi_j
+%       \bigl(\varepsilon^{\mathrm{rep}}_{i}
+%       +\varepsilon^{\mathrm{rep}}_{j}\bigr)
+%     }_{\textup{(A)}\;:\;\text{representation bias
+%     (irreducible, geometric)}}
+%     \\[6pt]
+%     +\;&
+%     \underbrace{
+%       c_i(\lambda)\,\hat{B}_i
+%     }_{\textup{(I)}\;:\;\text{off-anchor oracle shrinkage}}
+%     \\[4pt]
+%     +\;&
+%     \underbrace{
+%       \frac{\sqrt{m}}{2\sqrt{\lambda}}
+%       \sum_{j\neq i}\!\pi_j\,
+%       \bigl(2B\sin\theta_{ij}
+%       +\varepsilon^{\mathrm{rep}}_{i}
+%       +\varepsilon^{\mathrm{rep}}_{j}\bigr)
+%     }_{\textup{(II)}\;:\;\text{projection residual
+%     via anchor regression}},
+% \end{aligned}
+% \label{eq:main_gap}
 % \end{equation}
-% for $u=0,\dots,K-1$, where $\delta_t^{(i)}$ is the TD error computed using the local Q-function
-% $Q_{\mathbf{M}^{(i)}_{k,u}}(s,a) = \langle \Phi(s,a), \mathbf{M}^{(i)}_{k,u} \rangle$.
-
-% \subsubsection{Upload and Aggregation}
-% The server receives the local parameter vectors $\{\mathbf{M}^{(i)}_{k,K}\}_{i=1}^N$ and performs
-% direct federated averaging:
-% \begin{equation}
-%     \mathbf{M}_{k+1}
-%     =
-%     \frac{1}{N}\sum_{i=1}^{N}
-%     \mathbf{M}^{(i)}_{k,K}.
-%     \label{eq:federated_averaging}
-% \end{equation}
-% By Theorem~\ref{thm:parameter_function_equivalence}, this parameter averaging is equivalent
-% to averaging the Q-functions, i.e., $Q_{\mathbf{M}_{k+1}}(s,a) = \frac{1}{N}\sum_{i=1}^N Q_{\mathbf{M}^{(i)}_{k,K}}(s,a)$
-% for all $(s,a)$. The averaged model $\mathbf{M}_{k+1}$ is then broadcast to all clients to
-% initiate round $k+1$.
-\subsection{FedQHD Algorithm}
-\label{subsec:algorithm}
-
-% We present the complete FedQHD algorithm with shared encoder and direct parameter averaging.
-% This approach leverages the parameter-function equivalence property to enable efficient
-% federated aggregation with minimal communication overhead ($O(D)$ parameter uploads per round).
-
-\begin{algorithm}[t]
-\caption{FedQHD: Shared Encoder Protocol}
-\label{alg:fedqhd_shared}
-\begin{algorithmic}[1]
-\STATE \textbf{Input:} Rounds $T$, local steps $K$, agents $N$, learning rates $\{\alpha_{k,u}\}$
-\STATE \textbf{Server Initialize:}
-\STATE \quad Shared encoder $\Phi: \mathcal{S}\times\mathcal{A}\to\mathbb{C}^D$
-\STATE \quad Global model $\mathbf{M}_0 = \mathbf{0} \in \mathbb{C}^D$
-\STATE
-\FOR{round $k = 0, 1, \ldots, T-1$}
-    \STATE \textbf{[Server Broadcast]}
-    \STATE \quad Send $\mathbf{M}_k$ to all agents (encoder $\Phi$ sent once at initialization)
-    \STATE
-    \STATE \textbf{[Client Local Learning]} (in parallel for all agents $i = 1, \ldots, N$)
-    \STATE \quad Initialize: $\mathbf{M}^{(i)}_{k,0} = \mathbf{M}_k$
-    \FOR{local step $u = 0, 1, \ldots, K-1$}
-        \STATE \quad Observe state $s_t^{(i)}$, select action $a_t^{(i)}$ via $\epsilon$-greedy on $Q_{\mathbf{M}^{(i)}_{k,u}}$
-        \STATE \quad Execute $a_t^{(i)}$, observe reward $r_t^{(i)}$ and next state $s_{t+1}^{(i)}$
-        \STATE \quad Select next action $a_{t+1}^{(i)}$ using current policy (SARSA)
-        \STATE \quad Encode: $\phi_t = \Phi(s_t^{(i)}, a_t^{(i)})$, $\phi_{t+1} = \Phi(s_{t+1}^{(i)}, a_{t+1}^{(i)})$
-        \STATE \quad TD error: $\delta_t^{(i)} = r_t^{(i)} + \gamma \langle \phi_{t+1}, \mathbf{M}^{(i)}_{k,u} \rangle - \langle \phi_t, \mathbf{M}^{(i)}_{k,u} \rangle$
-        \STATE \quad \textbf{Update:} $\mathbf{M}^{(i)}_{k,u+1} = \mathbf{M}^{(i)}_{k,u} + \alpha_{k,u} \delta_t^{(i)} \phi_t$
-    \ENDFOR
-    \STATE \quad \textbf{Upload:} Send $\mathbf{M}^{(i)}_{k,K}$ to server
-    \STATE
-    \STATE \textbf{[Server Aggregation]}
-    \STATE \quad Receive parameter vectors $\{\mathbf{M}^{(i)}_{k,K}\}_{i=1}^{N}$ from all agents
-    \STATE \quad \textbf{Average parameters:} $\mathbf{M}_{k+1} = \frac{1}{N}\sum_{i=1}^{N} \mathbf{M}^{(i)}_{k,K}$
-    \STATE \quad \textbf{(Optional)} Project: $\mathbf{M}_{k+1} \leftarrow \text{Proj}_{\mathcal{B}(G)}(\mathbf{M}_{k+1})$
-\ENDFOR
-\STATE
-\STATE \textbf{Output:} Global Q-function $Q_{\mathbf{M}_T}(s,a) = \langle \Phi(s,a), \mathbf{M}_T \rangle$
-\end{algorithmic}
-\end{algorithm}
-
-% \subsection{Theoretical Property: Parameter-Function Equivalence}
-% \label{subsec:theory}
-
-% \begin{theorem}[Parameter-Function Equivalence]
-% \label{thm:parameter_function_equivalence}
-% Let $\Phi: \mathcal{S}\times\mathcal{A} \to \mathbb{C}^D$ be a shared encoder fixed across all agents, and let $\{\mathbf{M}^{(i)}\}_{i=1}^N$ be local model hypervectors. Define the averaged hypervector as
-% \begin{equation}
-%     \bar{\mathbf{M}} = \frac{1}{N}\sum_{i=1}^N \mathbf{M}^{(i)}.
-% \end{equation}
-% Then, for all state-action pairs $(s,a) \in \mathcal{S} \times \mathcal{A}$, parameter averaging is equivalent to function averaging:
-% \begin{equation}
-%     Q_{\bar{\mathbf{M}}}(s,a) = \frac{1}{N}\sum_{i=1}^N Q_{\mathbf{M}^{(i)}}(s,a).
-%     \label{eq:param_func_equiv}
-% \end{equation}
+% where all representation errors
+% $\varepsilon_i^{\mathrm{rep}}
+% =\max_a\|(I-\Pi_i)Q^*(\cdot,a)\|_{\mathcal{H}}$
+% are measured in RKHS norm
+% (Definition~\textup{\ref{def:oracle}}), and:
+% \begin{align}
+%     \theta_{ij}
+%     &= \text{largest principal angle between }
+%     \mathcal{F}_i,\;\mathcal{F}_j
+%     \text{ in }\mathcal{H}
+%     \;\;\textup{(Definition~\ref{def:principal_angle})},
+%     \label{eq:theta_def}\\
+%     c_i(\lambda)
+%     &= \frac{\lambda}{\sigma_{\min}(G_i)+\lambda}
+%     \;\in\;[0,1),
+%     \qquad
+%     G_i = X_iX_i^{\mathrm{H}}\in\mathbb{K}^{m\times m},
+%     \label{eq:ci_def}\\
+%     \hat{B}_i
+%     &= \|\hat{W}_i\|_F
+%     \;\leq\;
+%     \frac{B\sqrt{|\mathcal{A}|}}
+%     {\sigma_{\min}^{1/2}(\Sigma_i)},
+%     \qquad
+%     \Sigma_i
+%     = X_i^{\mathrm{H}}X_i / m.
+%     \label{eq:Bhat_def}
+% \end{align}
 % \end{theorem}
 
 % \begin{proof}
-% By definition of the HDC Q-function~\eqref{eq:hdc_q_function} and linearity of the inner product:
-% \begin{align}
-%     Q_{\bar{\mathbf{M}}}(s,a)
-%     &= \langle \Phi(s,a), \bar{\mathbf{M}} \rangle \\
-%     &= \left\langle \Phi(s,a), \frac{1}{N}\sum_{i=1}^N \mathbf{M}^{(i)} \right\rangle \\
-%     &= \frac{1}{N}\sum_{i=1}^N \langle \Phi(s,a), \mathbf{M}^{(i)} \rangle \quad \text{(linearity of $\langle\cdot,\cdot\rangle$)} \\
-%     &= \frac{1}{N}\sum_{i=1}^N Q_{\mathbf{M}^{(i)}}(s,a). \qquad \qed
-% \end{align}
+% We bound each term in the master
+% decomposition~\eqref{eq:master_decomp}.
+
+% \medskip
+% \noindent\textbf{Term~(A): Representation Bias}
+% By Proposition~\ref{prop:term_A} (Appendix~\ref{app:proof_termA})
+% \begin{equation}
+%     (A)
+%     \;\leq\;
+%     2B\sum_{j\neq i}\pi_j\sin(\theta_{ij})
+%     +\sum_{j\neq i}\pi_j
+%     \bigl(\varepsilon^{\mathrm{rep}}_{i}
+%     +\varepsilon^{\mathrm{rep}}_{j}\bigr).
+%     \label{eq:termA_applied}
+% \end{equation}
+
+% \medskip
+% \noindent\textbf{Term~(B): anchor-set regression error.}
+% We further decompose (B) by introducing the oracle
+% anchor predictions
+% $\hat{Q}^{\mathrm{ref}}_{i,a}
+% =\Re(X_i\hat{W}_{i,a})\in\mathrm{col}(X_i)$
+% and the oracle ridge solution
+% $\hat{W}_i^{\mathrm{ridge}}
+% \defeq(X_i^{\mathrm{H}}X_i+\lambda I)^{-1}
+% X_i^{\mathrm{H}}\hat{Q}^{\mathrm{ref}}_i$.
+% By the triangle inequality:
+% \begin{equation}
+%     (B)
+%     \;\leq\;
+%     \underbrace{
+%     |\hat{Q}_i(s,a)
+%     -Q_i(s,a;\,\hat{W}_i^{\mathrm{ridge}})|
+%     }_{(B_1):\;\text{oracle shrinkage}}
+%     \;+\;
+%     \underbrace{
+%     |Q_i(s,a;\,\hat{W}_i^{\mathrm{ridge}})
+%     -Q_i(s,a;\,W^{\mathrm{glob}}_i(\lambda))|
+%     }_{(B_2):\;\text{teacher mismatch on anchors}}.
+%     \label{eq:termB_split}
+% \end{equation}
+
+% \emph{Subterm $(B_1)$: oracle shrinkage.}
+% By the Woodbury identity and spectral analysis of $G_i$:
+% \begin{equation}
+%     (B_1)
+%     \;\leq\; c_i(\lambda)\,\hat{B}_i,
+%     \qquad
+%     c_i(\lambda)
+%     =\frac{\lambda}{\sigma_{\min}(G_i)+\lambda}.
+%     \label{eq:B1_bound}
+% \end{equation}
+
+% \emph{Subterm $(B_2)$: teacher mismatch.}
+% Define the anchor-level teacher mismatch
+% $\Delta^{\mathrm{ref}}_{i,a}
+% \defeq Q^{\mathrm{glob}}_{\mathrm{ref},a}
+% -\hat{Q}^{\mathrm{ref}}_{i,a}
+% =\sum_{j\neq i}\pi_j
+% (\hat{Q}^{\mathrm{ref}}_{j,a}
+% -\hat{Q}^{\mathrm{ref}}_{i,a})$.
+% By the Woodbury identity,
+% Theorem~\ref{thm:invisibility} (only the in-subspace
+% component $P_i\Delta^{\mathrm{ref}}_{i,a}$ contributes),
+% and a spectral bound on
+% $(G_i+\lambda I)^{-1}$:
+% \begin{equation}
+%     (B_2)
+%     \;\leq\;
+%     \frac{1}{2\sqrt{\lambda}}\,
+%     \|P_i\Delta^{\mathrm{ref}}_{i,a}\|_2
+%     \;\leq\;
+%      \frac{\sqrt{m}}{2\sqrt{\lambda}}\sum_{j\neq i}\pi_j
+%     \bigl(2B\sin\theta_{ij}
+%     +\varepsilon_i^{\mathrm{rep}}
+%     +\varepsilon_j^{\mathrm{rep}}\bigr).
+%     \label{eq:B2_bound}
+% \end{equation}
+% The full derivations of~\eqref{eq:B1_bound} and
+% \eqref{eq:B2_bound}are given in Appendix~\ref{app:proof_termB}.
+
+% Substituting~\eqref{eq:termA_applied},
+% \eqref{eq:B1_bound} and  \eqref{eq:B2_bound} into the master
+% decomposition~\eqref{eq:master_decomp}
+% yields~\eqref{eq:main_gap}.
 % \end{proof}
 
-% This theorem justifies the direct parameter averaging strategy in Algorithm~\ref{alg:fedqhd_shared}
-% and distinguishes HDC-based Q-learning from deep neural network approaches, where parameter
-% averaging does not preserve function-level aggregation due to nonlinear activation functions.
+% \begin{corollary}[Zero-gap conditions]
+% \label{cor:floor}
+% $|\Delta_i(s,a)|=0$ if and only if simultaneously:
+% \textup{(i)} $\theta_{ij}=0$ for all $j\neq i$;
+% \textup{(ii)} $\varepsilon_i^{\mathrm{rep}}=0$
+% for all $i$;
+% \textup{(iii)} $\lambda\to 0$ and $m\geq D_i$.
+% \end{corollary}
 
-% \subsection{Extension: Heterogeneous Encoders via Regression-Based Aggregation}
-% \label{subsec:heterogeneous_extension}
+% \begin{corollary}[Homogeneous recovery]
+% \label{cor:homogeneous}
+% When $\Phi_i=\Phi$ for all $i$
+% ($\theta_{ij}=0$,
+% $\varepsilon_i^{\mathrm{rep}}=\varepsilon^{\mathrm{rep}}$):
+% $|\Delta_i(s,a)|\leq c_i(\lambda)\hat{B}_i\to 0$
+% as $\lambda\to 0$, $m\geq D$.
+% \end{corollary}
+
+% \begin{corollary}[Optimal regularisation]
+% \label{cor:optimal_lambda}
+% Balancing Terms~(I) and~(II):
+% \begin{equation}
+%     \lambda^*_i=\left(
+%     \frac{\sigma_{\min}(G_i)\hat{B}_i(1-\gamma)}
+%     {\sqrt{m}\sum_{j\neq i}\pi_j
+%     (B\sin\theta_{ij}
+%     +\varepsilon^{\mathrm{rep}}_i
+%     +\varepsilon^{\mathrm{rep}}_j)}
+%     \right)^{2/3}.
+% \end{equation}
+% \end{corollary}
 
 
-\subsubsection{Regression-Based Aggregation Protocol}
 
-The key insight is that while parameters cannot be directly averaged across different
-feature spaces, Q-\textit{functions} can be averaged pointwise. By exploiting the linearity
-of HDC Q-functions in parameter space, we can solve a regression problem to find global
-parameters that approximate the averaged Q-function.
 
-\textbf{Anchor-based aggregation:} The server maintains:
-\begin{itemize}
-    \item A global encoder $\Phi_{\text{global}}: \mathcal{S}\times\mathcal{A}\to\mathbb{C}^D$
-    \item A set of anchor state-action pairs $\mathcal{X} = \{(s_j, a_j)\}_{j=1}^{L}$
-    sampled from a representative distribution
-\end{itemize}
+%───────────────────────────────────────────────────────────────
 
-\textbf{Upload phase:} Instead of uploading parameter vectors, each agent evaluates its
-local Q-function on the anchor set:
+\begin{definition}[Pairwise heterogeneity cost]
+\label{def:het_cost}
+For clients $i,j$ with function subspaces
+$\mathcal{F}_i,\mathcal{F}_j\subset\mathcal{H}$, define
 \begin{equation}
-    \mathbf{q}^{(i)}_k = \left[ Q_{\mathbf{M}^{(i)}_{k,K}}^{(i)}(s_j, a_j) \right]_{j=1}^{L}
-    = \left[ \langle \Phi^{(i)}(s_j, a_j), \mathbf{M}^{(i)}_{k,K} \rangle \right]_{j=1}^{L}
-    \in \mathbb{R}^L.
-    \label{eq:q_value_upload_het}
+    h_{ij}
+    \;\defeq\;
+    2B\sin(\theta_{ij})
+    \;+\;
+    \varepsilon_i^{\mathrm{rep}}
+    \;+\;
+    \varepsilon_j^{\mathrm{rep}},
+    \label{eq:hij_def}
 \end{equation}
-This requires $O(L)$ communication per agent, which can be more efficient than $O(D)$
-parameter uploads when $L \ll D$.
+where $\theta_{ij}$ is the largest principal angle
+between $\mathcal{F}_i$ and $\mathcal{F}_j$ in
+$\mathcal{H}$ (Definition~\ref{def:principal_angle})
+and $\varepsilon_i^{\mathrm{rep}}
+= \max_a\|(I-\Pi_i)Q^*(\cdot,a)\|_{\mathcal{H}}$
+(Definition~\ref{def:oracle}).
+The weighted heterogeneity cost for client $i$ is
+$\bar{h}_i \defeq \sum_{j\neq i}\pi_j\,h_{ij}$.
+For RBF random feature encoders of dimension $D_i$,
+$h_{ij} = O(1/\sqrt{\min(D_i,D_j)})$.
+\end{definition}
 
-\textbf{Aggregation phase:} The server computes the target averaged Q-values:
+Recall the federation gap
+(Definition~\ref{eq:gap_def}):
 \begin{equation}
-    \bar{\mathbf{q}}_k = \frac{1}{N}\sum_{i=1}^{N} \mathbf{q}^{(i)}_k,
-    \label{eq:averaged_q_het}
+    \Delta_i(s,a)
+    \;\defeq\;
+    \hat{Q}_i(s,a)
+    \;-\;
+    Q_i(s,a;\,W^{\mathrm{glob}}_i(\lambda)),
 \end{equation}
-and solves a least-squares regression to find global parameters that best approximate
-$\bar{\mathbf{q}}_k$ under $\Phi_{\text{global}}$:
+and the master decomposition~\eqref{eq:master_decomp}
+into Term~(A) (representation bias) and
+Term~(B) (aggregation distortion).
+
+%───────────────────────────────────────────────────────────────
+\subsubsection{Main Theorem}
+
+\begin{theorem}[Federation gap bound]
+\label{thm:fed_gap_main}
+Under
+Assumptions~\ref{assum:common_rkhs}--\ref{assum:qstar_l2},
+with $\lambda > 0$, the federation gap satisfies for all
+$s\in\mathcal{S}$, $a\in\mathcal{A}$:
 \begin{equation}
-    \mathbf{M}_{k+1} = \arg\min_{\mathbf{M} \in \mathbb{C}^D}
-    \sum_{j=1}^{L} \left\|
-    \langle \Phi_{\text{global}}(s_j, a_j), \mathbf{M} \rangle - \bar{q}_{k,j}
-    \right\|^2.
-    \label{eq:regression_aggregation_het}
+\boxed{
+    |\Delta_i(s,a)|
+    \;\leq\;
+    \underbrace{
+    \bar{h}_i
+    \vphantom{\frac{\sqrt{m}}{\sqrt{\gamma_i+\lambda}}}
+    }_{\substack{\textbf{(I) encoder}\\\textbf{heterogeneity}}}
+    \;+\;
+    \underbrace{
+    \frac{\sqrt{m}}
+    {\sqrt{\gamma_i + \lambda}}\;
+    \bar{h}_i
+    }_{\substack{\textbf{(II) anchor}\\\textbf{amplification}}}
+    \;+\;
+    \underbrace{
+    \frac{\lambda}
+    {\gamma_i + \lambda}\;
+    \hat{B}_i
+    \vphantom{\frac{\sqrt{m}}{\sqrt{\gamma_i+\lambda}}}
+    }_{\substack{\textbf{(III) ridge}\\\textbf{shrinkage}}}
+}
+\label{eq:gap_design}
 \end{equation}
-
-This has a closed-form solution via the Moore-Penrose pseudoinverse:
-\begin{equation}
-    \mathbf{M}_{k+1} = \mathbf{\Psi}^\dagger \bar{\mathbf{q}}_k,
-    \label{eq:closed_form_aggregation_het}
-\end{equation}
-where $\mathbf{\Psi} = [\Phi_{\text{global}}(s_1,a_1), \dots, \Phi_{\text{global}}(s_L,a_L)]^T \in \mathbb{C}^{L \times D}$.
-
-\subsubsection{Modified Algorithm for Heterogeneous Encoders}
-
-Algorithm~\ref{alg:fedqhd_heterogeneous} presents the complete protocol with regression-based
-aggregation.
-
-\begin{algorithm}[t]
-\caption{FedQHD: Heterogeneous Encoder Extension}
-\label{alg:fedqhd_heterogeneous}
-\begin{algorithmic}[1]
-\STATE \textbf{Input:} Rounds $T$, local steps $K$, agents $N$, anchor size $L$, learning rates $\{\alpha_{k,u}\}$
-\STATE \textbf{Server Initialize:}
-\STATE \quad Global encoder $\Phi_{\text{global}}: \mathcal{S}\times\mathcal{A}\to\mathbb{C}^D$
-\STATE \quad Global model $\mathbf{M}_0 = \mathbf{0} \in \mathbb{C}^D$
-\STATE \quad Anchor set $\mathcal{X} = \{(s_j, a_j)\}_{j=1}^{L}$
-\STATE \quad Feature matrix $\mathbf{\Psi} = [\Phi_{\text{global}}(s_1,a_1), \dots, \Phi_{\text{global}}(s_L,a_L)]^T \in \mathbb{C}^{L \times D}$
-\STATE \textbf{Client Initialize:} Each agent $i$ initializes or adapts local encoder $\Phi^{(i)}$
-\STATE
-\FOR{round $k = 0, 1, \ldots, T-1$}
-    \STATE \textbf{[Server Broadcast]} Send $(\mathbf{M}_k, \Phi_{\text{global}}, \mathcal{X})$ to all agents
-    \STATE
-    \STATE \textbf{[Client Local Learning]} (in parallel for all agents $i = 1, \ldots, N$)
-    \STATE \quad Initialize: $\mathbf{M}^{(i)}_{k,0} = \mathbf{M}_k$
-    \STATE \quad \textbf{(Optional) Adapt encoder:} Fine-tune $\Phi^{(i)}$ based on $\Phi_{\text{global}}$
-    \FOR{local step $u = 0, 1, \ldots, K-1$}
-        \STATE \quad Observe state $s_t^{(i)}$, select action $a_t^{(i)}$ via $\epsilon$-greedy
-        \STATE \quad Execute $a_t^{(i)}$, observe $r_t^{(i)}, s_{t+1}^{(i)}$, select next action $a_{t+1}^{(i)}$
-        \STATE \quad Encode: $\phi_t = \Phi^{(i)}(s_t^{(i)}, a_t^{(i)})$, $\phi_{t+1} = \Phi^{(i)}(s_{t+1}^{(i)}, a_{t+1}^{(i)})$
-        \STATE \quad TD error: $\delta_t^{(i)} = r_t^{(i)} + \gamma \langle \phi_{t+1}, \mathbf{M}^{(i)}_{k,u} \rangle - \langle \phi_t, \mathbf{M}^{(i)}_{k,u} \rangle$
-        \STATE \quad \textbf{Update:} $\mathbf{M}^{(i)}_{k,u+1} = \mathbf{M}^{(i)}_{k,u} + \alpha_{k,u} \delta_t^{(i)} \phi_t$
-    \ENDFOR
-    \STATE \quad \textbf{Evaluate on anchors:} $\mathbf{q}^{(i)}_k = [\langle \Phi^{(i)}(s_j, a_j), \mathbf{M}^{(i)}_{k,K} \rangle]_{j=1}^{L}$
-    \STATE \quad \textbf{Upload:} Send Q-value vector $\mathbf{q}^{(i)}_k \in \mathbb{R}^L$ to server
-    \STATE
-    \STATE \textbf{[Server Aggregation]}
-    \STATE \quad Receive $\{\mathbf{q}^{(i)}_k\}_{i=1}^{N}$ from all agents
-    \STATE \quad \textbf{Average Q-values:} $\bar{\mathbf{q}}_k = \frac{1}{N}\sum_{i=1}^{N} \mathbf{q}^{(i)}_k$
-    \STATE \quad \textbf{Regression:} $\mathbf{M}_{k+1} = \mathbf{\Psi}^\dagger \bar{\mathbf{q}}_k$
-    \STATE \quad \textbf{(Optional)} Project: $\mathbf{M}_{k+1} \leftarrow \text{Proj}_{\mathcal{B}(G)}(\mathbf{M}_{k+1})$
-\ENDFOR
-\STATE
-\STATE \textbf{Output:} Global Q-function $Q_{\mathbf{M}_T}(s,a) = \langle \Phi_{\text{global}}(s,a), \mathbf{M}_T \rangle$
-\end{algorithmic}
-\end{algorithm}
-
-\subsubsection{Theoretical Guarantee}
-
-\begin{theorem}[Regression-Based Aggregation Correctness]
-\label{thm:regression_aggregation}
-Let $\{\Phi^{(i)}\}_{i=1}^N$ be heterogeneous local encoders and $\{\mathbf{M}^{(i)}\}_{i=1}^N$ be
-corresponding parameter vectors. Let $\Phi_{\text{global}}$ be the global encoder and
-$\mathcal{X} = \{(s_j, a_j)\}_{j=1}^{L}$ be anchor points. Define the target averaged Q-function as
-\begin{equation}
-    \bar{Q}(s,a) = \frac{1}{N}\sum_{i=1}^N Q_{\mathbf{M}^{(i)}}^{(i)}(s,a),
-\end{equation}
-where $Q_{\mathbf{M}^{(i)}}^{(i)}(s,a) = \langle \Phi^{(i)}(s,a), \mathbf{M}^{(i)} \rangle$.
-Let $\mathbf{M}_{\text{reg}}$ be the solution to~\eqref{eq:regression_aggregation_het}.
-Then, $\mathbf{M}_{\text{reg}}$ minimizes the mean squared error on the anchor set:
-\begin{equation}
-    \mathbf{M}_{\text{reg}} = \arg\min_{\mathbf{M}} \sum_{j=1}^{L}
-    \left| \langle \Phi_{\text{global}}(s_j, a_j), \mathbf{M} \rangle - \bar{Q}(s_j, a_j) \right|^2.
-\end{equation}
-Moreover, if $L \geq D$ and the anchor features span $\mathbb{C}^D$, then $Q_{\mathbf{M}_{\text{reg}}}$
-exactly interpolates $\bar{Q}$ on $\mathcal{X}$.
+where:
+\begin{align}
+    \gamma_i
+    &\;\defeq\;
+    \sigma_{\min}(G_i),
+    \quad
+    G_i = X_i X_i^{\mathrm{H}}
+    \in \mathbb{K}^{m \times m},
+    \label{eq:gamma_def}\\
+    \hat{B}_i
+    &\;=\; \|\hat{W}_i\|_F
+    \;\leq\;
+    \frac{B\sqrt{m\,|\mathcal{A}|}}
+    {\sqrt{\gamma_i}},
+    \quad\text{when $\gamma_i > 0$}.
+    \label{eq:Bhat_def}
+\end{align}
 \end{theorem}
 
-\begin{proof}
-The regression objective is a standard least-squares problem with linear model
-$\langle \Phi_{\text{global}}(s_j, a_j), \mathbf{M} \rangle$. The closed-form solution
-follows from normal equations. When $L \geq D$ and $\text{rank}(\mathbf{\Psi}) = D$,
-the pseudoinverse satisfies $\mathbf{\Psi}^\dagger \mathbf{\Psi} = \mathbf{I}_D$, yielding
-exact interpolation on $\mathcal{X}$. \qed
+\begin{proof}[Proof sketch]
+Term~(I) follows from the triangle inequality and the RKHS pairwise bound
+(Lemma~\ref{lem:pairwise_rkhs}), bounding the representation bias
+as $\sum_{j\neq i}\pi_j h_{ij} = \bar{h}_i$.
+Term~(III) follows from spectral analysis of
+$(X_i^{\mathrm{H}} X_i + \lambda I)^{-1}$:
+the oracle ridge shrinkage satisfies $(B_1) \leq [\lambda/(\gamma_i+\lambda)]\hat{B}_i$.
+Term~(II) follows from the Woodbury identity and
+Theorem~\ref{thm:invisibility}: only the in-subspace teacher component
+enters the regression solution, and the resulting teacher mismatch is
+bounded by $(\sqrt{m}/\sqrt{\gamma_i+\lambda})\bar{h}_i$.
+Full derivations, including Lemma~\ref{lem:pairwise_rkhs} and all subterm bounds,
+are given in Appendix~\ref{app:proof_fedgap}.
 \end{proof}
 
-\textbf{Remark:} Theorem~\ref{thm:regression_aggregation} shows that regression-based
-aggregation preserves the averaged Q-function on anchor points, enabling heterogeneous
- model aggregation. The choice of anchor distribution and size $L$ controls the
-approximation quality and generalization to unseen states. In practice, anchors can be
-sampled from a replay buffer or from the empirical state-action distribution observed
-during training.
+%───────────────────────────────────────────────────────────────
+\subsubsection{Interpretation}
 
+The three terms have distinct roles and design levers:
+
+\begin{enumerate}[label=\textbf{(\Roman*)}]
+    \item \textbf{Encoder heterogeneity} $\bar{h}_i$:
+    the irreducible cost of using different encoders,
+    controlled by $D$
+    ($\bar{h}_i = O(1/\sqrt{D})$ for RBF features).
+    This term persists even with infinite anchors
+    and zero regularisation.
+
+    \item \textbf{Anchor amplification}
+    $\frac{\sqrt{m}}{\sqrt{\gamma_i+\lambda}}\,
+    \bar{h}_i$:
+    the cost of transferring heterogeneity through
+    anchor-set regression. Proportional to $\bar{h}_i$
+    (no heterogeneity $\Rightarrow$ no amplification)
+    and controlled by $m$, $\lambda$, and $\gamma_i$.
+
+    \item \textbf{Ridge shrinkage}
+    $\frac{\lambda}{\gamma_i+\lambda}\,\hat{B}_i$:
+    the bias from regularisation.
+    Controlled by $\lambda$ (smaller $\Rightarrow$
+    less shrinkage), $m$ (more anchors improve
+    $\gamma_i$), and $D$ (once $D_i$ crosses $m$,
+    $\gamma_i$ jumps from zero to positive).
+\end{enumerate}
+
+Terms~(II) and~(III) are in tension through $\lambda$:
+larger $\lambda$ reduces (II) but increases (III).
+
+%───────────────────────────────────────────────────────────────
+\subsubsection{Phase Transition at $D_i = m$}
+
+The Gram matrix $G_i$ is $m \times m$ with
+$\mathrm{rank}(G_i) = \min(m, D_i)$.
+Its minimum eigenvalue $\gamma_i$ exhibits a
+phase transition:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\small
+\begin{tabular}{lcc}
+\toprule
+ & $D_i \geq m$ & $D_i < m$ \\
+\midrule
+$\mathrm{rank}(G_i)$
+ & $m$ (full rank)
+ & $D_i$ \\
+$\gamma_i$
+ & $> 0$, $\to \sigma_{\min}(K_\infty)$ as $D_i\!\to\!\infty$
+ & $= 0$ \\
+Term (II)
+ & $\frac{\sqrt{m}}{\sqrt{\gamma_i+\lambda}}\,\bar{h}_i$
+   \;($\lambda$ can be small)
+ & $\frac{\sqrt{m}}{\sqrt{\lambda}}\,\bar{h}_i$
+   \;(reverts to original) \\
+Term (III)
+ & $\frac{\lambda}{\gamma_i+\lambda}\,\hat{B}_i
+   < \hat{B}_i$
+ & $\hat{B}_i$ \;(maximal, $\lambda$-independent) \\
+\textbf{Bottleneck}
+ & heterogeneity $\bar{h}_i$
+ & capacity $\hat{B}_i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+When $D_i < m$, Term~(III) saturates at $\hat{B}_i$
+regardless of $\lambda$, and adding more anchors
+beyond $D_i$ only amplifies Term~(II) without
+reducing Term~(III).
+When $D_i \geq m$, $\gamma_i > 0$ and the ridge
+can be made small, making the gap dominated by
+the heterogeneity floor $\bar{h}_i$.
+
+%───────────────────────────────────────────────────────────────
+\subsubsection{Corollaries}
+
+\begin{corollary}[Zero-gap conditions]
+\label{cor:floor}
+$|\Delta_i(s,a)|=0$ if and only if simultaneously:
+\textup{(i)}~$\theta_{ij}=0$ for all $j\neq i$;
+\textup{(ii)}~$\varepsilon_i^{\mathrm{rep}}=0$ for all $i$;
+\textup{(iii)}~$\lambda\to 0$ and $D_i \geq m$.
+\end{corollary}
+
+\begin{corollary}[Homogeneous recovery]
+\label{cor:homogeneous}
+When $\Phi_i=\Phi$ for all $i$:
+$\bar{h}_i = 0$, so
+$|\Delta_i| \leq c_i(\lambda)\hat{B}_i \to 0$
+as $\lambda\to 0$, $D \geq m$.
+\end{corollary}
+
+\begin{corollary}[Optimal regularisation]
+\label{cor:optimal_lambda}
+Balancing Terms~(II) and~(III) in~\eqref{eq:gap_design}
+yields:
+\begin{equation}
+    \lambda^*_i
+    \;=\;
+    \left(
+    \frac{\gamma_i\,\hat{B}_i}
+    {\sqrt{m}\;\bar{h}_i}
+    \right)^{2/3}.
+    \label{eq:lambda_star}
+\end{equation}
+\end{corollary}
+
+\begin{corollary}[Regime-specific scaling]
+\label{cor:regimes}
+\mbox{}
+
+\noindent\textbf{Overparameterised ($D_i \geq m$,
+$\gamma_i > 0$).}
+Setting $\lambda \to 0$:
+\begin{equation}
+    |\Delta_i|
+    \;\leq\;
+    \left(1+\frac{\sqrt{m}}{\sqrt{\gamma_i}}\right)
+    \bar{h}_i
+    \;=\;
+    O(\bar{h}_i)
+    \;=\;
+    O(1/\sqrt{D}).
+    \label{eq:gap_over}
+\end{equation}
+
+\noindent\textbf{Underparameterised ($D_i < m$,
+$\gamma_i = 0$).}
+At optimal $\lambda^*_i$:
+\begin{equation}
+    |\Delta_i|
+    \;\leq\;
+    \bar{h}_i
+    \;+\;
+    O\!\left(
+    m^{1/3}\,\bar{h}_i^{2/3}\,\hat{B}_i^{1/3}
+    \right).
+    \label{eq:gap_under}
+\end{equation}
+\end{corollary}

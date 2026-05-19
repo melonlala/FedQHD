@@ -1,0 +1,120 @@
+FedQHD Ablation Experiments  (CartPole-v1)
+Metric   : Q_error
+Episodes=500  Seeds=3  AggInterval=50
+D grid      : [16, 32, 64, 128, 256, 512, 1024, 2048]
+m grid      : [128, 256, 512, 1024, 1536, 2048]
+lambda grid : [0.1, 1, 10, 100, 1000, 10000, 100000]
+D_FIXED=1024  M_FIXED=1000
+
+Collecting 8192 anchor states …  (A1 needs up to 8192, A2 needs 2048)
+Collecting 400 held-out eval anchor states …
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+  [Q*] Reference agent loaded ← results/ablation/ref_agent.npz  (D=2048, ε=0.010)
+
+Computing / loading Q_star for 8192 anchors …
+  [Q*] Cache anchor mismatch – recomputing …
+  [Q*] Vectorised MC rollouts: m=8192, n_mc=5 …
+  [Q*]   action 0 done, Q range [1.00, 93.30]
+  [Q*]   action 1 done, Q range [1.00, 93.17]
+  [Q*] Done. Q* range: [1.000, 93.303]
+  [Q*] Q_star saved → results/ablation/Q_star_m8192_nmc5.npz
+
+Computing Q_star at 400 held-out eval anchors …
+  [Q*] Cache anchor mismatch – recomputing …
+  [Q*] Vectorised MC rollouts: m=400, n_mc=5 …
+  [Q*]   action 0 done, Q range [1.00, 80.95]
+  [Q*]   action 1 done, Q range [1.00, 81.14]
+  [Q*] Done. Q* range: [1.000, 81.144]
+  [Q*] Q_star saved → results/ablation/Q_star_m400_nmc5.npz
+
+============================================================
+Ablation 1: Vary D  [16, 32, 64, 128, 256, 512, 1024, 2048]  (m=8192(fixed), λ=1e-04, ANALYTICAL)
+============================================================
+Ablation 1:   0%|          | 0/8 [00:00<?, ?it/s]RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+RFF kernel parameters:
+OMEGA: (16, 4)
+B: (16,)
+  D=   16  m=  8192  fed_gap=10.4398 ± 0.2317
+Ablation 1:  12%|█▎        | 1/8 [00:00<00:06,  1.01it/s]RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+RFF kernel parameters:
+OMEGA: (32, 4)
+B: (32,)
+  D=   32  m=  8192  fed_gap=9.4688 ± 0.0266
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+RFF kernel parameters:
+OMEGA: (64, 4)
+B: (64,)
+  D=   64  m=  8192  fed_gap=8.4740 ± 0.1736
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+RFF kernel parameters:
+OMEGA: (128, 4)
+B: (128,)
+  D=  128  m=  8192  fed_gap=7.2837 ± 0.1659
+Ablation 1:  50%|█████     | 4/8 [00:01<00:01,  3.89it/s]RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+RFF kernel parameters:
+OMEGA: (256, 4)
+B: (256,)
+  D=  256  m=  8192  fed_gap=6.8844 ± 0.3575
+Ablation 1:  62%|██████▎   | 5/8 [00:01<00:00,  3.18it/s]RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+RFF kernel parameters:
+OMEGA: (512, 4)
+B: (512,)
+  D=  512  m=  8192  fed_gap=7.2179 ± 0.2376
+Ablation 1:  75%|███████▌  | 6/8 [00:02<00:00,  2.13it/s]RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+RFF kernel parameters:
+OMEGA: (1024, 4)
+B: (1024,)
+  D= 1024  m=  8192  fed_gap=7.2596 ± 0.2167
+Ablation 1:  88%|████████▊ | 7/8 [00:03<00:00,  1.34it/s]RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+RFF kernel parameters:
+OMEGA: (2048, 4)
+B: (2048,)
+  D= 2048  m=  8192  fed_gap=7.0878 ± 0.1594
+Ablation 1: 100%|██████████| 8/8 [00:06<00:00,  1.31s/it]Ablation 1: 100%|██████████| 8/8 [00:06<00:00,  1.20it/s]
+Saved: results/ablation/ablation1_vary_D_Q_error.json
+Saved: results/figures/ablation1_vary_D_Q_error.{pdf,png}  (slope=-0.079)
+  (Skipping full consistency check — not all ablations ran)
+
+Total time: 89.1s
