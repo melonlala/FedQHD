@@ -27,12 +27,10 @@ FedQHD/
 │   ├── train.py                 # Generic training loops used by main.py
 │   └── run_{CartPole,Acrobot,LunarLander,MountainCar}.sh
 ├── utils/                       # Helper utilities
-│   ├── hparam_search.py         # Grid search over (lr, agg, decay, rff_gamma)
-│   ├── rerun_main_table_with_variance.py  # Multi-seed main table generator
-│   ├── plot_scalability_bar.py
-│   └── utils.py                 # Plotting helpers
-├── main.py                      # Legacy single-method entry point
-└── results/                     # JSON results, figures, summaries
+    ├── hparam_search.py         # Grid search over (lr, agg, decay, rff_gamma)
+    ├── rerun_main_table_with_variance.py  # Multi-seed main table generator
+    ├── plot_scalability_bar.py
+    └── utils.py                 # Plotting helpers
 ```
 
 ## Installation
@@ -117,14 +115,6 @@ bash run_LunarLander.sh
 bash run_MountainCar.sh
 ```
 
-To regenerate the main-results table with multiple seeds (and standard deviations):
-
-```bash
-python utils/rerun_main_table_with_variance.py
-```
-
-This reads existing `results/<Env>/<question>/params_*.json` files when present and
-reuses the same hyperparameters.
 
 ## Scalability (Q4)
 
@@ -136,11 +126,6 @@ python run_experiments.py --experiment scalability --env CartPole \
     --client_counts "5,10,20,50" --episodes 600
 ```
 
-Plot the bar summary:
-
-```bash
-python utils/plot_scalability_bar.py
-```
 
 ## Ablations (A1 / A2 / A3)
 
@@ -169,18 +154,6 @@ python ablation_experiments.py --env LunarLander --which A3 --metric Q_error \
 ```
 
 Outputs land in `results/ablation/` and `results/figures/`.
-
-## Hyperparameter search
-
-```bash
-python utils/hparam_search.py --method_type qhd    --env CartPole --episodes 500
-python utils/hparam_search.py --method_type dqn    --env CartPole --episodes 500
-python utils/hparam_search.py --method_type hetero --env LunarLander --episodes 100 \
-    --eps_decay_values 0.900,0.990,0.995
-```
-
-`HETERO_GRID` sweeps `lr ∈ {0.1, 0.2, 0.5}`, `agg ∈ {10, 25}`, and
-`exploration_decay ∈ {0.990, 0.995, 0.999}` by default.
 
 ## Output structure
 
@@ -214,4 +187,4 @@ Each result JSON conforms to the `ExperimentResults` schema defined in
 
 ## Citation
 
-If you use this code, please cite the FedQHD paper (see `main.tex` / `main.bib`).
+If you use this code, please cite this repository.
