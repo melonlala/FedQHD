@@ -21,3 +21,9 @@ search_a3_params.py
 search_ablation_hparams.py
 test_experiments.py
 visualize_results.py
+log/
+results/
+hdsarsa_figs/
+sections/
+figures/
+docs/
