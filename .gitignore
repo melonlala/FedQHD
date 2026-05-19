@@ -2,7 +2,7 @@ add_convergence_checks.py
 CLAUDE.md
 fast_agg_search.py
 generate_figures.py
-lunarlander_sppedup_search.py
+lunarlander_speedup_search.py
 main.bib
 main.py
 main.tex
@@ -10,11 +10,12 @@ plot_a3_episodes.py
 rlj.bst
 rlj.sty
 run_experiments.py
-run_hparam_LunerLander_hetero.sh
+run_hparam_LunarLander_hetero.sh
 run_hparam_LunarLander.sh
 run_hparam_MountainCar.sh
+run_hparam_search.sh
 run_parallel.sh
-scalaility_analysis.py
+scalability_analysis.py
 search_a1a2_params.py
 search_a3_params.py
 search_ablation_hparams.py
