@@ -1,0 +1,107 @@
+
+\section{NeuRIPS26}
+Summary
+This paper proposes a new Federated Q-learning method for federated reinforcement learning for the setting where due to the heterogeneity of the participating agents, the function spaces are inconsistent, thus preventing averaging. The authors propose FedQHD to address this problem and provide a detailed performance analysis in addition to numerical experiments.
+
+Strengths
+The study of heterogeneous collaborative agents with differing dimensions is an under-studied problem and the authors make meaningful steps towards this goal.
+The approach is clean and efficient and gets to the heart of the problem.
+Weaknesses
+All reviewers are in agreement that the experimental part of this work is inadequate for reasons that include: two few seeds, tasks that are too simple, and results are provided outside of the 
+ regime that the theory supports. Additionally, the baseline algorithms are not representative of current state of the art methods.
+The bound on the update for Algorithm 2 is proved using a different update than what is in the algorithm and thus misses an error term that one would expect to see in the analysis.
+I believe that substantial work is needed on the numerical side in order to show that FedQHD is indeed fit for purpose. Moreover, the reviewers have identified several technical issues that need to be clarified. I hope the authors are able to make these changes as this seems like a promising approach to an interesting problem.
+\subsection{Reviews}
+\subsubsection{}
+Summary:
+The paper studies federated Q-learning when clients use fixed random-feature encoders with different dimensions or bandwidths, and proposes FedQHD. With a shared encoder, FedQHD averages the linear readout matrices; with heterogeneous encoders, the server averages client Q-values on shared anchor states and each client fits the resulting teacher using one ridge-regression solve. The problem is relevant and the proposed compilation step is simple and potentially useful, the closed-form compilation idea is clean, and the writing is clear.
+
+Contribution Type: General: Most submissions will fall into this type.
+Strengths And Weaknesses:
+Strengths
+
+Structural model heterogeneity is a meaningful obstacle for federated reinforcement learning, since ordinary parameter averaging is undefined when feature dimensions differ. The anchor-prediction interface and one-shot ridge compilation are easy to understand, inexpensive relative to iterative distillation, and plausibly useful for resource-constrained clients with fixed linear-in-parameter value models.
+The homogeneous-encoder observation is clean: averaging the readout matrices represents the pointwise weighted average of the client Q-functions. The manuscript also correctly limits its theoretical scope to a static compilation analysis rather than claiming convergence of the complete online RL process.
+Weaknesses
+
+The proof of Theorem 2 analyzes a different teacher from Algorithm 2. Algo 2 constructs 
+ from the learned client predictors. Appendix I instead introduces 
+, the mean of the client oracle projections, and subsequently takes 
+. Thus, the proof omits the local-estimation discrepancy 
+ and does not establish the stated bound for the update performed by Algorithm 2 unless the learned predictors are assumed to equal their oracle projections. A valid bound needs an explicit client-estimation term, propagated through the ridge operator. The manuscript also explicitly limits the result to static compilation, so it provides no guarantee for the repeated online TD-compilation dynamics.
+Some inconsistencies exist. Figure 1’s plot title says (m=64), while its caption and surrounding text say (m=4D). Section 7.1 defines compilation error as the maximum deviation from a client oracle on held-out anchors, while Figures 1 and 3 use a different term Approx. Error and label the quantity as (\mathrm{RMSE}(Q_i^{\mathrm{fed}},Q^\star)); (compilation error should be properly defined in section 5/6 as well). The manuscript never explains how (Q^\star) or the client oracle is computed for these continuous-state environments. Figure 3 also does not show the clean (m=D) transition claimed in the prose: the displayed policy gap is approximately zero at (m/D=0.2) and (0.5), then increases at (m/D=1), contradicting the claim that policy value is unstable throughout (m<D) and becomes reliable once (m\ge D).
+The empirical comparison does not seem to be convincing enough. E.g., FedHQL is explicitly cited as a heterogeneous federated Q-learning method, but is not evaluated. Any reason? The “Truncate FedAvg-QHD” baseline is not meaningful evidence for FedQHD: independently sampled RFF coordinates are not aligned, so truncating and averaging coordinate-wise is expected to fail by construction. Finally, “Oracle QHD” and “Oracle DQN” are pooled-data baselines rather than oracles or upper bounds; FedQHD substantially surpasses “Oracle QHD” in some entries, which further indicates that this terminology and the training-budget comparison need clarification.
+Quality: 2: not good
+Clarity: 3: good
+Significance: 2: not good
+Originality: 4: excellent
+Questions:
+What exact anchor count was used in Figure 1, what quantity is plotted in Figures 1 and 3, and how are 
+, the client oracle, and the “Oracle QHD” policy value computed?
+Can the authors provide a controlled comparison including FedHQL, a fully specified distillation baseline, fixed total environment-interaction budgets when varying N, more seeds, and all missing hyperparameters and hardware details?
+Limitations:
+The conclusion briefly mentions learned encoders, richer observations, and actor–critic methods as future work.
+
+\subsubsection{}
+Summary:
+The paper proposes FedQHD, a federated Q-learning method based on hyperdimensional/random-feature state encoders with linear readouts. The key idea is to exploit the linear-in-parameters structure of QHD to perform closed-form function-space aggregation. With a shared encoder, FedQHD reduces exactly to weighted averaging of local readout matrices. With heterogeneous encoders, the server averages client Q-values on shared anchor states to form a teacher, and each client compiles this teacher into its local representation through a single ridge projection. The paper derives a pointwise decomposition of the federation gap and evaluates the method on four continuous-state, discrete-action Gym control tasks.
+
+Contribution Type: General: Most submissions will fall into this type.
+Strengths And Weaknesses:
+The technical route is clean and elegant. Instead of forcing parameter averaging under heterogeneous encoders, the method uses fixed random features and linear readouts to cast federation as function-space teacher compilation over an anchor set. The homogeneous case exactly recovers parameter averaging, while the heterogeneous case uses a one-step ridge solve rather than iterative distillation. Theorem 2 decomposes the federation gap into encoder heterogeneity, anchor conditioning, and ridge shrinkage, which matches the algorithmic design.
+
+The experiments show that FedQHD outperforms most non-oracle baselines on CartPole, Acrobot, LunarLander, and MountainCar, while being substantially faster than DQN/distillation-based methods. The ablations over feature dimension and anchor size support the theoretical trends. Overall, the paper is compact and has a clear technical claim.
+
+The main weakness is the limited experimental scale. The four Gym tasks are useful for proof of concept, but they do not establish practical FedRL performance in more realistic settings such as visual observations, continuous action spaces, actor-critic methods, or heterogeneous dynamics/rewards across clients. Second, the main heterogeneous experiments use m=200 anchor states while encoder dimensions range from 500 to 10000, which seems in tension with the paper's emphasis on the well-conditioned m >= D_i regime. The appendix studies m/D, but the main results in an underdetermined regime need clearer explanation. Third, the privacy, communication, and availability assumptions around shared anchor states deserve more discussion. Finally, the main table reports means only, with standard deviations relegated to the appendix.
+
+Quality: 3: good
+Clarity: 3: good
+Significance: 3: good
+Originality: 3: good
+Questions:
+In the main heterogeneous experiments, m=200 is smaller than many D_i values. Why does FedQHD work well despite the theory emphasizing m >= D_i?
+Can the authors evaluate more realistic heterogeneity, such as different client dynamics/rewards, state distributions, high-dimensional observations, or actor-critic settings?
+Do shared anchor states create privacy or deployment concerns? How should S_ref be constructed without a shared simulator or when random rollouts do not cover client supports?
+Please report standard deviations or confidence intervals in the main table, and explain why FedQHD exceeds Oracle QHD on LunarLander.
+Are the distillation baselines matched for anchor sets, communication budget, and federation interval?
+Limitations:
+Partially. The paper mentions learned encoders, richer observations, and actor-critic settings as future work. It should also discuss anchor-set availability/privacy, the underdetermined m < D_i regime, client distribution shift, and the expressivity limits of fixed random features.
+
+\subsubsection{}
+Summary:
+This paper proposes FedQHD, a Q-learning framework for federated reinforcement learning. The core representation is a fixed random feature or a hyperdimensional encoder plus a linear readout, thus the Q-function is linear with respect to the parameters. For homogeneous encoders, the authors prove that function-space consensus is equivalent to a weighted average of the readout parameters; for heterogeneous encoders, the server aggregates the Q-values ​​of each client on a shared anchor-state set to form a teacher, and then each client projects the teacher back into its own encoder space using ridge regression.
+
+Contribution Type: General: Most submissions will fall into this type.
+Strengths And Weaknesses:
+Strengths
+This paper addresses a important problem: how heterogeneous clients can perform Q-function aggregation without sharing trajectories.
+
+Under a shared encoder, the weighted average of linear readouts does indeed naturally correspond to function-space averaging; this part is clearly stated and has practical engineering applications.
+
+Compared to repeated teacher-student distillation, a one-time ridge solve is more direct and may indeed be faster.
+
+Weaknesses
+This paper's theoretical requirements include common RKHS, positive definite feature covariance, and anchor distribution covering the state distributions of all clients. In particular, the anchor set needs to be covert relative to the state distribution of each client; the paper also states that if different clients are in different state regions, the anchor set needs to be expanded. This is almost a major challenge in real-world federated RL, yet the paper only addresses this with random rollouts.
+
+In experiments, all four tasks are classic Gym tasks, not involving complex multi-agent environments, nor are they subject to serious evaluation of privacy or communication constraints. The paper's conclusion, however, suggests that the method is suitable for broader FedRL deployments, which is insufficiently supported.
+
+The experiment in this paper only used 3 seeds. The variance of RL is very large, especially for tasks like LunarLander/Acrobot, and 3 seeds are insufficient to support the superior performance of the proposed method.
+
+The main text claims that the well-conditioned regime is 
+, but in the heterogeneous setting of the main experiment, 
+ ranges from 500 to 10000, while the anchor size is only 
+, which is inconsistent.
+
+Quality: 2: not good
+Clarity: 2: not good
+Significance: 3: good
+Originality: 3: good
+Questions:
+In the main experiment, the heterogeneous setting uses 
+, but 
+ can be as high as 10000. Since your theory emphasizes that 
+ is a well-conditioned regime, why did the main experiment choose a setting that clearly violates this condition?
+
+Real-world heterogeneous federated RL often involves environment heterogeneity, reward heterogeneity, and policy-induced state distribution shift. The heterogeneity in this paper mainly lies in the differences in the random feature parameters of the encoder. Does your method remain effective under different transition dynamics or reward functions?
+
+Do anchor states compromise privacy? If anchors come from client-local trajectories, is it possible that uploading Q-values ​​to anchors could leak policies and rewards?

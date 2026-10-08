@@ -1,0 +1,1237 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% LaTeX Template for AAMAS-2027 (based on sigconf.tex)
+%%% Prepared by the AAMAS-2027 Publication Chairs based on the version from AAMAS-2026.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Start your document with the \documentclass command.
+
+
+%%% == IMPORTANT ==
+%%% Use the first variant below to anonymize your submission (no author information shown).
+%%% Use the second variant below for the final paper (including author information).
+%%% For further information on anonymity and double-blind reviewing,
+%%% please consult the call for paper information
+%%% https://warwick.ac.uk/fac/sci/dcs/aamas2027/calls/
+
+%%%% For anonymized submission, use this
+\documentclass[sigconf,anonymous]{aamas}
+
+%%%% For camera-ready, use this
+%\documentclass[sigconf]{aamas}
+
+
+%%% Load required packages here (note that many are included already).
+
+\usepackage{balance} % for balancing columns on the final page
+\usepackage{mathtools} % \coloneqq, multlined
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{property}{Property}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\newcommand{\defeq}{\coloneqq}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% AAMAS-2027 copyright block (do not change!)
+
+\makeatletter
+\gdef\@copyrightpermission{
+  \begin{minipage}{0.2\columnwidth}
+   \href{https://creativecommons.org/licenses/by/4.0/}{\includegraphics[width=0.90\textwidth]{by}}
+  \end{minipage}\hfill
+  \begin{minipage}{0.8\columnwidth}
+   \href{https://creativecommons.org/licenses/by/4.0/}{This work is licensed under a Creative Commons Attribution International 4.0 License.}
+  \end{minipage}
+  \vspace{5pt}
+}
+\makeatother
+
+\setcopyright{ifaamas}
+\acmConference[AAMAS 2027]{Proc.\@ of the 26th International Conference
+on Autonomous Agents and Multiagent Systems (AAMAS 2027)}{3--7 May 2027}{Hanoi, Vietnam}{M.~Baldoni, F.~Fang, W.~Yeoh, N.~Yorke-Smith (eds.)}
+\copyrightyear{2027}
+\acmYear{2027}
+\acmDOI{}
+%\acmPrice{}
+\acmISBN{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% == IMPORTANT ==
+%%% Use this command to specify your OpenReview submission number.
+%%% In anonymous mode, it will be printed on the first page.
+
+\acmSubmissionID{2536}
+
+%%% Use this command to specify the track you want to submit your paper to.
+
+\submissionType{Research Paper Track}
+%\submissionType{AAAI Track}
+%\submissionType{Demonstration Track}
+%\submissionType{Blue Sky Ideas Track}
+%\submissionType{JAAMAS Track}
+%\submissionType{Doctoral Consortium}
+
+%%% Use this command to specify the title of your paper.
+
+\title{FedQHD: Closed-Form Function-Space Federated Reinforcement Learning}
+
+%%% Provide names, affiliations, and email addresses for all authors.
+
+\author{Arthur Pendragon}
+\affiliation{
+  \institution{Camelot Castle}
+  \city{Camelot}
+  \country{United Kingdom}}
+\email{king.arthur@camelot.uk}
+
+\author{Nimue}
+\affiliation{
+  \institution{The Lady's Lake}
+  \city{Avalon}
+  \country{United Kingdom}}
+\email{lady.of.the.lake@avalon.uk}
+
+%%% Use this environment to specify a short abstract for your paper.
+
+\begin{abstract}
+Federated reinforcement learning enables decentralized agents to collaboratively improve policies or value estimates without exchanging raw trajectories. However, FedAvg-style parameter averaging is not function-space consistent: when clients use heterogeneous encoders or even identical nonlinear networks, averaged parameters need not correspond to the weighted average of client value functions in any common function space.
+We propose \emph{FedQHD}, a federated Q-learning method using hyperdimensional (random-feature) state encoders with a linear readout, so that Q-functions are nonlinear in state yet linear in trainable parameters. This linear structure enables closed-form aggregation. With a shared encoder, the function-space consensus update coincides exactly with weighted averaging of local readout matrices. With heterogeneous encoders, the server constructs a global teacher by averaging client Q-values on a shared anchor-state set, and each client compiles this teacher into its local representation via a single ridge projection. We formalize the \emph{federation gap}---the error incurred when compiling the teacher actually formed from the learned client predictors into a heterogeneous client representation---relative to a client-specific oracle projection. We first give a data-dependent pointwise bound in terms of the realized teacher mismatch and ridge sensitivity, and then decompose it into encoder heterogeneity, anchor conditioning, client estimation error, regularization bias, and anchor coverage. The condition $m\geq D_i$ together with full column rank is sufficient to remove the coverage term, while the under-determined regime $m<D_i$ is controlled by a state-dependent Nystr\"om residual. On four continuous-state, discrete-action control benchmarks, FedQHD matches or outperforms FedAvg-style baselines and distillation-based alternatives while requiring substantially less computation, and the empirical
+dependence of the federation gap on encoder dimension matches our theoretical analysis.
+\end{abstract}
+
+%%% Use this command to specify a few keywords describing your work.
+%%% Keywords should be separated by commas.
+
+\keywords{Legends, Myths, Folktales}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Include any author-defined commands here.
+
+\newcommand{\BibTeX}{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em\TeX}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%%% The following commands remove the headers in your paper. For final
+%%% papers, these will be inserted during the pagination process.
+
+%\pagestyle{fancy}
+%\fancyhead{}
+
+%%% The next command prints the information defined in the preamble.
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+\label{sec:intro}
+Reinforcement learning (RL) systems in autonomous vehicles~\citep{liang2022federated, chellapandi2023federated}, industrial robots~\citep{liu2019lifelong}, and resource-constrained edge devices~\citep{yu2020deep} often learn from on-device interaction data that cannot be centralized due to communication costs, privacy requirements, and the volume of on-device experience. Federated reinforcement learning (FedRL) targets this setting by allowing agents to improve jointly without sharing raw trajectories~\citep{zhuo2020federated, qi2021federated}.
+
+
+Most FedRL pipelines inherit parameter averaging (FedAvg) from supervised federated learning~\citep{mcmahan2017communication}: clients train locally, the server averages parameters, and the averaged model is broadcast back. However, federated \emph{Q}-learning exposes two structural obstacles. First, weight averaging of nonlinear value networks is not value-function averaging; achieving function-space agreement typically requires additional optimization. Second, practical deployments are structurally heterogeneous: clients may use different encoders, feature dimensions, or architectures, making parameter averaging algebraically undefined~\citep{fan2023fedhql, jiang2025fedhpd}.
+
+
+The dominant approach to heterogeneous federation is knowledge distillation~\citep{li2019fedmd, lin2021ensembledistillation, jiang2025fedhpd}, which exchanges predictions on shared query states and iteratively trains local students toward an ensembled teacher. Distillation introduces per-round iterative optimization, hyperparameter sensitivity, and instability under the nonstationary Bellman targets of online RL~\citep{czarnecki2019distilling}. We pursue an alternative that remains well-defined under heterogeneous representations without iterative teacher--student training.
+
+Hyperdimensional computing (HDC), and more broadly fixed random-feature value approximation, offers an alternative value representation: states are mapped through a fixed high-dimensional feature map and action values are produced by a linear readout~\citep{kanerva2009hyperdimensional}. This linear readout enables closed-form least-squares-style updates and avoids backpropagation in hyperdimensional Q-learning (QHD)~\citep{ni2022qhd}. The linearity in the trainable parameters also simplifies federation: for linear-in-parameters value functions, averaging in value function space coincides exactly with averaging parameters~\citep{lagoudakis2003least, bhandari2018finite}, and heterogeneous aggregation reduces to a projection step rather than iterative distillation.
+
+
+We propose \emph{FedQHD}, a federated $Q$-learning framework that aggregates clients through their $Q$-values and remains well-defined under encoder heterogeneity. With a shared encoder, the federated update reduces exactly to weighted averaging of readout matrices, recovering FedAvg in closed form. With heterogeneous encoders, the server forms a teacher by averaging client $Q$-values on a shared \emph{anchor} set, and each client compiles this teacher into its own representation via a single ridge-regression solve per round---without exchanging trajectories and without iterative optimization.
+
+Our contributions are:
+\begin{itemize}
+    \item \textbf{Closed-form federation under heterogeneous encoders.} We propose a closed-form federated $Q$-learning algorithm that handles heterogeneous encoders in a single step, compiling a function-space teacher into each client's local representation via anchor-based ridge regression and recovering FedAvg exactly when encoders are shared.
+    \item \textbf{Pointwise bound on the federation gap.} We derive a data-dependent bound for the update actually performed by FedQHD and a geometric corollary that separates encoder heterogeneity, anchor conditioning, client estimation error, ridge shrinkage, and anchor coverage. The result treats $m\geq D_i$ with full column rank as a sufficient condition for eliminating the coverage term and also characterizes $m<D_i$.
+    \item \textbf{Empirical validation on four continuous-control benchmarks.} We conduct experiments on four continuous-control tasks under both homogeneous and heterogeneous encoders, showing that FedQHD matches or exceeds federated DQN baselines while running substantially faster than distillation-based alternatives, with ablations confirming the predicted dependence on encoder dimension and anchor-set size.
+\end{itemize}
+
+%% Related Work
+\section{Related Work}
+\label{sec:related_work}
+
+\paragraph{Federated RL with shared parameterizations.}
+Federated learning was popularized by FedAvg, which aggregates client models through iterative parameter averaging~\citep{mcmahan2017communication}. Early federated RL systems applied this paradigm by sharing neural value or policy network parameters across agents~\citep{zhuo2020federated,nadiger2019federated}, including applications such as autonomous driving under distribution shift~\citep{liang2022federated} and Byzantine-robust policy gradients~\citep{fan2021fault}. More recent work established finite-time guarantees for federated TD and Q-learning under Markovian sampling~\citep{khodadadian2022federated} and analyzed performance degradation under environment heterogeneity~\citep{jin2022federated}. However, these approaches assume a \emph{shared parameterization} across clients: FedAvg-style aggregation requires identical parameter shapes and is undefined when clients use different encoders or feature dimensions.
+
+
+
+\paragraph{Variance reduction and personalization.}
+Several works address optimization drift in FedAvg. FedProx~\citep{li2020federated} introduces proximal regularization, while SCAFFOLD~\citep{karimireddy2020scaffold} uses control variates to reduce client variance. Personalized federated learning methods further allow each client to maintain a locally adapted model~\citep{fallah2020personalized}. In contrast, FedQHD eliminates client drift entirely in the homogeneous case (exact aggregation) and handles heterogeneous encoders through a closed-form ridge projection rather than iterative optimization.
+
+
+\paragraph{Distillation-based federation under heterogeneity.}
+Knowledge distillation aggregates models in output space rather than parameter space~\citep{hinton2015distilling}, enabling federation across heterogeneous architectures. In supervised federated learning~\citep{li2019fedmd,lin2021ensembledistillation,zhu2021data,chen2020fedbe}, methods differ in proxy-data assumptions but all rely on iterative gradient-based fitting. In RL, policy distillation~\citep{rusu2016policydistillation} and Distral~\citep{teh2017distral} introduced function-space transfer mechanisms. Recent heterogeneous FedRL approaches adopt similar principles: FedHQL aggregates models through server-side queries~\citep{fan2023fedhql}, SCCD distills ensembles using pseudo-data~\citep{mai2023server}, and FedHPD matches action distributions on shared anchor states~\citep{jiang2025fedhpd}. These approaches require iterative teacher--student optimization and can be sensitive to design and hyperparameter choices, particularly under nonstationary Bellman targets~\citep{czarnecki2019distilling}.
+
+
+
+\paragraph{Linear function approximation, kernels, and random features in RL.}
+Linear value-function approximation has long provided stable and analyzable RL algorithms. Least-squares approaches such as LSPI and fitted Q-iteration formulate Bellman updates as regression problems with closed-form solutions~\citep{lagoudakis2003least,ernst2005tree}, while finite-time guarantees for linear TD have been established under both i.i.d.\ and Markovian sampling~\citep{bhandari2018finite}. Kernel and basis-function methods extend this framework to nonlinear state representations while retaining linear parameter structure~\citep{ormoneit2002kernel,konidaris2011value}. Random Fourier features provide scalable kernel approximations~\citep{rahimi2007random}, and regret analyses connect reproducing kernel Hilbert space (RKHS) geometry to RL sample complexity~\citep{jin2020provably}. HDC~\citep{kanerva2009hyperdimensional} can be viewed as a high-dimensional random-feature instantiation; QHD and HDPG demonstrate that HDC encoders enable efficient RL with linear readouts and least-squares-style updates~\citep{ni2022qhd,ni2022hdpg}.
+
+
+\paragraph{Positioning of FedQHD.}
+FedQHD addresses \emph{structural heterogeneity} in federated Q-learning, where clients may use different encoders and parameter dimensions and parameter averaging becomes ill-defined~\citep{fan2023fedhql,jiang2025fedhpd}. Instead of iterative distillation, FedQHD aggregates Q-values on a shared anchor-state interface and compiles the resulting consensus into each client representation via a one-shot ridge projection. In the homogeneous limit (shared encoder), this procedure reduces exactly to parameter averaging, connecting classical federated learning with heterogeneous value-function aggregation.
+
+%% Preliminaries / Background
+\section{Preliminaries}
+\label{sec:preliminaries}
+
+\subsection{Markov decision processes and off-policy value learning}
+We consider a Markov decision process $\mathcal{M} = (\mathcal{S}, \mathcal{A}, P, r, \gamma)$, where $\mathcal{S}$ is a continuous state space, $\mathcal{A}$ is a finite action set, $P:\mathcal{S}\times\mathcal{A}\!\to\!\Delta(\mathcal{S})$ is the transition kernel, $r:\mathcal{S}\times\mathcal{A}\!\to\!\mathbb{R}$ is the reward function, and $\gamma\in(0,1)$ is the discount factor. The optimal action-value function $Q^\star$ is the unique fixed point of the Bellman optimality operator
+\[
+Q^\star(s,a)= r(s,a) + \gamma\,\mathbb{E}_{s'\sim P(\cdot|s,a)}
+\Bigl[\max_{a'\in\mathcal{A}} Q^\star(s',a')\Bigr],
+\]
+with optimal policy $\pi^\star(s)=\arg\max_a Q^\star(s,a)$. Since $\mathcal{S}$ is continuous, $Q^\star$ is approximated using standard off-policy temporal-difference framework: transitions $(s,a,r,s')$ are stored in a replay buffer and $Q^\star$ is estimated by semi-gradient updates against a periodically frozen target network~\citep{ni2022qhd}.
+
+
+\subsection{Hyperdimensional computing (HDC)}
+
+\label{subsec:hdc_background}
+
+HDC is a brain-inspired computational paradigm in which symbols and structured entities are represented as high-dimensional vectors---called \emph{hypervectors}---with components drawn independently from simple distributions~\citep{kanerva2009hyperdimensional}. In such spaces, independently sampled hypervectors are nearly orthogonal with high probability, a geometric property that underlies classical HDC operations such as \emph{bundling} (superposition via addition), \emph{binding} (association via elementwise multiplication or permutation), and \emph{permutation} (role shifting). Because information is distributed holographically across all dimensions, HDC representations exhibit strong robustness to noise, quantization, and partial corruption.
+
+Given an input $x$, an HDC encoder produces a bounded hypervector $\phi(x)\in\mathbb{K}^D$ using random projections or compositional schemes built from a small set of base hypervectors. These encoders admit a precise random-feature interpretation: the empirical kernel $k_D(x,x')=\langle \phi(x),\phi(x')\rangle$
+converges to a smooth limiting kernel $k_\ast(x,x')$ as $D\to\infty$, with uniform concentration at rate $O(D^{-1/2})$ \citep{rahimi2007random,bach2015equivalence,rudi2017generalization}. As a consequence, linear prediction in the hypervector domain serves as a computationally efficient, finite-dimensional approximation to kernel methods in the RKHS associated with $k_\ast$.
+
+
+
+%% Methodology (Proposed Approach)
+\section{Problem Formulation}
+\label{sec:problem}
+
+
+\paragraph{QHD: hyperdimensional Q-learning for continuous-state control.}
+We consider an MDP for each agent $i$ with continuous states $s\in\mathcal{S}$ and discrete actions $a\in\mathcal{A}$.  Agent $i$ selects a hyperdimensional encoder
+$\Phi_i:\mathcal{S}\to\mathbb{K}^{D_i}$, $\mathbb{K}\in\{\mathbb{R},\mathbb{C}\}$,
+mapping states to $D_i$-dimensional hypervectors.  For each action $a$, it maintains a parameter hypervector $\mathbf w_{i,a}\in\mathbb{K}^{D_i}$. We use $\langle \cdot, \cdot \rangle$
+to denote the standard Hermitian inner product on $\mathbb{K}^{D_i}$,
+$\langle u, v \rangle = u^{\mathrm{H}} v = \sum_{k=1}^{D_i} \overline{u_k}\,v_k$,
+and we write $\Re(z)$ for the real part of $z \in \mathbb{C}$, with the
+convention $\Re(z) = z$ when $z \in \mathbb{R}$. The approximated action-value is
+\begin{equation}
+Q_i(s,a)\;=\;\Re\!\bigl(\langle \Phi_i(s), \mathbf w_{i,a}\rangle\bigr)\,,
+\label{eq:qhd_q}
+\end{equation}
+so that stacking $W_i=[\mathbf w_{i,a}]_{a\in\mathcal{A}}\in\mathbb{K}^{D_i\times|\mathcal{A}|}$ yields
+$Q_i(s,\cdot)=\Re(\Phi_i(s)^{\mathrm H}W_i)$.  Although $\Phi_i$ may be nonlinear in $s$, the model \eqref{eq:qhd_q} is linear in parameters. QHD updates $W_i$ via standard off-policy TD with a delayed target network~\citep{ni2022qhd}; the explicit semi-gradient update rule is given in Appendix~\ref{app:qhd_update}.
+
+
+\paragraph{Federated value learning objective.}  We consider $N$ agents (clients) learning in parallel from private data. They do not share raw data; instead, after local training, each client $i$ has learned a Q-function $Q_i(s,a)=\Re(\Phi_i(s)^{\mathrm H}W_i)$.  The server defines a global \emph{function-space} objective by aggregating these models under an agreement distribution $\mu$ (implemented via a shared anchor set; see below).
+
+Concretely, given weights $\{\pi_i\}$ with $\sum_i\pi_i=1$, the server seeks the global value function $Q^{\mathrm{glob}}$ that minimizes
+\begin{equation}\label{eq:global}
+\sum_{i=1}^N \pi_i\,\mathbb{E}_{(s,a)\sim\mu}\bigl[(Q_i(s,a)-Q(s,a))^2\bigr].
+\end{equation}
+By standard projection arguments, the minimizer is the weighted average in function space:
+\begin{equation}
+Q^{\text{glob}}(s,a)=\sum_i \pi_i Q_i(s,a), \quad (\mu\text{-a.e.}).
+\label{eq:qglob_avg}
+\end{equation}
+Here $\mu$ denotes the agreement distribution over state-action pairs; in practice, we implement $\mu$ via a discrete anchor set.
+The server thus obtains a global action-value model in closed form without accessing client trajectories.
+%The server thus obtains a global action-value model in closed form without accessing client data.
+The problem is to compile this function-space teacher into a parameter vector for each client’s representation.
+
+
+Although Eq.~\eqref{eq:global} is defined in function space, FedAvg-style aggregation either requires iterative optimization (for nonlinear approximators) or becomes algebraically undefined (under heterogeneous encoders). FedQHD resolves both by exploiting the linearity in parameters of \eqref{eq:qhd_q}.
+
+
+\section{FedQHD: Function-Space Federation with Closed-Form Compilation}
+\label{sec:method}
+We present FedQHD in two regimes. When clients share an encoder, the federation step is exact in closed form. When clients use heterogeneous encoders, the server aggregates client predictions on a shared anchor-state set, and each client compiles the resulting teacher into its local feature space via a closed-form ridge solve.
+
+\begin{algorithm}[t]
+\caption{FedQHD: Homogeneous Protocol}
+\label{alg:fedqhd_shared}
+\begin{algorithmic}[1]
+\STATE \textbf{Init:} shared encoder
+       $\Phi:\mathcal{S}\to\mathbb{K}^D$;\;
+       $W^{\mathrm{glob}}_0 = \mathbf{0}$
+\FOR{round $k = 0, \ldots, T\!-\!1$}
+    \STATE Broadcast $W^{\mathrm{glob}}_k$ to all clients
+    \FOR{client $i = 1,\ldots,N$ \textbf{in parallel}}
+        \STATE $W_i, W_i^- \leftarrow W^{\mathrm{glob}}_k$
+        \FOR{$e = 1,\ldots,K$}
+            \STATE $\delta \leftarrow \text{TD}(s,a,r,s'; W_i, W_i^-)$
+            \STATE $W_i[:,a] \leftarrow
+           W_i[:,a] + \eta\, \delta\, \Phi(s)$
+            \STATE Sync $W_i^-$ every $\tau$ eps; decay $\epsilon$
+        \ENDFOR
+        \STATE Upload $W_i$ to server
+    \ENDFOR
+    \STATE $W^{\mathrm{glob}}_{k+1} \leftarrow
+           \sum_{i} \pi_i W_i$
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Homogeneous encoders}
+\label{sec:homo_fedqhd}
+If all clients share an encoder $\Phi$, substituting into \eqref{eq:qglob_avg} gives the global model $Q^{\mathrm{glob}}(s,a)=\Re\bigl(\Phi(s)^\mathrm{H}W^{\mathrm{glob}}\bigr)$, where $W^{\mathrm{glob}}\in\mathbb{K}^{D\times|\mathcal{A}|}$ is the minimizer of a quadratic objective $\sum_{i=1}^N \pi_i E_{(s,a)\sim\mu} \big[ \langle \Phi(s), (W_i -W^{\mathrm{glob}})_{:,a} \rangle^2\big]$. The closed-form solution is:
+%One obtains in closed form solution:
+\[
+W^{\mathrm{glob}} \;=\; \sum_{i=1}^N \pi_i W_i.
+\]
+That is, when $\Phi_i=\Phi$, function-space consensus coincides exactly with parameter averaging, which is independent of $\mu$.  The server simply computes the weighted average of the local weight matrices without requiring raw data and sends $W^{\mathrm{glob}}$ back to the clients as their updated parameters. The homogeneous FedQHD procedure is given in Algorithm~\ref{alg:fedqhd_shared}.
+
+
+
+\begin{algorithm}[t]
+\caption{FedQHD: Heterogeneous Protocol}
+\label{alg:fedqhd_heterogeneous}
+\begin{algorithmic}[1]
+\STATE \textbf{Init:} anchors
+       $\mathcal{S}_{\mathrm{ref}}\!=\!\{s_1,\ldots,s_m\}$;
+       each client $i$: encoder $\Phi_i$, $W_i\!=\!\mathbf{0}$
+\FOR{round $k = 0, \ldots, T\!-\!1$}
+    \FOR{client $i = 1,\ldots,N$ \textbf{in parallel}}
+        \STATE $W_i^- \leftarrow W_i$
+        \FOR{$e = 1,\ldots,K$}
+            \STATE $\delta \leftarrow \text{TD}(s,a,r,s'; W_i, W_i^-)$
+            \STATE $W_i[:,a] \leftarrow
+           W_i[:,a] + \eta\, \delta\, \Phi_i(s)$
+            \STATE Sync $W_i^-$ every $\tau$ eps; decay $\epsilon$
+        \ENDFOR
+        \STATE Upload $Q^{\mathrm{ref}}_i\!=\!\Re(X_iW_i)$
+    \ENDFOR
+    \STATE \textbf{Server:}
+           $Q^{\mathrm{glob}}_{\mathrm{ref}} \leftarrow
+           \sum_{i} \pi_i Q^{\mathrm{ref}}_i$;
+    \FOR{client $i$ \textbf{in parallel}}
+        \STATE $W_i^{\mathrm{glob}} \leftarrow X_i^{\mathrm{H}}
+               (G_i\!+\!\lambda I)^{-1}
+               Q^{\mathrm{glob}}_{\mathrm{ref}}$
+    \ENDFOR
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Heterogeneous encoders}
+\label{sec:hetero_fedqhd}
+
+When clients use different encoders $\Phi_i$ with possibly different dimensions $D_i$, direct parameter averaging is not defined. Instead, we align client representations through a \emph{shared anchor set}. The server samples a set of reference states $\mathcal{S}_{\mathrm{ref}}=\{s_1,\dots,s_m\}$. The anchor set can be obtained from random rollouts, a shared unlabeled dataset, or states encountered during local training; in our experiments we use random rollouts.
+
+Each client $i$ evaluates its Q-function on the anchors,
+$Q^{\mathrm{ref}}_i(s_j,a)=Q_i(s_j,a)$, forming a matrix $Q^{\mathrm{ref}}_i\in\mathbb{R}^{m\times|\mathcal{A}|}$. The server aggregates these predictions to obtain the anchor teacher $Q^{\mathrm{glob}}_{\mathrm{ref}}
+=\sum_{i=1}^N \pi_i Q^{\mathrm{ref}}_i.$ Client $i$ then fits parameters $W_i^{\mathrm{glob}}$ by solving
+\[
+\min_{W\in\mathbb{K}^{D_i\times|\mathcal{A}|}}
+\sum_{j=1}^m\sum_{a\in\mathcal{A}}
+\Bigl(\Re\bigl(\Phi_i(s_j)^{\mathrm H}\mathbf w_a\bigr)
+-Q^{\mathrm{glob}}_{\mathrm{ref}}(s_j,a)\Bigr)^2
++\lambda\|W\|_F^2.
+\]
+Since the model is linear in $W$, the solution has the closed form
+\[
+W^{\mathrm{glob}}_i=
+\left(X_i^{\mathrm H}X_i+\lambda I_{D_i}\right)^{-1}X_i^{\mathrm H}Q^{\mathrm{glob}}_{\mathrm{ref}},
+\]
+when $\lambda>0$ or $X_i^{\mathrm H}X_i$ is full rank.
+This corresponds to ridge regression projecting the global teacher onto client $i$’s feature space. After updating to $W_i^{\mathrm{glob}}$, the client resumes local RL updates until the next federation round. Equivalently, using the Woodbury identity, $W_i^{\mathrm{glob}} = X_i^{\mathrm H}(G_i + \lambda I_m)^{-1} Q_{\mathrm{ref}}^{\mathrm{glob}}$, which requires inverting an $m\times m$ matrix rather than $D_i\times D_i$. The heterogeneous procedure is given in Algorithm~\ref{alg:fedqhd_heterogeneous}.
+
+As analyzed in Sec.~\ref{sec:theory}, the resulting compilation error depends on representation mismatch, anchor conditioning, and regularization.
+
+
+\section{Theoretical Analysis}
+\label{sec:theory}
+% codex_made: clarify the per-round bounds while preserving their structure.
+We analyze one heterogeneous federation round conditional on the learned
+predictors $W_1,\ldots,W_N$ uploaded in that round.  The bounds describe
+the compiled predictor's error relative to a client reference.
+Convergence of the local TD updates requires a separate analysis.
+We use real features, as in the experiments.  A complex
+linear readout can be expressed in real coordinates because
+$\Re(\Phi^{\mathrm H}w)=\langle[\Re\Phi;\Im\Phi],
+[\Re w;\Im w]\rangle$; the bounds then apply when ridge regression is
+performed on these real coordinates, with feature dimension $2D_i$.
+
+\subsection{Federation gap and anchor-space quantities}
+\label{subsec:fed_gap}
+
+For each client $i$, fix a representable reference predictor
+$\hat Q_i(s,a)=\Phi_i(s)^\top\hat W_{i,a}$, using the minimum-norm
+parameters when the representation is non-unique.  The algebraic result
+below holds for any such reference.  Under the geometric assumptions
+introduced later, we take $\hat Q_i=\Pi_iQ^\star$, the client-specific
+oracle projection of a target value function $Q^\star$.
+
+Let
+\[
+X_i=\begin{bmatrix}
+\Phi_i(s_1)^\top\\[-1mm]\vdots\\[-1mm]\Phi_i(s_m)^\top
+\end{bmatrix},\qquad
+G_i=X_iX_i^\top,\qquad
+\mathbf k_i(s)=X_i\Phi_i(s),
+\]
+and let $P_i=X_iX_i^\dagger$ and
+$P_{i,\mathrm{row}}=X_i^\dagger X_i$ be the orthogonal projectors onto
+$\mathrm{col}(X_i)$ and $\mathrm{row}(X_i)$, respectively.  For an action
+$a$, define the oracle anchor labels
+$y^\star_{i,a}=X_i\hat W_{i,a}$, their weighted mean
+$\bar y^\star_a=\sum_j\pi_j y^\star_{j,a}$, and the teacher actually
+formed by Algorithm~\ref{alg:fedqhd_heterogeneous},
+\[
+y^{\mathrm{glob}}_a
+=Q^{\mathrm{glob}}_{\mathrm{ref},a}
+=\sum_{j=1}^N\pi_jX_jW_{j,a}.
+\]
+The federation gap is
+\begin{equation}
+\Delta_i(s,a)
+\defeq
+\hat Q_i(s,a)-Q_i(s,a;W_i^{\mathrm{glob}}),
+\label{eq:gap_def}
+\end{equation}
+where $W_i^{\mathrm{glob}}$ is obtained by compiling
+$y^{\mathrm{glob}}$.  The oracle mean serves as a reference in the
+analysis and is not needed by the algorithm.
+
+For $\lambda>0$, introduce the state-dependent ridge sensitivity and
+self-reconstruction bias
+\begin{align}
+\alpha_{i,\lambda}(s)
+&\defeq
+\left\|(G_i+\lambda I)^{-1}\mathbf k_i(s)\right\|_2,
+\label{eq:alpha_def}\\
+\beta_{i,\lambda}(s)
+&\defeq
+\left\|\lambda(X_i^\top X_i+\lambda I)^{-1}\Phi_i(s)\right\|_2.
+\label{eq:beta_def}
+\end{align}
+Both quantities can be computed from the client features, anchors, and
+regularization parameter.  We also define the projected oracle
+mismatch and projected client estimation error
+\begin{align}
+H_{i,a}
+&\defeq
+\frac{1}{\sqrt m}
+\left\|P_i(\bar y^\star_a-y^\star_{i,a})\right\|_2,
+\label{eq:H_def}\\
+E_{i,a}^{\mathrm{est}}
+&\defeq
+\frac{1}{\sqrt m}
+\left\|P_i(y^{\mathrm{glob}}_a-\bar y^\star_a)\right\|_2.
+\label{eq:E_def}
+\end{align}
+These quantities retain cancellation across clients within each
+discrepancy and discard components orthogonal to $\mathrm{col}(X_i)$.
+Their evaluation requires the reference predictors; when the oracles
+are unknown, they remain theoretical quantities.
+
+\subsection{Projection residual invisibility}
+
+\begin{theorem}[Projection residual invisibility]
+\label{thm:invisibility}
+For $\lambda>0$, the compiled prediction depends only on the component of
+the teacher in $\mathrm{col}(X_i)$:
+\[
+Q_i(s,a;W_i^{\mathrm{glob}})
+=
+\mathbf k_i(s)^\top(G_i+\lambda I)^{-1}
+P_i y^{\mathrm{glob}}_a.
+\]
+Consequently,
+$\mathbf k_i(s)^\top(G_i+\lambda I)^{-1}(I-P_i)y=0$
+for every $y\in\mathbb R^m$.  For $\lambda=0$, the same statement holds
+for the minimum-norm solution with $G_i^\dagger$.
+\end{theorem}
+
+\begin{proof}
+See Appendix~\ref{app:proof_invisibility}.
+\end{proof}
+
+The discarded component can be nonzero only when
+$\mathrm{rank}(X_i)<m$.  If $m\le D_i$ and $X_i$ has full row rank,
+$P_i=I_m$, so no teacher component is discarded by this projection.
+Coverage of states outside the anchor set is a separate issue,
+quantified below by $\rho_i(s)$.
+
+\subsection{A data-dependent federation-gap bound}
+
+\begin{theorem}[Data-dependent federation gap]
+\label{thm:fed_gap_main}
+For each client $i$, state-action pair $(s,a)$, and $\lambda>0$, the
+update performed by Algorithm~\ref{alg:fedqhd_heterogeneous} satisfies
+\begin{align}
+|\Delta_i(s,a)|
+&\le
+\beta_{i,\lambda}(s)\|\hat W_i\|_F
++
+\alpha_{i,\lambda}(s)
+\left\|P_i(y^{\mathrm{glob}}_a-y^\star_{i,a})\right\|_2
+\label{eq:data_gap_direct}\\
+&\le
+\beta_{i,\lambda}(s)\|\hat W_i\|_F
++
+\sqrt m\,\alpha_{i,\lambda}(s)
+\bigl(H_{i,a}+E_{i,a}^{\mathrm{est}}\bigr).
+\label{eq:data_gap_split}
+\end{align}
+Equation~\eqref{eq:data_gap_direct} retains the combined discrepancy
+between the actual teacher and client $i$'s reference labels, including
+cancellation between heterogeneity and estimation errors.
+Equation~\eqref{eq:data_gap_split} separates that discrepancy
+into oracle heterogeneity and client estimation.
+\end{theorem}
+
+\begin{proof}
+See Appendix~\ref{app:proof_termB}.
+\end{proof}
+
+Theorem~\ref{thm:fed_gap_main} holds for fixed anchors and arbitrary
+uploaded predictors.  The following geometric corollary bounds the
+reference mismatch under a common RKHS assumption.  A sampling
+assumption is needed only for the subsequent statement about scaling
+with $m$; no independence between client errors is assumed.
+
+\subsection{Geometric interpretation}
+
+\begin{assumption}[Common evaluation space]
+\label{assum:common_rkhs}
+There is an RKHS $\mathcal H$ with kernel
+$\kappa(s,s')$ satisfying $\kappa(s,s)\le1$ such that
+$Q^\star(\cdot,a)\in\mathcal H$ with
+$\|Q^\star(\cdot,a)\|_{\mathcal H}\le B$ and every
+$\mathcal F_i=\{\Phi_i(\cdot)^\top w:w\in\mathbb R^{D_i}\}$ is a closed
+subspace of $\mathcal H$.  The geometric corollary requires this
+structural assumption to hold for the chosen target and feature maps.
+Smoothness of the MDP alone does not establish it.
+\end{assumption}
+
+Let $\Pi_i$ be the $\mathcal H$-orthogonal projector onto $\mathcal F_i$
+and now set
+\[
+\hat Q_i(\cdot,a)=\Pi_iQ^\star(\cdot,a),\qquad
+\varepsilon_i^{\mathrm{rep}}
+\defeq
+\max_a\|(I-\Pi_i)Q^\star(\cdot,a)\|_{\mathcal H}.
+\]
+Define subspace misalignment by
+$\sin\theta_{ij}\defeq\|\Pi_i-\Pi_j\|_{\mathcal H\to\mathcal H}$.
+For unequal-dimensional subspaces this norm equals one, so the
+angle bound reduces to $B$; the representation errors can give a
+smaller bound.
+
+\begin{assumption}[Bounded features and anchor coverage]
+\label{assum:anchor}
+For every client $i$,
+$\|\Phi_i(s)\|_2\le L_i$ on the states of interest.  When a
+high-probability scaling statement in $m$ is invoked, anchors are sampled
+i.i.d.\ from $\nu_{\mathrm{ref}}$ and
+\[
+\Sigma_{\mathrm{ref},i}
+\defeq
+\mathbb E_{\nu_{\mathrm{ref}}}
+[\Phi_i(s)\Phi_i(s)^\top]\succ0.
+\]
+A sufficient coverage condition is that the local state distribution is
+absolutely continuous with respect to $\nu_{\mathrm{ref}}$ and has
+positive-definite feature covariance.
+\end{assumption}
+
+\begin{lemma}[Pairwise oracle disagreement]
+\label{lem:term_A}
+Under Assumption~\ref{assum:common_rkhs},
+\begin{equation}
+\|\hat Q_i(\cdot,a)-\hat Q_j(\cdot,a)\|_{\mathcal H}
+\le
+h_{ij}
+\defeq
+\min\left\{
+B\sin\theta_{ij},
+\varepsilon_i^{\mathrm{rep}}+\varepsilon_j^{\mathrm{rep}}
+\right\}.
+\label{eq:pairwise_clean}
+\end{equation}
+Consequently, with
+$\bar h_i\defeq\sum_{j\ne i}\pi_jh_{ij}$,
+the empirical oracle mismatch satisfies $H_{i,a}\le\bar h_i$.
+\end{lemma}
+
+For the learned predictors, define their anchor RMS error by
+\[
+\varepsilon_j^{\mathrm{est}}
+\defeq
+\max_a
+\left(
+\frac1m\sum_{\ell=1}^m
+\bigl(Q_j(s_\ell,a;W_j)-\hat Q_j(s_\ell,a)\bigr)^2
+\right)^{1/2},
+\qquad
+\bar\varepsilon^{\mathrm{est}}
+\defeq
+\sum_j\pi_j\varepsilon_j^{\mathrm{est}}.
+\]
+Then $E_{i,a}^{\mathrm{est}}\le\bar\varepsilon^{\mathrm{est}}$.
+The sum includes client $i$'s own error.  It accounts for finite-data
+and optimization errors, as well as any difference between the TD
+solution and the oracle projection.  Increasing the number of anchors
+alone does not ensure that this discrepancy decreases.
+
+For the spectral bounds below, suppose $X_i$ has positive rank and let
+\[
+\gamma_i\defeq\lambda_{\min}^+(G_i),\qquad
+\rho_i(s)
+\defeq
+\|(I-P_{i,\mathrm{row}})\Phi_i(s)\|_2
+=
+\left(
+\|\Phi_i(s)\|_2^2-
+\mathbf k_i(s)^\top G_i^\dagger\mathbf k_i(s)
+\right)^{1/2}.
+\]
+The quantity $\rho_i(s)$ is the empirical Nystr\"om residual of state
+$s$ relative to the anchors.  If $X_i=0$, the compiled predictor is
+zero and Theorem~\ref{thm:fed_gap_main} still applies directly, with
+$\alpha_{i,\lambda}(s)=0$ and
+$\beta_{i,\lambda}(s)=\|\Phi_i(s)\|_2$.
+
+\begin{corollary}[Geometric five-factor bound]
+\label{cor:geometric_gap}
+Under Assumptions~\ref{assum:common_rkhs}--\ref{assum:anchor},
+for $\lambda>0$ and $\mathrm{rank}(X_i)>0$,
+\begin{align}
+|\Delta_i(s,a)|
+\le{}&
+\frac{L_i\sqrt m}{\sqrt{\gamma_i+\lambda}}
+\bigl(\bar h_i+\bar\varepsilon^{\mathrm{est}}\bigr)
+\nonumber\\
+&+
+\left[
+\rho_i(s)^2+
+\left(\frac{\lambda}{\gamma_i+\lambda}\right)^2
+\mathbf k_i(s)^\top G_i^\dagger\mathbf k_i(s)
+\right]^{1/2}
+\|\hat W_i\|_F .
+\label{eq:fed_gap_bound}
+\end{align}
+A simpler but looser five-term form is
+\begin{equation}
+|\Delta_i(s,a)|
+\le
+\underbrace{
+\frac{L_i\sqrt m}{\sqrt{\gamma_i+\lambda}}\bar h_i
+}_{\textup{(I)--(II) heterogeneity amplification}}
++
+\underbrace{
+\frac{L_i\sqrt m}{\sqrt{\gamma_i+\lambda}}
+\bar\varepsilon^{\mathrm{est}}
+}_{\textup{(IV) client estimation}}
++
+\underbrace{
+\left(
+\frac{L_i\lambda}{\gamma_i+\lambda}+\rho_i(s)
+\right)\|\hat W_i\|_F
+}_{\textup{(III), (V) shrinkage and coverage}} .
+\label{eq:fed_gap_five_term}
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+See Appendix~\ref{app:proof_termB}.
+\end{proof}
+
+\begin{remark}[Anchor scaling]
+\label{rem:m_scaling}
+Under Assumption~\ref{assum:anchor}, standard matrix concentration gives
+$\gamma_i=\Theta(m)$ with high probability once the sample size is large
+relative to
+$L_i^2\log(D_i/\delta)/
+\lambda_{\min}(\Sigma_{\mathrm{ref},i})$.
+For a fixed anchor distribution and fixed $\lambda$, the factor
+$L_i\sqrt m/\sqrt{\gamma_i+\lambda}$ is therefore of constant order in
+$m$.  This scaling does not force the contribution of a systematic
+client estimation error to vanish.  For fixed anchors, increasing
+$\lambda$ decreases the sensitivity $\alpha_{i,\lambda}(s)$ but
+increases the reconstruction factor $\beta_{i,\lambda}(s)$.
+Regularization therefore trades sensitivity to teacher errors for
+reconstruction bias; it provides no guarantee that the total error
+decreases.
+\end{remark}
+
+\begin{remark}[The under-determined regime]
+\label{rem:underdetermined}
+When $m<D_i$ and $X_i$ has full row rank, $\gamma_i$ is the smallest
+eigenvalue of the $m\times m$ empirical kernel matrix, while
+$\rho_i(s)$ can be nonzero.  A small coverage residual controls one
+component of the error; the bound also depends on ridge sensitivity,
+teacher mismatch, and the reference parameter norm.  If
+$\mathrm{rank}(X_i)=D_i$, then $\rho_i\equiv0$.  Full column rank
+requires $m\ge D_i$ and removes the coverage term, but alone gives no
+lower bound on $\gamma_i$ or guarantee of accurate compilation.
+\end{remark}
+
+\begin{remark}[Per-round interpretation]
+\label{rem:per_round}
+The bounds hold at every federation round with the quantities evaluated
+at the predictors uploaded in that round.  They do not control the
+evolution of $\bar\varepsilon^{\mathrm{est}}(k)$ under local TD updates.
+Such a statement requires a separate joint convergence analysis.
+Even convergence to a TD fixed point would not establish zero oracle
+error without an additional argument relating that point to $\hat Q_i$.
+\end{remark}
+
+\begin{corollary}[Sufficient zero-gap conditions]
+For fixed uploaded predictors, reference predictors, and anchors,
+if the actual teacher matches client $i$'s oracle labels in the
+representable anchor subspace,
+$P_i(y^{\mathrm{glob}}_a-y^\star_{i,a})=0$, the anchor feature matrix has
+full column rank, then $\Delta_i(s,a)\to0$ as $\lambda\to0$.
+A sufficient geometric specialization is
+$\bar h_i=\bar\varepsilon^{\mathrm{est}}=0$ together with
+$\mathrm{rank}(X_i)=D_i$.
+\end{corollary}
+
+\begin{corollary}[Heterogeneity-dominated regime]
+\label{col:phase_transition}
+For fixed uploaded and reference predictors, suppose
+$\mathrm{rank}(X_i)=D_i$, so $\rho_i\equiv0$, and the anchors
+satisfy the scaling condition of Remark~\ref{rem:m_scaling}.  As
+$\lambda\to0$,
+\[
+\limsup_{\lambda\downarrow0}|\Delta_i(s,a)|
+\le
+C_i\bigl(\bar h_i+\bar\varepsilon^{\mathrm{est}}\bigr)
+\]
+with high probability for an anchor-distribution-dependent constant
+$C_i$.  The upper bound retains the client estimation term; its
+contribution to the actual gap may be smaller because of cancellation
+or projection.
+\end{corollary}
+
+Equation~\eqref{eq:data_gap_direct} gives the bound in terms of the
+actual teacher and a representable reference.  The geometric corollary
+explains this discrepancy through encoder heterogeneity, anchor
+conditioning, client estimation, ridge shrinkage, and anchor coverage.
+Using these bounds with oracle references requires access to those
+references or a separate bound on their estimation error.
+
+
+%% Experiments
+
+\section{Experiments}
+\label{sec:experiments}
+
+
+We evaluate FedQHD on four continuous-control benchmarks under both
+homogeneous and heterogeneous encoder settings. Our experiments address:
+\textbf{(Q1)} Does FedQHD improve policy learning over independent
+training and existing federated RL baselines?
+\textbf{(Q2)} Under heterogeneous encoders, can anchor-based aggregation
+recover a meaningful shared value function?
+\textbf{(Q3)} Does FedQHD reduce computation compared with
+backpropagation-based and distillation-based federation?
+\textbf{(Q4)} How does the encoder dimension $D$ affect FedQHD quality?
+
+Learning curves on CartPole and LunarLander, the ablation on anchor set size $m$, the scalability study
+with respect to $N$, and the full experimental setup are provided in Appendix~\ref{app:exp}--\ref{subsec:scalability}.
+
+
+\subsection{Experimental Setup}
+\label{subsec:exp_setup}
+
+We conduct FedQHD on four continuous-state and discrete-action control benchmarks from OpenAI Gym~\citep{brockman2016openai}: \texttt{CartPole-v1}, \texttt{Acrobot-v1}, \texttt{LunarLander-v3} and \texttt{MountainCar-v0}.
+
+In homogeneous experiments, all clients share a random Fourier feature (RFF) encoder of dimension $D=10{,}000$ and fixed bandwidth $\sigma$.
+In heterogeneous experiments, each client independently samples an RFF encoder with bandwidth $\sigma_i \sim \mathrm{Unif}[0.5\sigma_0,1.5\sigma_0]$ and dimension $D_i$ ranging from $5\times10^2$ to $10^4$. Anchor-based aggregation uses a server-constructed reference set of size $m=200$. Unless otherwise stated, we use \(m=200\) anchors in the main experiments; Appendix~\ref{app:ablation_m} studies the effect of varying \(m\).
+
+
+
+
+We compare FedQHD against the following baselines:
+{(i) Independent QHD: The performance of a randomly selected local model in each of the $N$ involved environments.} {(ii) Oracle QHD$^\dagger$: A single QHD trained on data pooled from all clients.} { (iii) Oracle DQN$^\dagger$: A single DQN trained on pooled data from all clients.} {(iv) FedAvg-DQN~\citep{jin2022federated}: Federated deep Q-learning with parameter averaging.} { (v) Truncate FedAvg-QHD: Client weight matrices $W_i \in \mathbb{R}^{D_i \times |A|}$ are truncated to the minimum dimension $D_{\min}$ before averaging, then zero-padded back to each client's original dimension.}
+%(v) Truncate FedAvg-QHD Client weight matrices $W_i \in \mathbb{R}^{D_i \times |\mathcal{A}|}$ are truncated to the minimum dimension $D_{\min}$ before averaging, then zero-
+{(vi) Distillation FedDQN \citep{jiang2025fedhpd}: Heterogeneous aggregation by distilling a client DQN toward an anchor-set teacher updated via averaged soft predictions.}
+
+We report (i) average reward: mean episodic return across
+clients; (ii) compilation error: maximum Q-value deviation
+between FedQHD and the client oracle on held-out anchors; and
+(iii) policy value gap: the return difference between greedy
+policies induced by Oracle QHD and FedQHD.
+
+
+\subsection{Results}
+\label{sec:results}
+
+\paragraph{Performance Comparison (Q1 and Q2)}
+\label{subsec:performance_homo}
+
+Table~\ref{tab:main_results} reports final average reward after training
+$N=5$ clients for 600 episodes. Full results with standard deviations across 3 seeds are reported in Appendix~\ref{app:performance}. FedQHD achieves the best non-oracle
+performance in 5 of 8 tasks and even surpasses Oracle QHD on
+LunarLander.
+
+
+Under heterogeneous encoders, aggregation strategies diverge sharply.
+Truncate FedAvg-QHD collapses when moving from Q1 to Q2 (e.g.,
+CartPole drops 73\%), confirming that naive dimension matching
+destroys the RFF feature structure. In contrast, FedQHD remains
+competitive because anchor-based projection preserves the geometry
+of client representations. Distillation FedDQN also transfers across
+heterogeneous architectures but requires iterative optimization and
+is substantially slower (Table~\ref{tab:computation_cost}), whereas
+FedQHD performs a single closed-form compilation step.
+
+
+
+% 9-column table: must span both columns (table*), which floats to the top of a page.
+\begin{table*}[t]
+\centering
+\caption{Final average reward (last 100 episodes), mean over $N{=}5$ clients and 3 seeds. \textbf{Bold}: best non-oracle. $\dagger$: oracle (pooled data). {--}: not applicable.}
+\label{tab:main_results}
+\setlength{\tabcolsep}{6pt}
+\small
+\begin{tabular}{l rr rr rr rr}
+\toprule
+& \multicolumn{2}{c}{CartPole} & \multicolumn{2}{c}{Acrobot} & \multicolumn{2}{c}{LunarLander} & \multicolumn{2}{c}{MountainCar} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+Method & Homo & Hetero & Homo & Hetero & Homo & Hetero & Homo & Hetero \\
+\midrule
+Indep. QHD          & 26.1            & 24.0            & $-306.1$        & $-495.4$        & $-187.3$        & $-174.6$        & $-200.0$        & $-200.0$ \\
+Trunc. FedAvg-QHD   & 230.8           & 112.6           & $-106.5$        & $-280.8$        & 65.0            & $-24.8$         & $-148.3$        & $-172.9$ \\
+FedAvg-DQN          & 120.8           & {--}            & $\mathbf{-85.3}$ & {--}           & 200.9           & {--}            & $-167.8$        & {--} \\
+Distill. FedDQN     & 169.9           & 149.4           & $-87.5$         & $\mathbf{-89.2}$ & 122.5         & $\mathbf{131.4}$ & $-156.0$       & $-174.3$ \\
+FedQHD              & $\mathbf{466.3}$ & $\mathbf{351.1}$ & $-105.0$       & $-102.5$        & $\mathbf{224.1}$ & 101.5          & $\mathbf{-143.7}$ & $\mathbf{-162.3}$ \\
+\midrule
+Oracle QHD$^\dagger$ & 373.2          & 458.5           & $-93.6$         & $-101.2$        & 87.6            & 232.9           & $-141.3$        & $-140.0$ \\
+Oracle DQN$^\dagger$ & 139.1          & 204.4           & $-75.3$         & $-79.8$         & 183.5           & 202.6           & $-125.7$        & $-122.8$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+
+
+
+\paragraph{Computation Cost.} Table~\ref{tab:computation_cost} reports the wall-clock training time of FedQHD with 5 clients after 600 episodes, complementing the performance results in Table~\ref{tab:main_results}.  FedQHD is consistently faster than all DQN-based methods, as it entirely replaces backpropagation with closed-form TD(0) updates and, unlike Distillation FedDQN, requires no additional per-round gradient loops through a teacher network.
+%
+Under homogeneous encoders with $D=10{,}000$, FedQHD takes 9.7--20.3 min across environments, compared to 25.9--85.6 min for FedAvg-DQN and 14.3--69.2 min for Distillation FedDQN. A more revealing finding emerges under Q2: despite requiring an extra anchor-based ridge-regression solve at each aggregation round, FedQHD's Q2 wall-clock time (1.4--5.9 min) is $3$--$12\times$ lower than its own Q1 cost on the same environment. This is because Q2 clients operate with mixed encoder dimensions ($D_i$ ranging from $5\times10^2$ to $10^4$, assigned cyclically) versus the fixed $D=10{,}000$ used uniformly in Q1,  demonstrating that in FedQHD representation dimensionality is the primary driver of computation cost.
+
+
+\begin{table*}[t]
+\centering
+\caption{%
+  Wall-clock training time (minutes per run, 600 episodes,  $N{=}5$ clients) reported as mean $\pm$ std across 3 seeds.
+  CP = CartPole, Acr = Acrobot, LL = LunarLander, MC = MountainCar.
+}
+\label{tab:computation_cost}
+\setlength{\tabcolsep}{5pt}
+\small
+
+\begin{tabular}{l rrrr rrrr}
+\toprule
+ & \multicolumn{4}{c}{Homogeneous}
+ & \multicolumn{4}{c}{Heterogeneous} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Method & CP & Acr & LL & MC & CP & Acr & LL & MC \\
+\midrule
+Independent QHD
+  & $1.7{\scriptstyle\pm0.1}$  & $9.6{\scriptstyle\pm0.1}$  & $2.8{\scriptstyle\pm0.0}$  & $12.7{\scriptstyle\pm0.1}$
+  & $0.1{\scriptstyle\pm0.0}$  & $5.0{\scriptstyle\pm0.0}$  & $0.8{\scriptstyle\pm0.0}$  & $1.4{\scriptstyle\pm0.0}$ \\
+Truncate FedAvg-QHD
+  & $3.5{\scriptstyle\pm0.2}$  & $5.6{\scriptstyle\pm0.0}$  & $15.5{\scriptstyle\pm0.2}$ & $7.6{\scriptstyle\pm0.2}$
+  & $0.3{\scriptstyle\pm0.0}$  & $2.1{\scriptstyle\pm0.3}$  & $2.9{\scriptstyle\pm0.1}$  & $1.7{\scriptstyle\pm0.1}$ \\
+FedAvg-DQN
+  & $25.9{\scriptstyle\pm1.4}$ & $22.8{\scriptstyle\pm0.7}$ & $36.8{\scriptstyle\pm0.6}$ & $85.6{\scriptstyle\pm4.8}$
+  & {--} & {--} & {--} & {--} \\
+Distillation FedDQN
+  & $12.4{\scriptstyle\pm0.6}$ & $21.6{\scriptstyle\pm0.1}$ & $31.3{\scriptstyle\pm5.5}$ & $28.1{\scriptstyle\pm2.4}$
+  & $10.3{\scriptstyle\pm1.4}$ & $19.7{\scriptstyle\pm2.3}$ & $35.2{\scriptstyle\pm3.7}$ & $52.9{\scriptstyle\pm3.6}$ \\
+FedQHD
+  & $\phantom{0}7.8{\scriptstyle\pm0.4}$ & $\phantom{0}5.6{\scriptstyle\pm0.0}$ & $15.5{\scriptstyle\pm0.2}$ & $17.2{\scriptstyle\pm0.3}$
+  & $1.6{\scriptstyle\pm0.1}$  & $1.9{\scriptstyle\pm0.0}$  & $5.9{\scriptstyle\pm0.1}$            & $1.4{\scriptstyle\pm0.0}$ \\
+\midrule
+Oracle QHD$^\dagger$
+  & $\phantom{0}6.1{\scriptstyle\pm0.7}$ & $\phantom{0}4.9{\scriptstyle\pm0.0}$ & $15.3{\scriptstyle\pm0.3}$ & $\phantom{0}7.7{\scriptstyle\pm0.3}$
+  & $6.1{\scriptstyle\pm0.7}$  & $6.3{\scriptstyle\pm0.1}$  & $14.8{\scriptstyle\pm0.4}$ & $8.5{\scriptstyle\pm0.4}$ \\
+Oracle DQN$^\dagger$
+  & $\phantom{0}8.9{\scriptstyle\pm0.3}$ & $15.2{\scriptstyle\pm1.9}$ & $24.9{\scriptstyle\pm1.2}$ & $67.8{\scriptstyle\pm3.3}$
+  & $64.1{\scriptstyle\pm3.7}$ & $77.3{\scriptstyle\pm7.8}$ & $130.4{\scriptstyle\pm7.9}$ & $101.5{\scriptstyle\pm6.9}$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+\paragraph{Effect of Encoder Dimension $D$.} We study CartPole and vary $D$ from 16 to 2048 while fixing $m=4D$, keeping all runs in the over-determined regime ($m>D$) so that the RFF feature map and the encoder heterogeneity dominates compiled error following the geometry floor $|\Delta_i| = \mathcal{O}(D^{-1/2})$~\citep{rahimi2007random}.
+
+Figure~\ref{fig:ablation1} confirms this prediction in Corollary~\ref{col:phase_transition}. The center panel shows the compiled error with a $-0.525$ log--log slope, validating that FedQHD's anchor-based projection inherits the standard RFF approximation guarantee. The left panel shows that lower $D$ leads to both slower convergence and lower final reward, while $D \geq 128$ consistently reaches the CartPole ceiling ($V \approx 500$) within 600 episodes. The right panel directly links the policy value gap to the compiled error curve, confirming that the federation gap is a reliable proxy for practical policy degradation.
+
+
+
+% 3-panel figure (aspect ~3.7:1): full text width so panels stay legible.
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/ablation1_vary_D.pdf}
+  \caption{Ablation 1 (vary $D$, set $m=4D$): learning curves (left), Q-error vs.\ $D$ (middle), and final policy value (right).}
+  \label{fig:ablation1}
+\end{figure*}
+
+
+
+%% Conclusion
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented FedQHD, a federated $Q$-learning framework that replaces
+parameter-space synchronization with closed-form function-space
+aggregation for linear-in-parameter hyperdimensional (random-feature)
+value representations. With a shared encoder, FedQHD reduces exactly to
+weighted averaging of local readout matrices, recovering FedAvg in
+closed form. With heterogeneous encoders, the server aggregates client
+$Q$-values on a shared anchor-state interface, and each client compiles
+the resulting teacher into its local representation via a one-shot
+ridge projection---avoiding per-round iterative distillation and
+gradient-based teacher--student optimization. We further derived a
+data-dependent pointwise bound on the federation gap for the teacher
+formed from the learned client predictors. A geometric corollary separates
+encoder heterogeneity, anchor conditioning, client estimation error,
+ridge shrinkage, and anchor coverage; $m\geq D_i$ with full column rank is a
+sufficient condition for eliminating the coverage term rather than a necessary condition for
+accurate compilation. On four
+continuous-state, discrete-action benchmarks, FedQHD matches or exceeds
+federated DQN baselines while requiring substantially less computation,
+with the empirical dependence of the federation gap on encoder
+dimension matching our theoretical analysis.
+Extending closed-form heterogeneous federation to learned encoders,
+richer observation spaces, and actor--critic settings remains an
+important direction for future work.
+%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% The next two lines define, first, the bibliography style to be
+%%% applied, and, second, the bibliography file to be used.
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{main}
+
+
+\appendix
+\section{QHD Semi-Gradient Update}
+\label{app:qhd_update}
+
+For completeness, we record the semi-gradient TD update rule used by
+QHD~\citep{ni2022qhd}. Given a transition $(s, a, r, s')$, a delayed
+target weight $W_i^-$, and learning rate $\eta$, define the bootstrapped
+target
+\begin{gather*}
+    y \;=\; r + \gamma\,\Re\!\bigl(\Phi_i(s')^{\mathrm H}\,\mathbf w^{-}_{i,a^\star}\bigr),\\
+    a^\star = \arg\max_{a'\in\mathcal{A}} Q_i(s', a').
+\end{gather*}
+The semi-gradient update on the readout vector for action $a$ is
+\[
+    \mathbf w_{i,a} \;\leftarrow\; \mathbf w_{i,a}
+    + \eta\,\bigl(y - Q_i(s,a)\bigr)\,\Phi_i(s).
+\]
+The target weights $W_i^-$ are periodically synchronized with $W_i$, in
+the standard fashion of off-policy $Q$-learning with target networks.
+
+
+\section{Experimental Setup}
+\label{app:exp}
+For homogeneous experiments, all clients share a random Fourier feature (RFF) encoder of dimension $D=10{,}000$ with fixed bandwidth $\sigma$:
+\[
+\Phi(s)=\tfrac{1}{\sqrt{D}}\big[\cos(\omega_1^\top s+b_1),\dots,\cos(\omega_D^\top s+b_D)\big]^\top.
+\]
+For heterogeneous experiments, each client independently samples $\Phi_i$ with bandwidth $\sigma_i\!\sim\!\mathrm{Unif}[0.5\sigma_0,1.5\sigma_0]$, dimension $D_i\!\in\!\{500,1000,2000,5000,10000\}$ and anchor set $\mathcal{S}_{\text{ref}}$ with $m=200$ states collected from random rollouts.
+
+All methods use $\epsilon$-greedy exploration with $\epsilon$ annealed from 1.0 to 0.001. We use learning rate $\eta=0.01$, discount $\gamma=0.99$, replay buffer size 10,000 per client, and uniform federation weights $\pi_i=1/N$. Federated aggregation occurs every $K=50$ local episodes with $N=5$ clients unless stated otherwise. We report mean over 3 random seeds. All DQN-based baseline use a 2-layer MLP with 128 hidden units per layer.
+
+
+\section{Performance Comparison}
+\label{app:performance}
+
+
+\begin{table*}[t]
+\centering
+\caption{Final average reward (last 100 episodes), mean $\pm$ std over 3 seeds. \textbf{Bold}: best non-oracle. $\dagger$: oracle (pooled data). {--}: N/A.}
+\label{tab:main_results_variance}
+\setlength{\tabcolsep}{3pt}
+\small
+\begin{tabular}{l rr rr rr rr}
+\toprule
+& \multicolumn{2}{c}{CartPole} & \multicolumn{2}{c}{Acrobot} & \multicolumn{2}{c}{LunarLander} & \multicolumn{2}{c}{MountainCar} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+Method & Homo & Hetero & Homo & Hetero & Homo & Hetero & Homo & Hetero \\
+\midrule
+Indep. QHD
+  & $26.1{\scriptstyle\pm1.1}$    & $24.0{\scriptstyle\pm1.1}$
+  & $-306.1{\scriptstyle\pm17.1}$ & $-495.4{\scriptstyle\pm0.4}$
+  & $-187.3{\scriptstyle\pm6.4}$  & $-174.6{\scriptstyle\pm5.6}$
+  & $-200.0{\scriptstyle\pm0.0}$  & $-200.0{\scriptstyle\pm0.0}$ \\
+Trunc. FedAvg-QHD
+  & $230.8{\scriptstyle\pm85.7}$  & $112.6{\scriptstyle\pm26.1}$
+  & $-106.5{\scriptstyle\pm1.8}$  & $-280.8{\scriptstyle\pm52.8}$
+  & $65.0{\scriptstyle\pm5.1}$    & $-24.8{\scriptstyle\pm9.7}$
+  & $-148.3{\scriptstyle\pm12.5}$ & $-172.9{\scriptstyle\pm18.6}$ \\
+FedAvg-DQN
+  & $120.8{\scriptstyle\pm9.0}$   & {--}
+  & $\mathbf{-85.3{\scriptstyle\pm2.5}}$ & {--}
+  & $200.9{\scriptstyle\pm14.0}$  & {--}
+  & $-167.8{\scriptstyle\pm9.3}$  & {--} \\
+Distill. FedDQN
+  & $169.9{\scriptstyle\pm8.8}$   & $149.4{\scriptstyle\pm12.8}$
+  & $-87.5{\scriptstyle\pm0.6}$   & $\mathbf{-89.2{\scriptstyle\pm2.6}}$
+  & $122.5{\scriptstyle\pm53.2}$  & $\mathbf{131.4{\scriptstyle\pm18.4}}$
+  & $-156.0{\scriptstyle\pm7.8}$  & $-174.3{\scriptstyle\pm14.6}$ \\
+FedQHD
+  & $\mathbf{466.3{\scriptstyle\pm22.3}}$ & $\mathbf{351.1{\scriptstyle\pm61.1}}$
+  & $-105.0{\scriptstyle\pm3.3}$  & $-102.5{\scriptstyle\pm0.7}$
+  & $\mathbf{224.1{\scriptstyle\pm11.8}}$ & $101.5{\scriptstyle\pm24.3}$
+  & $\mathbf{-143.7{\scriptstyle\pm5.7}}$ & $\mathbf{-162.3{\scriptstyle\pm8.9}}$ \\
+\midrule
+Oracle QHD$^\dagger$
+  & $373.2{\scriptstyle\pm80.9}$  & $458.5{\scriptstyle\pm52.1}$
+  & $-93.6{\scriptstyle\pm0.6}$   & $-101.2{\scriptstyle\pm1.5}$
+  & $87.6{\scriptstyle\pm6.2}$    & $232.9{\scriptstyle\pm14.3}$
+  & $-141.3{\scriptstyle\pm4.1}$  & $-140.0{\scriptstyle\pm3.9}$ \\
+Oracle DQN$^\dagger$
+  & $139.1{\scriptstyle\pm10.5}$  & $204.4{\scriptstyle\pm16.9}$
+  & $-75.3{\scriptstyle\pm0.4}$   & $-79.8{\scriptstyle\pm2.0}$
+  & $183.5{\scriptstyle\pm12.8}$  & $202.6{\scriptstyle\pm15.7}$
+  & $-125.7{\scriptstyle\pm6.3}$  & $-122.8{\scriptstyle\pm5.5}$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+Figure~\ref{fig:learning_curve} shows that FedQHD
+converges within 600 episodes on CartPole and LunarLander, whereas
+DQN-based methods plateau earlier. This suggests that function-space
+aggregation transfers more useful information per communication round
+than parameter averaging in deep networks.
+
+
+% 2x2 grid of learning curves: full width so the four panels are readable.
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/CartPole_LunarLander_combined.pdf}
+    \caption{
+    Learning curves for CartPole (top) and LunarLander (bottom) under homogeneous (left) and heterogeneous (right) encoders.}
+    \label{fig:learning_curve}
+\end{figure*}
+
+\section{Effect of Anchor Set Size $m$}
+\label{app:ablation_m}
+We fix $D=512$ and vary the anchor size $m$ from $51$ to $2048$ on CartPole. Corollary~\ref{cor:geometric_gap} separates two effects around $m=D$: for $m<D$, the state-dependent coverage residual $\rho_i(s)$ can be nonzero; near a poorly conditioned square Gram matrix, the realized sensitivity $\alpha_{i,\lambda}(s)$ can be large; and once $X_i$ has full column rank, $\rho_i(s)$ vanishes.
+
+Figure~\ref{fig:ablation2} shows that the compiled error drops within the under-determined regime and then stabilizes. This behavior is consistent with improved anchor coverage, but $m=D$ is not a necessary threshold for accurate control: the data-dependent bound depends on the realized sensitivity and teacher mismatch at visited states.
+
+Together with the ablation on dimension, this supports $m\ge D$ with full column rank as a sufficient rule for removing the coverage term. In the under-determined regime, accuracy is instead governed by the Nystr\"om residual and the spectrum-weighted ridge sensitivity in Theorem~\ref{thm:fed_gap_main}.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/ablation2_vary_m.pdf}
+  \caption{
+           Ablation 2 (vary $m$, fix $D=512$): learning curves (left), Q-error vs.\ $m/D$ with the $m=D$ transition (middle), and final policy value (right).}
+  \label{fig:ablation2}
+\end{figure*}
+
+
+
+
+
+\section{Scalability Analysis}
+\label{subsec:scalability}
+We evaluate the scalability of FedQHD by varying $N \in \{1, 2, 5, 20\}$ on CartPole and LunarLander, measuring the average reward over the final 30 episodes after 500 episodes. Following standard benchmarks, we define a task as \emph{solved} when the rolling average reward $\geq\!475$ for CartPole and $\geq\!200$ for LunarLander. The dashed red line in each panel marks this threshold; bars that cross it indicate a qualitatively reliable policy.
+
+Figure~\ref{fig:scalability} shows the consistently improved final reward of FedQHD with $N$, yielding gains of $+30.6\%$ on CartPole and $+29.5\%$ on LunarLander relative to $N=1$ with no degradation at large $N$, which demonstrates that federation is a reliable lever for performance in FedQHD. Notably, a modest $N\!=\!5$ already recovers most of the scalability benefit on both environments, suggesting that FedQHD is well-suited to practical deployments where large client counts are often infeasible.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figures/scalability_bar_combined.pdf}
+    \caption{FedQHD performance at 575--600 episodes vs.\ number of clients $N$.}
+    \label{fig:scalability}
+\end{figure*}
+
+Across homogeneous and heterogeneous settings, FedQHD consistently matches or exceeds federated DQN baselines while requiring substantially less computation. Its performance degradation under encoder mismatch follows the projection regime predicted by Theorem~\ref{thm:fed_gap_main}, and its scalability saturates once the dominant value subspace is sufficiently covered. Together, the results validate the geometric design principles underlying FedQHD.
+
+\section{Proof of Theorem~\ref{thm:invisibility}}
+\label{app:proof_invisibility}
+\begin{proof}
+For $\lambda>0$, the primal and dual forms of ridge regression give
+\[
+W_i^{\mathrm{glob}}
+=
+(X_i^\top X_i+\lambda I)^{-1}X_i^\top y^{\mathrm{glob}}
+=
+X_i^\top(G_i+\lambda I)^{-1}y^{\mathrm{glob}}.
+\]
+Thus
+\[
+Q_i(s,a;W_i^{\mathrm{glob}})
+=
+\mathbf k_i(s)^\top(G_i+\lambda I)^{-1}y^{\mathrm{glob}}_a.
+\]
+The spaces $\mathrm{col}(X_i)=\mathrm{col}(G_i)$ and
+$\ker(G_i)$ are invariant under $(G_i+\lambda I)^{-1}$.
+Moreover, $\mathbf k_i(s)\in\mathrm{col}(X_i)$, so the component
+$(I-P_i)y^{\mathrm{glob}}_a\in\ker(G_i)$ is orthogonal to the prediction
+functional and contributes zero.  When $\lambda=0$, replace the inverse
+by $G_i^\dagger$; it annihilates the same null-space component.
+\end{proof}
+
+\section{Proof of Lemma~\ref{lem:term_A}}
+\label{app:proof_termA}
+\begin{proof}
+Fix an action and suppress it from the notation.  Because
+$\hat Q_k=\Pi_kQ^\star$, the triangle inequality through $Q^\star$ gives
+\[
+\|\hat Q_i-\hat Q_j\|_{\mathcal H}
+\le
+\|(I-\Pi_i)Q^\star\|_{\mathcal H}
++
+\|(I-\Pi_j)Q^\star\|_{\mathcal H}
+\le
+\varepsilon_i^{\mathrm{rep}}+\varepsilon_j^{\mathrm{rep}}.
+\]
+A second route uses the difference of projectors:
+\[
+\|\hat Q_i-\hat Q_j\|_{\mathcal H}
+=
+\|(\Pi_i-\Pi_j)Q^\star\|_{\mathcal H}
+\le
+B\|\Pi_i-\Pi_j\|_{\mathcal H\to\mathcal H}
+=
+B\sin\theta_{ij}.
+\]
+Taking the smaller of the two bounds proves
+\eqref{eq:pairwise_clean}.  For the anchors, the reproducing property
+and $\kappa(s,s)\le1$ imply
+$|\hat Q_i(s_\ell,a)-\hat Q_j(s_\ell,a)|\le h_{ij}$.
+Therefore,
+\begin{align*}
+H_{i,a}
+&=
+m^{-1/2}
+\left\|
+P_i\sum_{j\ne i}\pi_j
+(y^\star_{j,a}-y^\star_{i,a})
+\right\|_2\\
+&\le
+\sum_{j\ne i}\pi_j h_{ij}
+=
+\bar h_i.
+\end{align*}
+\end{proof}
+
+\section{Proof of Theorem~\ref{thm:fed_gap_main} and
+Corollary~\ref{cor:geometric_gap}}
+\label{app:proof_termB}
+
+\begin{proof}[Proof of Theorem~\ref{thm:fed_gap_main}]
+Let
+$\mathcal R_i(y)=(X_i^\top X_i+\lambda I)^{-1}X_i^\top y$.
+Compiling client $i$'s own oracle labels gives
+\[
+\hat Q_i(s,a)-Q_i(s,a;\mathcal R_i(y^\star_i))
+=
+\Phi_i(s)^\top
+\lambda(X_i^\top X_i+\lambda I)^{-1}\hat W_{i,a}.
+\]
+Cauchy--Schwarz and \eqref{eq:beta_def} bound its absolute value by
+$\beta_{i,\lambda}(s)\|\hat W_i\|_F$.
+
+By linearity of $\mathcal R_i$ and the dual ridge identity,
+\begin{align*}
+&Q_i(s,a;\mathcal R_i(y^{\mathrm{glob}}))
+-
+Q_i(s,a;\mathcal R_i(y^\star_i))\\
+&\qquad=
+\mathbf k_i(s)^\top(G_i+\lambda I)^{-1}
+(y^{\mathrm{glob}}_a-y^\star_{i,a})\\
+&\qquad=
+\mathbf k_i(s)^\top(G_i+\lambda I)^{-1}
+P_i(y^{\mathrm{glob}}_a-y^\star_{i,a}),
+\end{align*}
+where the final equality is Theorem~\ref{thm:invisibility}.
+Cauchy--Schwarz and \eqref{eq:alpha_def} yield the second term in
+\eqref{eq:data_gap_direct}.  Finally,
+\[
+y^{\mathrm{glob}}_a-y^\star_{i,a}
+=
+(y^{\mathrm{glob}}_a-\bar y^\star_a)
++
+(\bar y^\star_a-y^\star_{i,a}),
+\]
+so the triangle inequality together with
+\eqref{eq:H_def}--\eqref{eq:E_def} proves
+\eqref{eq:data_gap_split}.
+\end{proof}
+
+\begin{proof}[Proof of Corollary~\ref{cor:geometric_gap}]
+First, Lemma~\ref{lem:term_A} gives $H_{i,a}\le\bar h_i$.
+For the learned-teacher term,
+\begin{align*}
+\sqrt m\,E_{i,a}^{\mathrm{est}}
+&=
+\left\|
+P_i\sum_j\pi_j
+(X_jW_{j,a}-y^\star_{j,a})
+\right\|_2\\
+&\le
+\sum_j\pi_j
+\|X_jW_{j,a}-y^\star_{j,a}\|_2
+\le
+\sqrt m\,\bar\varepsilon^{\mathrm{est}}.
+\end{align*}
+
+Next, diagonalize $G_i$ on its positive eigenspace.  Since
+$\mathbf k_i(s)\in\mathrm{col}(G_i)$,
+\begin{align*}
+\alpha_{i,\lambda}(s)^2
+&=
+\mathbf k_i(s)^\top(G_i+\lambda I)^{-2}\mathbf k_i(s)\\
+&\le
+\frac{1}{\gamma_i+\lambda}
+\mathbf k_i(s)^\top G_i^\dagger\mathbf k_i(s)
+\le
+\frac{L_i^2}{\gamma_i+\lambda}.
+\end{align*}
+The last inequality follows from
+$\mathbf k_i(s)^\top G_i^\dagger\mathbf k_i(s)
+=\|P_{i,\mathrm{row}}\Phi_i(s)\|_2^2$.
+
+For the reconstruction term, decompose $\Phi_i(s)$ into the row space
+of $X_i$ and its orthogonal complement.  On the row space, the
+eigenvalues of
+$\lambda(X_i^\top X_i+\lambda I)^{-1}$ are at most
+$\lambda/(\gamma_i+\lambda)$; on the orthogonal complement the operator
+is the identity.  Orthogonality gives the sharper bound
+\[
+\beta_{i,\lambda}(s)^2
+\le
+\left(\frac{\lambda}{\gamma_i+\lambda}\right)^2
+\mathbf k_i(s)^\top G_i^\dagger\mathbf k_i(s)
++
+\rho_i(s)^2.
+\]
+Substitution into Theorem~\ref{thm:fed_gap_main} proves
+\eqref{eq:fed_gap_bound}.  Finally,
+$\sqrt{x^2+y^2}\le x+y$ and
+$\mathbf k_i(s)^\top G_i^\dagger\mathbf k_i(s)\le L_i^2$
+give \eqref{eq:fed_gap_five_term}.
+\end{proof}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
