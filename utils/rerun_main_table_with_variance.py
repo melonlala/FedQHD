@@ -22,8 +22,8 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
-from experiments_runner import ExperimentResults  # noqa: E402
-from run_single_method import METHODS, result_filename  # noqa: E402
+from scripts.experiments_runner import ExperimentResults  # noqa: E402
+from scripts.run_single_method import METHODS, result_filename  # noqa: E402
 
 
 ENVS = ["CartPole", "Acrobot", "LunarLander", "MountainCar"]

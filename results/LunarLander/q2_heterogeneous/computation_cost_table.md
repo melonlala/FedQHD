@@ -1,0 +1,10 @@
+# Training Time Comparison
+
+| Method | Training Time (s) | Relative Time |
+|--------|-------------------|---------------|
+| Distillation FedDQN (Heterogeneous) | 4278.04 | 4278.04x |
+| FedQHD (Heterogeneous) | 229.09 | 229.09x |
+| Independent QHD (Heterogeneous) | 65.76 | 65.76x |
+| Oracle DQN (Heterogeneous) | 9392.92 | 9392.92x |
+| Oracle QHD (Heterogeneous) | 980.05 | 980.05x |
+| Truncate FedAvg-QHD (Heterogeneous) | 309.06 | 309.06x |

@@ -20,7 +20,7 @@ import numpy as np
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from experiments_runner import (
+from scripts.experiments_runner import (
     train_independent_qhd,
     train_fedqhd_homogeneous,
     train_fedqhd_heterogeneous,
