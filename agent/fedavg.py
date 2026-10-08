@@ -24,16 +24,25 @@ class FedAvgAgent:
     Manages multiple agents that learn independently and periodically aggregate their knowledge.
     """
     def __init__(self, state_dim, action_dim,  agent_type, num_agents, learning_rate=0.1, discount_factor=0.9,
-                 exploration_rate=1.0, exploration_decay=0.99, exploration_min=0.01, hd_dim=None, state_bounds=None, use_structured_rbf=False, num_rbf_centers=1000):
+                 exploration_rate=1.0, exploration_decay=0.99, exploration_min=0.01, hd_dim=None, state_bounds=None, use_structured_rbf=False, num_rbf_centers=1000,
+                 random_seed=42, dqn_kwargs=None):
         self.num_agents = num_agents
         self.exploration_rate = exploration_rate
         self.exploration_decay = exploration_decay
         self.exploration_min = exploration_min
         self.state_dim = state_dim
         self.action_dim = action_dim
-        self.random_state = 42  # For reproducibility
+        self.random_state = random_seed  # Shared encoder seed (homogeneous clients)
 
-        if agent_type == 'dqn':
+        if agent_type == 'dqn' and dqn_kwargs is not None:
+            # Fully specified DQN clients (e.g. rl-baselines3-zoo preset)
+            self.agents = [DQNAgent(state_dim=state_dim, action_dim=action_dim, **dqn_kwargs)
+                           for _ in range(num_agents)]
+            self.global_model = QNetwork(state_dim, action_dim,
+                                         net_arch=dqn_kwargs.get('net_arch'),
+                                         hidden_size=dqn_kwargs.get('hidden_size', 128))
+        elif agent_type == 'dqn':
+            # Legacy clients (as submitted; note exploration_min is not forwarded)
             self.agents = [DQNAgent(state_dim=state_dim, action_dim=action_dim, learning_rate=learning_rate, discount_factor=discount_factor,
                                     exploration_rate=exploration_rate, exploration_decay=exploration_decay, batch_size=64, target_update_freq=100)  
                            for _ in range(num_agents)]
@@ -46,7 +55,8 @@ class FedAvgAgent:
         elif agent_type == 'qhd':
             self.agents = [QHDAgent(state_dim=state_dim, action_dim=action_dim, learning_rate=learning_rate, discount_factor=discount_factor, 
                                    exploration_rate=exploration_rate, exploration_decay=exploration_decay, exploration_min=exploration_min, 
-                                   random_seed=self.random_state, state_bounds=state_bounds) 
+                                   random_seed=self.random_state, state_bounds=state_bounds,
+                                   **({'hd_dim': hd_dim} if hd_dim else {}))
                            for _ in range(num_agents)]
             # self.global_model = np.zeros((action_dim, 10000), dtype=np.float64)
 
@@ -146,6 +156,8 @@ class FedAvgAgent:
         for agent in self.agents:
             if self.agent_type == 'dqn':
                 agent.q_network.load_state_dict(self.global_model.state_dict())
+                if getattr(agent, 'prox_mu', 0) > 0:
+                    agent.set_prox_reference()
             elif self.agent_type in ['q_learning', 'sarsa']:
                 agent.q_table = self.global_model.copy()
             elif self.agent_type in ['qhd', 'hd_sarsa']:

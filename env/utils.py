@@ -1,6 +1,7 @@
 import gymnasium as gym
 import numpy as np
 from env.gridworld import GridWorld 
+from env.hetero_maze import make_maze_env
 
 class GridWorldWrapper:
     """
@@ -304,7 +305,105 @@ class AtariFreewayWrapper:
         self.env.close()
 
 
-def create_env(args):
+class ClientEnv:
+    """Thin proxy around an env wrapper used for federated clients.
+
+    Records whether the last transition was a true termination (as opposed to a
+    time-limit truncation) in ``last_terminated``; everything else is delegated.
+    """
+    def __init__(self, env, client_id=None, dynamics=None):
+        self._env = env
+        self.client_id = client_id
+        self.dynamics = dynamics or {}
+        self.last_terminated = False
+
+    def step(self, action):
+        next_state, reward, done, truncated, info = self._env.step(action)
+        self.last_terminated = bool(done) and not bool(truncated)
+        return next_state, reward, done, truncated, info
+
+    def __getattr__(self, name):
+        return getattr(self._env, name)
+
+
+def _client_factor(args, client_id):
+    """Evenly spaced heterogeneity factor u_i in [-1, 1] across clients (0 for the server)."""
+    n = max(int(getattr(args, 'agent_num', 1)), 1)
+    if client_id is None or n == 1:
+        return 0.0
+    return -1.0 + 2.0 * (client_id % n) / (n - 1)
+
+
+def _apply_dynamics_heterogeneity(env, args, client_id):
+    """Scale physical parameters of client ``client_id`` by (1 + level * u_i).
+
+    Returns the dict of parameters that were set (empty when disabled).
+    """
+    level = float(getattr(args, 'env_hetero_level', 0.0) or 0.0)
+    if getattr(args, 'env_hetero', 'none') != 'dynamics' or level == 0.0:
+        return {}
+    f = 1.0 + level * _client_factor(args, client_id)
+    params = {}
+    if args.env == 'CartPole':
+        u = env.env.unwrapped
+        u.length = 0.5 * f
+        u.masspole = 0.1 * f
+        u.total_mass = u.masspole + u.masscart
+        u.polemass_length = u.masspole * u.length
+        params = {'length': u.length, 'masspole': u.masspole}
+    elif args.env == 'Acrobot':
+        u = env.env.unwrapped
+        u.LINK_LENGTH_1 = 1.0 * f
+        u.LINK_MASS_1 = 1.0 * f
+        u.LINK_MASS_2 = 1.0 * f
+        params = {'LINK_LENGTH_1': u.LINK_LENGTH_1, 'LINK_MASS_1': u.LINK_MASS_1,
+                  'LINK_MASS_2': u.LINK_MASS_2}
+    elif args.env == 'MountainCar':
+        u = env.env.unwrapped
+        u.gravity = 0.0025 * f
+        params = {'gravity': u.gravity}
+    elif args.env == 'LunarLander':
+        # gravity must lie in (-12, 0); the simulator is rebuilt with the new value
+        g = float(np.clip(-10.0 * f, -11.99, -0.5))
+        kwargs = {}
+        max_ep_steps = getattr(args, 'max_episode_steps', None)
+        if max_ep_steps is not None:
+            kwargs['max_episode_steps'] = max_ep_steps
+        env.env.close()
+        env.env = gym.make("LunarLander-v3", gravity=g, **kwargs)
+        params = {'gravity': g}
+    return params
+
+
+def create_env(args, client_id=None):
+    """Create the environment for ``client_id`` (None = server / anchor-collection env).
+
+    The base environment is built by ``_create_base_env``; it is then
+    (i) seeded from ``args.random_seed`` and the client id, so that runs are
+    reproducible and clients see different initial-state streams, and
+    (ii) optionally given client-specific dynamics (``--env_hetero dynamics``).
+    """
+    if args.env == 'HeteroMaze':
+        # client-specific layout / goal (--env_hetero layout|goal|layout+goal)
+        env, dynamics = make_maze_env(args, client_id)
+    else:
+        env = _create_base_env(args)
+        dynamics = {}
+        if client_id is not None:
+            dynamics = _apply_dynamics_heterogeneity(env, args, client_id)
+    seed = getattr(args, 'random_seed', None)
+    if seed is not None and hasattr(env, 'env') and hasattr(env.env, 'reset'):
+        cid = 997 if client_id is None else client_id
+        env_seed = int(seed) * 1000 + cid
+        try:
+            env.env.reset(seed=env_seed)
+            env.env.action_space.seed(env_seed)
+        except TypeError:
+            pass
+    return ClientEnv(env, client_id=client_id, dynamics=dynamics)
+
+
+def _create_base_env(args):
     if args.env == 'GridWorld':
         env = GridWorldWrapper(size=args.grid_size)
         return env
@@ -328,6 +427,8 @@ def create_env(args):
     elif args.env == 'Acrobot':
         env = AcrobotWrapper()
         return env
+    elif args.env == 'HeteroMaze':
+        return make_maze_env(args, None)[0]
     elif args.env == 'Taxi':
         env = TaxiWrapper()
         return env

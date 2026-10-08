@@ -27,7 +27,7 @@ import numpy as np
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from scripts.experiments_runner import (
+from experiments_runner import (
     train_independent_qhd,
     train_oracle_qhd,
     train_fedqhd_homogeneous,
@@ -38,6 +38,7 @@ from scripts.experiments_runner import (
     train_distillation_dqn,
     ExperimentResults,
 )
+from revision_methods import train_fedhql, train_fedqhd_gd, train_fedhpd
 
 # ── method registry ────────────────────────────────────────────────────────────
 # Maps CLI key → (display name, callable)
@@ -54,6 +55,10 @@ METHODS = {
                                  lambda ep, a: train_oracle_dqn(ep, a)),
     'fedavg_dqn':              ("FedAvg-DQN",
                                  lambda ep, a: train_fedavg_dqn(ep, a)),
+    'fedprox_dqn':             ("FedProx-DQN",
+                                 lambda ep, a: train_fedavg_dqn(ep, a, prox=True)),
+    'pooled_qhd':              ("Pooled QHD",
+                                 lambda ep, a: train_oracle_qhd(ep, a, pooled=True)),
     'distillation_dqn':        ("Distillation FedDQN (Homogeneous)",
                                  lambda ep, a: train_distillation_dqn(ep, a, heterogeneous=False)),                        
     'truncate_fedavg_qhd':       ("Truncate FedAvg-QHD (Homogeneous)",
@@ -71,12 +76,22 @@ METHODS = {
                                    lambda ep, a: train_truncate_fedavg_qhd(ep, a, heterogeneous=True)),
     'distillation_dqn_hetero': ("Distillation FedDQN (Heterogeneous)",
                                  lambda ep, a: train_distillation_dqn(ep, a, heterogeneous=True)),
+    # Revision baselines (heterogeneous)
+    'fedhql_qhd_hetero':       ("FedHQL (QHD clients)",
+                                 lambda ep, a: train_fedhql(ep, a, client_type='qhd')),
+    'fedhql_dqn_hetero':       ("FedHQL (DQN clients)",
+                                 lambda ep, a: train_fedhql(ep, a, client_type='dqn')),
+    'fedqhd_gd_hetero':        ("FedQHD-GD (Heterogeneous)",
+                                 lambda ep, a: train_fedqhd_gd(ep, a)),
+    'fedhpd_hetero':           ("FedHPD",
+                                 lambda ep, a: train_fedhpd(ep, a)),
 }
 
-Q1_METHODS = {'independent_qhd', 'fedqhd_homo', 'oracle_qhd',
+Q1_METHODS = {'independent_qhd', 'fedqhd_homo', 'oracle_qhd', 'fedprox_dqn', 'pooled_qhd',
               'oracle_dqn', 'fedavg_dqn', 'distillation_dqn', 'truncate_fedavg_qhd'}
 Q2_METHODS = {'independent_qhd_hetero', 'fedqhd_hetero', 'oracle_qhd_hetero', 'oracle_dqn_hetero',
-              'truncate_fedavg_qhd_hetero', 'distillation_dqn_hetero'}
+              'truncate_fedavg_qhd_hetero', 'distillation_dqn_hetero',
+              'fedhql_qhd_hetero', 'fedhql_dqn_hetero', 'fedqhd_gd_hetero', 'fedhpd_hetero'}
 
 
 def result_filename(display_name: str) -> str:
@@ -158,6 +173,8 @@ def build_params_dict(method_key: str, display_name: str, args) -> dict:
         'hyperdimension':          args.hyperdimension,
         'rff_gamma':               args.rff_gamma,
         'anchor_set_size':         args.anchor_set_size,
+        'hetero_dims':             args.hetero_dims,
+        'revision_options':        {k: getattr(args, k) for k in REVISION_OPTIONS},
         'timestamp':               time.strftime('%Y-%m-%d %H:%M:%S'),
     }
 
@@ -188,7 +205,7 @@ def run_single(args):
     print(f"OUTPUT  : {out_dir}")
     print("=" * 70 + "\n")
 
-    np.random.seed(args.random_seed)
+    seed_everything(args.random_seed)
 
     # ── multi-run averaging ────────────────────────────────────────────────
     if args.runs > 1:
@@ -197,7 +214,7 @@ def run_single(args):
             print(f"\n── Run {run_id + 1}/{args.runs} ──")
             args_run = copy.copy(args)
             args_run.random_seed = args.random_seed + run_id
-            np.random.seed(args_run.random_seed)
+            seed_everything(args_run.random_seed)
             all_results.append(train_fn(args.episodes, args_run))
 
         # Average across runs
@@ -244,7 +261,82 @@ def run_single(args):
     return result
 
 
-def main():
+def seed_everything(seed: int):
+    import random
+    random.seed(seed)  # DQN replay sampling uses Python's random module
+    np.random.seed(seed)
+    try:
+        import torch
+        torch.manual_seed(seed)
+    except ImportError:
+        pass
+
+
+REVISION_OPTIONS = [
+    'ridge_lambda', 'anchor_source', 'env_hetero', 'env_hetero_level',
+    'bootstrap_on_truncation', 'indep_no_reset', 'dqn_preset', 'distill_loss', 'distill_tau', 'distill_steps',
+    'distill_interval', 'fedhql_interval', 'fedhql_kappa', 'fedhql_horizon', 'fedhql_batch',
+    'fedhql_alpha', 'fedhql_ucb', 'fedhql_lr', 'gd_steps', 'gd_lr', 'fedprox_mu',
+    'fedhpd_interval', 'fedhpd_kd_steps', 'eval_episodes', 'compile_mode', 'dqn_lr_scale', 'dqn_device',
+    'dqn_eps_steps_scale', 'maze_step', 'maze_noise', 'maze_start',
+]
+
+
+def add_revision_arguments(parser):
+    """Options added for the post-review revision (defaults reproduce the old behaviour,
+    except that runs are now properly seeded)."""
+    g = parser.add_argument_group('revision')
+    g.add_argument('--ridge_lambda', type=float, default=1e-4,
+                   help='Ridge λ of the heterogeneous FedQHD compile')
+    g.add_argument('--anchor_source', default='nominal', choices=['nominal', 'clients', 'uniform', 'mix'],
+                   help='Anchor rollouts from a nominal server env or pooled from client envs')
+    g.add_argument('--env_hetero', default='none',
+                   choices=['none', 'dynamics', 'layout', 'goal', 'layout+goal'],
+                   help="Per-client environment heterogeneity ('dynamics': gym control tasks; "
+                        "'layout' / 'goal' / 'layout+goal': HeteroMaze)")
+    g.add_argument('--env_hetero_level', type=float, default=0.0,
+                   help='dynamics: client i scales physical parameters by 1 + level*u_i, '
+                        'u_i in [-1, 1]; HeteroMaze: doorway / goal shift and door closure level')
+    g.add_argument('--maze_step', type=float, default=1.0, help='HeteroMaze move length (cells)')
+    g.add_argument('--maze_noise', type=float, default=0.1, help='HeteroMaze move noise std (cells)')
+    g.add_argument('--maze_start', default='room', choices=['room', 'anywhere'],
+                   help='HeteroMaze start states: top-left room or any free cell')
+    g.add_argument('--bootstrap_on_truncation', action='store_true',
+                   help='Bootstrap TD targets on time-limit truncation (correct target)')
+    g.add_argument('--indep_no_reset', action='store_true',
+                   help='Independent QHD: never re-initialise agents (true independent learning)')
+    g.add_argument('--dqn_preset', default='legacy', choices=['legacy', 'zoo'],
+                   help='DQN hyperparameters: as submitted, or rl-baselines3-zoo per environment')
+    g.add_argument('--distill_loss', default='kl', choices=['kl', 'mse'])
+    g.add_argument('--distill_tau', type=float, default=1.0)
+    g.add_argument('--distill_steps', type=int, default=10)
+    g.add_argument('--distill_interval', type=int, default=None,
+                   help='Distillation interval (default: --dqn_agg_interval)')
+    g.add_argument('--fedhql_interval', type=int, default=None)
+    g.add_argument('--fedhql_kappa', type=int, default=64)
+    g.add_argument('--fedhql_horizon', type=int, default=16)
+    g.add_argument('--fedhql_batch', type=int, default=128)
+    g.add_argument('--fedhql_alpha', type=float, default=0.05)
+    g.add_argument('--fedhql_ucb', type=float, default=1.0)
+    g.add_argument('--fedhql_lr', type=float, default=None)
+    g.add_argument('--no_diagnostics', action='store_true',
+                   help='Skip compile diagnostics (tuning runs; no effect on training)')
+    g.add_argument('--compile_mode', default='overwrite', choices=['overwrite', 'warmstart'],
+                   help='Heterogeneous compile: overwrite W (Alg. 2) or warm-start from local W')
+    g.add_argument('--dqn_device', default='auto', choices=['auto', 'cpu', 'cuda'],
+                   help="DQN device; 'cpu' is much faster for these small nets on a shared GPU")
+    g.add_argument('--dqn_lr_scale', type=float, default=1.0)
+    g.add_argument('--dqn_eps_steps_scale', type=float, default=1.0)
+    g.add_argument('--fedprox_mu', type=float, default=0.01)
+    g.add_argument('--fedhpd_interval', type=int, default=5, help='FedHPD distillation interval d')
+    g.add_argument('--fedhpd_kd_steps', type=int, default=1)
+    g.add_argument('--eval_episodes', type=int, default=10,
+                   help='Greedy evaluation episodes per client at the end (0 = skip)')
+    g.add_argument('--gd_steps', type=int, default=10)
+    g.add_argument('--gd_lr', type=float, default=1.0)
+
+
+def build_parser():
     parser = argparse.ArgumentParser(
         description='Run a single FedQHD method and replace its results',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -256,7 +348,8 @@ def main():
                         help='Which method to run')
     parser.add_argument('--env', default='CartPole',
                         choices=['GridWorld', 'LunarLander', 'CartPole', 'MountainCar',
-                                 'CliffWalking', 'Acrobot', 'Taxi', 'Pong', 'Freeway'],
+                                 'CliffWalking', 'Acrobot', 'Taxi', 'Pong', 'Freeway',
+                                 'HeteroMaze'],
                         help='Environment')
     parser.add_argument('--question', default='q2', choices=['q1', 'q2'],
                         help='Research question (determines output subdirectory)')
@@ -295,8 +388,12 @@ def main():
     # Output
     parser.add_argument('--output_dir', type=str, default='results')
     parser.add_argument('--grid_size',  type=int, nargs=2, default=[8, 8])
+    add_revision_arguments(parser)
+    return parser
 
-    args = parser.parse_args()
+
+def main():
+    args = build_parser().parse_args()
     run_single(args)
 
 

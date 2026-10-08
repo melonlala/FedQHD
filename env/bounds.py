@@ -12,10 +12,14 @@ state_bounds = {
     'CliffWalking': [
                 [0, 11], [0, 3]
             ],
+    # Acrobot-v1 observation: [cos θ1, sin θ1, cos θ2, sin θ2, θ1_dot, θ2_dot]
+    # (fixed 2026-10-07: cos θ2 / sin θ2 previously got the ±4π / ±9π velocity bounds)
     'Acrobot': [
-                [-1.0, 1.0], [-1.0, 1.0], [-4*3.14, 4*3.14],
-                [-9*3.14, 9*3.14], [-12.57, 12.57], [-28.27, 28.27]
+                [-1.0, 1.0], [-1.0, 1.0], [-1.0, 1.0], [-1.0, 1.0],
+                [-12.57, 12.57], [-28.27, 28.27]
             ],
+    # HeteroMaze: (x, y) position in the 11x11 four-rooms maze (env/hetero_maze.py)
+    'HeteroMaze': [[0.0, 11.0], [0.0, 11.0]],
     'GridWorld': [
                 [0, 64], [0, 3]
             ],

@@ -5,17 +5,19 @@ import numpy as np
 import random
 
 class QNetwork(nn.Module):
-    def __init__(self, state_dim, action_dim, hidden_size=128):
+    def __init__(self, state_dim, action_dim, hidden_size=128, net_arch=None):
         super(QNetwork, self).__init__()
-        self.fc1 = nn.Linear(state_dim, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, 2*hidden_size)
-        self.fc3 = nn.Linear(2*hidden_size, action_dim)
-        # self.fc4 = nn.Linear(hidden_size, action_dim)
+        # Legacy architecture: hidden -> 2*hidden. net_arch=[w1, w2, ...] gives an MLP with
+        # those widths (e.g. [256, 256], the rl-baselines3-zoo default for classic control).
+        widths = list(net_arch) if net_arch else [hidden_size, 2 * hidden_size]
+        dims = [state_dim] + widths
+        self.hidden = nn.ModuleList(nn.Linear(a, b) for a, b in zip(dims[:-1], dims[1:]))
+        self.out = nn.Linear(dims[-1], action_dim)
 
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        return self.fc3(x)  # No activation on output layer
+        for layer in self.hidden:
+            x = F.relu(layer(x))
+        return self.out(x)  # No activation on output layer
 
 class ReplayBuffer:
     def __init__(self, capacity):
@@ -41,7 +43,19 @@ class DQNAgent:
     def __init__(self, state_dim, action_dim, learning_rate=0.001, discount_factor=0.99,
                  exploration_rate=1.0, exploration_decay=0.995, exploration_min=0.01,
                  buffer_size=10000, batch_size=64, target_update_freq=5, tau=0.001,
-                 hidden_size=128, device=None):
+                 hidden_size=128, device=None, net_arch=None, loss='mse', max_grad_norm=1.0,
+                 learning_starts=0, train_freq=1, gradient_steps=1,
+                 target_update_interval=None, eps_schedule=None):
+        """Defaults reproduce the original agent (soft target updates, per-episode ε decay).
+
+        rl-baselines3-zoo style options:
+          target_update_interval  hard target copy every N env steps (instead of soft τ updates)
+          train_freq / gradient_steps  gradient steps per N env steps (-1 = train_freq steps)
+          learning_starts         env steps collected before training
+          loss='huber', max_grad_norm, net_arch
+          eps_schedule=dict(initial, final, fraction, total_steps)  linear ε per env step;
+                                  decay_exploration() then becomes a no-op.
+        """
 
         self.state_dim = state_dim
         self.action_dim = action_dim
@@ -53,6 +67,19 @@ class DQNAgent:
         self.batch_size = batch_size
         self.target_update_freq = target_update_freq
         self.tau = tau
+        self.loss = loss
+        self.max_grad_norm = max_grad_norm
+        self.learning_starts = learning_starts
+        self.train_freq = train_freq
+        self.gradient_steps = train_freq if gradient_steps == -1 else gradient_steps
+        self.target_update_interval = target_update_interval
+        self.eps_schedule = eps_schedule
+        self.env_steps = 0
+        # FedProx (Li et al., 2020): μ/2 ||θ − θ_glob||² added to the TD loss when prox_ref is set
+        self.prox_mu = 0.0
+        self.prox_ref = None
+        if eps_schedule:
+            self.exploration_rate = eps_schedule['initial']
 
         if device:
             self.device = device
@@ -64,8 +91,10 @@ class DQNAgent:
             )
 
         # Build Networks
-        self.q_network = QNetwork(self.state_dim, self.action_dim, hidden_size=hidden_size).to(self.device)
-        self.target_network = QNetwork(self.state_dim, self.action_dim, hidden_size=hidden_size).to(self.device)
+        self.q_network = QNetwork(self.state_dim, self.action_dim, hidden_size=hidden_size,
+                                  net_arch=net_arch).to(self.device)
+        self.target_network = QNetwork(self.state_dim, self.action_dim, hidden_size=hidden_size,
+                                       net_arch=net_arch).to(self.device)
         self.target_network.load_state_dict(self.q_network.state_dict())
         
         self.optimizer = torch.optim.Adam(self.q_network.parameters(), lr=self.lr)
@@ -124,14 +153,25 @@ class DQNAgent:
         done_float = 1.0 if done else 0.0
         
         self.replay_buffer.push(state, action, reward, next_state, done_float)
-        
-        if len(self.replay_buffer) < self.batch_size:
+        self.env_steps += 1
+
+        if self.eps_schedule:
+            sch = self.eps_schedule
+            frac = min(1.0, self.env_steps / max(1.0, sch['fraction'] * sch['total_steps']))
+            self.exploration_rate = sch['initial'] + frac * (sch['final'] - sch['initial'])
+
+        if self.target_update_interval and self.env_steps % self.target_update_interval == 0:
+            self.target_network.load_state_dict(self.q_network.state_dict())
+
+        if len(self.replay_buffer) < self.batch_size or self.env_steps <= self.learning_starts:
+            return
+        if self.env_steps % self.train_freq != 0:
             return
 
         # replay from buffer
-        self._replay()
-            
-        self.step_count += 1
+        for _ in range(self.gradient_steps):
+            self._replay()
+            self.step_count += 1
 
     def _replay(self):
         states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.batch_size)
@@ -151,21 +191,35 @@ class DQNAgent:
             next_q_values = self.target_network(next_states).max(1)[0]
             target_q_values = rewards + (1 - dones) * self.gamma * next_q_values
 
-        loss = F.mse_loss(q_values, target_q_values)
-        
+        if self.loss == 'huber':
+            loss = F.smooth_l1_loss(q_values, target_q_values)
+        else:
+            loss = F.mse_loss(q_values, target_q_values)
+
+        if self.prox_mu > 0 and self.prox_ref is not None:
+            loss = loss + 0.5 * self.prox_mu * sum(
+                torch.sum((p - r) ** 2) for p, r in zip(self.q_network.parameters(), self.prox_ref))
+
         self.optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.q_network.parameters(), max_norm=1.0)
+        torch.nn.utils.clip_grad_norm_(self.q_network.parameters(), max_norm=self.max_grad_norm)
         self.optimizer.step()
 
         # if self.step_count % self.target_update_freq == 0:
         #     self.target_network.load_state_dict(self.q_network.state_dict())
 
-        # Soft update
-        self.soft_update_target_network()
+        # Soft update (legacy); zoo mode uses hard copies every target_update_interval env steps
+        if not self.target_update_interval:
+            self.soft_update_target_network()
+
+    def set_prox_reference(self):
+        """Anchor the FedProx term at the current (just-received global) parameters."""
+        self.prox_ref = [p.detach().clone() for p in self.q_network.parameters()]
 
     def soft_update_target_network(self):
         for target_param, local_param in zip(self.target_network.parameters(), self.q_network.parameters()):
             target_param.data.copy_(self.tau * local_param.data + (1.0 - self.tau) * target_param.data)
     def decay_exploration(self):
+        if self.eps_schedule:  # ε follows the per-step linear schedule instead
+            return
         self.exploration_rate = max(self.min_exploration_rate, self.exploration_rate * self.exploration_rate_decay)

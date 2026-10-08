@@ -39,8 +39,10 @@ class QHDAgent:
         
         # Initialize Q-function model vectors (one for each action), randomly normalized
         self.model_vectors = np.zeros((self.action_dim, self.hd_dim), dtype=np.float64)
+        # Continues the local action-vector RNG stream, so the initial W is identical
+        # to the old global-RNG behaviour for the same random_seed.
         for i in range(self.action_dim):
-            self.model_vectors[i] = np.random.randn(self.hd_dim)
+            self.model_vectors[i] = self._init_rng.randn(self.hd_dim)
             self.model_vectors[i] /= np.linalg.norm(self.model_vectors[i])
 
         self._cached_state_hv = None  # Cache from choose_action, consumed by update_model
@@ -52,14 +54,16 @@ class QHDAgent:
 
     def _initialize_rff_parameters(self):
         """Initialize RFF parameters using your specific encoder setup"""
-        np.random.seed(self.random_state)
+        # Local RNG: same values as the former np.random.seed(random_state) stream,
+        # but without resetting the global RNG (which made run seeds ineffective).
+        rng = np.random.RandomState(self.random_state)
         sigma_omega = np.sqrt(2 * self.rff_gamma)
-        self.omega = np.random.normal(
+        self.omega = rng.normal(
             loc=0.0, 
             scale=sigma_omega, 
             size=(self.hd_dim, self.state_dim)
         )
-        self.b = np.random.uniform(0, 2 * np.pi, size=self.hd_dim)
+        self.b = rng.uniform(0, 2 * np.pi, size=self.hd_dim)
         
         print("RFF kernel parameters:")
         print("OMEGA:", self.omega.shape)
@@ -69,11 +73,11 @@ class QHDAgent:
         """Initialize hyperdimensional action vectors"""
         # Since we're using real-valued RFF, create real action vectors
         action_vectors = np.zeros((self.action_dim, self.hd_dim), dtype=np.float64)
-        np.random.seed(self.random_state + 1)  # Different seed for action vectors
+        self._init_rng = np.random.RandomState(self.random_state + 1)  # Different seed for action vectors
 
         for i in range(self.action_dim):
             # Create random real-valued vectors for each action
-            action_vectors[i] = np.random.randn(self.hd_dim)
+            action_vectors[i] = self._init_rng.randn(self.hd_dim)
             # Normalize to unit length
             action_vectors[i] = action_vectors[i] / np.linalg.norm(action_vectors[i])
         return action_vectors

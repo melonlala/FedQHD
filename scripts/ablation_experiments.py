@@ -128,9 +128,10 @@ LAMBDA_HAT   = 1e-10  # near-zero λ for Q̂_i projection (oracle best-in-class)
 N_EVAL = 400  # held-out test anchors for unbiased RMSE evaluation (collected with different seed)
 
 # ─── Plot axis labels ─────────────────────────────────────────────────────────
-ERR_LABEL = r"Approx. Error RMSE$(Q_i^{\mathrm{fed}},\, Q^*)$"
-PVG_LABEL = r"Policy Value Gap $V(\pi^*) - V(\pi_i^{\mathrm{fed}})$"
-PV_LABEL  = r"Policy Value $V(\pi_i^{\mathrm{fed}})$"
+ERR_LABEL = r"$\mathcal{E}_i = \mathrm{RMSE}(Q_i, Q^\star)$"
+PVG_LABEL = r"Policy Value Gap $V(\pi_{\mathrm{ref}}) - V(\pi_i)$"
+PV_LABEL  = r"Policy Value $V(\pi_i)$"
+GAP_LABEL = r"Federation gap RMSE$(Q_i^{\mathrm{fed}},\, \hat Q_i)$"
 
 
 # =============================================================================
@@ -1056,7 +1057,12 @@ def plot_ablation1(results_per_D: List[Dict], save_prefix: str,
             std_c  = _smooth(r['reward_std'].mean(axis=0),  lc_window)
             _fill(ax, episodes, mean_c, std_c, c, f"D={entry['D']}")
         w_label = f'  (w={lc_window})' if lc_window > 1 else ''
-        m_label = results_per_D[0]['m']
+        m_vals  = {d['m'] for d in results_per_D}
+        if len(m_vals) == 1:
+            m_label = str(m_vals.pop())
+        else:
+            ratios  = {d['m'] / d['D'] for d in results_per_D}
+            m_label = f"{ratios.pop():g}D" if len(ratios) == 1 else 'varies'
         _style(ax, 'Episode', 'Mean Reward', f'Learning Curves (vary D, m={m_label}){w_label}')
         ax.legend(fontsize=15)
 
@@ -1068,7 +1074,7 @@ def plot_ablation1(results_per_D: List[Dict], save_prefix: str,
         err_m = np.array([d['err_m'] for d in results_per_D])
         err_s = np.array([d['err_s'] for d in results_per_D])
         ax.errorbar(D_vals, err_m, yerr=err_s, fmt='o-', color='steelblue',
-                    linewidth=2, markersize=7, capsize=4, label='Fed. Gap')
+                    linewidth=2, markersize=7, capsize=4, label=r'$\mathcal{E}_i$')
         # Fit slope on log-log
         slope, _ = np.polyfit(np.log(D_vals), np.log(np.maximum(err_m, 1e-8)), 1)
         mid       = len(D_vals) // 2
@@ -1080,7 +1086,7 @@ def plot_ablation1(results_per_D: List[Dict], save_prefix: str,
         ax.set_xticks(D_vals)
         ax.set_xticklabels([str(int(d)) for d in D_vals], rotation=30,
                             ha='right', fontsize=15)
-        _style(ax, r'$D_i$', ERR_LABEL, f'Fed. Gap vs $D_i$  (slope {slope:.2f})')
+        _style(ax, r'$D_i$', ERR_LABEL, f'Compilation error vs $D_i$  (slope {slope:.2f})')
         ax.legend(fontsize=15)
 
     # Panel 3: Policy Value vs D
@@ -1145,16 +1151,17 @@ def plot_ablation2(results_per_m: List[Dict], save_prefix: str,
         err_m  = np.array([d['err_m'] for d in results_per_m])
         err_s  = np.array([d['err_s'] for d in results_per_m])
         ax.errorbar(ratio_vals, err_m, yerr=err_s, fmt='o-', color='steelblue',
-                    linewidth=2, markersize=7, capsize=4, label='Fed. Gap')
+                    linewidth=2, markersize=7, capsize=4, label=r'$\mathcal{E}_i$')
         ax.axvline(x=1.0, color='red', linestyle='--', linewidth=1.5,
                    label=r'$m = D$ (transition)')
         ax.axvspan(ratio_vals[0] * 0.8, 1.0, alpha=0.06, color='orange',
-                   label=r'Under-param. ($m < D$)')
+                   label=r'Under-determined ($m < D$)')
         ax.set_xscale('log', base=2)
         ax.set_xticks(ratio_vals)
         ax.set_xticklabels([f'{r:.2f}' for r in ratio_vals], rotation=30,
                             ha='right', fontsize=15)
-        _style(ax, r'$m / D$', ERR_LABEL, 'Fed. Gap vs $m/D$')
+        ax.set_yscale('log')  # error spans ~3 orders of magnitude; linear hides m = D
+        _style(ax, r'$m / D$', ERR_LABEL, 'Compilation error vs $m/D$')
         ax.legend(fontsize=15)
 
     # Panel 3: Policy Value vs m/D
@@ -1234,7 +1241,7 @@ def plot_ablation3(results_per_lam: List[Dict], save_prefix: str,
         # ax.axvline(x=alpha_star, color='red', linestyle='--',
         #            linewidth=1.5, label=rf'Theory $\alpha^*={alpha_star:.1f}$')
         ax.set_xscale('log')
-        _style(ax, r'$\alpha = \lambda / m$', ERR_LABEL,
+        _style(ax, r'$\alpha = \lambda / m$', GAP_LABEL,
                f'Fed. Gap vs α  (D={D_fix}, m={m_fix})')
         ax.legend(fontsize=15)
 

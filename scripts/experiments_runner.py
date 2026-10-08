@@ -19,6 +19,285 @@ from agent.dqn_agent import DQNAgent
 from agent.fedavg import FedAvgAgent
 
 
+def _seed_base(args) -> int:
+    """Base seed for client encoders. Encoders differ across run seeds (seed 42 reproduces the
+    original encoders); in the homogeneous setting all clients share the base seed."""
+    return int(getattr(args, 'random_seed', 42))
+
+
+def _hetero_gamma(args, i: int) -> float:
+    """Kernel parameter of heterogeneous client i: rff_gamma * U(0.5, 1.5), drawn from a
+    dedicated per-seed RNG so that all heterogeneous methods share identical encoders."""
+    rng = np.random.RandomState(int(getattr(args, 'random_seed', 42)) + 777)
+    return float(args.rff_gamma * rng.uniform(0.5, 1.5, size=i + 1)[i])
+
+
+# rl-baselines3-zoo DQN hyperparameters (hyperparams/dqn.yml, retrieved 2026-10-04).
+# SB3 defaults for keys not listed there: Huber loss, max_grad_norm=10, hard target updates,
+# exploration_initial_eps=1.0.
+ZOO_DQN = {
+    'CartPole':    dict(n_timesteps=5e4, learning_rate=2.3e-3, batch_size=64, buffer_size=100000,
+                        learning_starts=1000, gamma=0.99, target_update_interval=10,
+                        train_freq=256, gradient_steps=128, exploration_fraction=0.16,
+                        exploration_final_eps=0.04, net_arch=[256, 256]),
+    'MountainCar': dict(n_timesteps=1.2e5, learning_rate=4e-3, batch_size=128, buffer_size=10000,
+                        learning_starts=1000, gamma=0.98, target_update_interval=600,
+                        train_freq=16, gradient_steps=8, exploration_fraction=0.2,
+                        exploration_final_eps=0.07, net_arch=[256, 256]),
+    'LunarLander': dict(n_timesteps=1e5, learning_rate=6.3e-4, batch_size=128, buffer_size=50000,
+                        learning_starts=0, gamma=0.99, target_update_interval=250,
+                        train_freq=4, gradient_steps=-1, exploration_fraction=0.12,
+                        exploration_final_eps=0.1, net_arch=[256, 256]),
+    'Acrobot':     dict(n_timesteps=1e5, learning_rate=6.3e-4, batch_size=128, buffer_size=50000,
+                        learning_starts=0, gamma=0.99, target_update_interval=250,
+                        train_freq=4, gradient_steps=-1, exploration_fraction=0.12,
+                        exploration_final_eps=0.1, net_arch=[256, 256]),
+}
+# HeteroMaze has no rl-baselines3-zoo entry. It shares MountainCar's reward structure
+# (-1 per step, 200-step limit, sparse success), so it uses the MountainCar configuration.
+ZOO_DQN['HeteroMaze'] = ZOO_DQN['MountainCar']
+
+
+def dqn_config(args, hidden_size=None, lr_scale: float = 1.0) -> dict:
+    """Constructor kwargs for every DQN client/baseline.
+
+    ``--dqn_preset zoo`` uses the rl-baselines3-zoo hyperparameters for the environment;
+    heterogeneous clients keep two hidden layers but change their width (``hidden_size``).
+    ``--dqn_preset legacy`` (default) reproduces the submitted configuration.
+    """
+    if getattr(args, 'dqn_preset', 'legacy') == 'zoo':
+        z = ZOO_DQN[args.env]
+        width = hidden_size or z['net_arch'][0]
+        # pooled-data references see N× the transitions: --dqn_lr_scale and
+        # --dqn_eps_steps_scale (ε-schedule length) are tuned for them (default 1 = zoo)
+        lr_scale = lr_scale * float(getattr(args, 'dqn_lr_scale', None) or 1.0)
+        eps_steps = z['n_timesteps'] * float(getattr(args, 'dqn_eps_steps_scale', None) or 1.0)
+        dev = getattr(args, 'dqn_device', None)
+        extra = {'device': torch.device(dev)} if dev and dev != 'auto' else {}
+        return dict(
+            **extra,
+            learning_rate=z['learning_rate'] * lr_scale, discount_factor=z['gamma'],
+            batch_size=z['batch_size'], buffer_size=z['buffer_size'],
+            learning_starts=z['learning_starts'], train_freq=z['train_freq'],
+            gradient_steps=z['gradient_steps'], target_update_interval=z['target_update_interval'],
+            loss='huber', max_grad_norm=10.0, net_arch=[width] * len(z['net_arch']),
+            eps_schedule=dict(initial=1.0, final=z['exploration_final_eps'],
+                              fraction=z['exploration_fraction'], total_steps=eps_steps),
+        )
+    kw = dict(
+        learning_rate=args.dqn_lr * lr_scale,
+        discount_factor=args.dqn_discount if args.dqn_discount is not None else args.discount_factor,
+        exploration_rate=getattr(args, 'dqn_exploration_rate', None) or 1.0,
+        exploration_decay=getattr(args, 'dqn_exploration_decay', None) or 0.995,
+        exploration_min=(args.dqn_exploration_min if getattr(args, 'dqn_exploration_min', None)
+                         is not None else 0.01),
+    )
+    if hidden_size:
+        kw['hidden_size'] = hidden_size
+    return kw
+
+
+def _td_done(env, done: bool, args) -> bool:
+    """Episode-end flag used in the TD target.
+
+    By default (legacy behaviour, used for the submitted results) time-limit truncation is
+    treated as terminal. With ``--bootstrap_on_truncation`` only true terminations stop
+    bootstrapping, which is the correct target for time-limited tasks.
+    """
+    if getattr(args, 'bootstrap_on_truncation', False) and hasattr(env, 'last_terminated'):
+        return env.last_terminated
+    return done
+
+
+
+def collect_anchor_states(args, action_dim: int, m: int) -> np.ndarray:
+    """Server anchor set S_ref: m states from uniformly random-action rollouts.
+
+    ``--anchor_source nominal`` (default) rolls out a server-side copy of the nominal
+    environment. ``--anchor_source clients`` pools equal shares of random rollouts from
+    every client's environment (relevant under dynamics heterogeneity, where client state
+    distributions differ).
+    """
+    source = getattr(args, 'anchor_source', 'nominal')
+    if source in ('uniform', 'mix'):
+        # Uniform anchors over the normalized state box (no simulator or rollouts needed);
+        # 'mix' = half uniform, half nominal random-rollout anchors.
+        n_uni = m if source == 'uniform' else m // 2
+        uni = sample_uniform_states(args.env, n_uni,
+                                    int(getattr(args, 'random_seed', 42)) + 54321)
+        if source == 'uniform':
+            return uni
+        roll = collect_anchor_states(_with(args, anchor_source='nominal'), action_dim, m - n_uni)
+        return np.concatenate([roll, uni])
+    if source == 'clients':
+        n = args.agent_num
+        sources = [create_env(args, client_id=i) for i in range(n)]
+        quotas = [m // n + (1 if i < m % n else 0) for i in range(n)]
+    else:
+        sources, quotas = [create_env(args)], [m]
+    # Dedicated RNG: every method with the same seed gets the same anchor/query set.
+    rng = np.random.RandomState(int(getattr(args, 'random_seed', 42)) + 12345)
+    anchor_states = []
+    for temp_env, quota in zip(sources, quotas):
+        got = []
+        while len(got) < quota:
+            state, _ = temp_env.reset()
+            got.append(state)
+            for _ in range(50):  # Random rollout steps
+                action = rng.randint(action_dim)
+                next_state, _, done, _, _ = temp_env.step(action)
+                got.append(next_state)
+                if done or len(got) >= quota:
+                    break
+        anchor_states.extend(got[:quota])
+    return np.array(anchor_states[:m])
+
+
+def _with(args, **kw):
+    a = copy.copy(args)
+    for k, v in kw.items():
+        setattr(a, k, v)
+    return a
+
+
+def sample_uniform_states(env_name: str, n: int, seed: int) -> np.ndarray:
+    """n states uniform over the normalized state box [-1, 1]^d (mapped back to raw states).
+
+    Structured coordinates stay valid: Acrobot (cos, sin) pairs come from uniform angles, and
+    LunarLander's leg-contact flags are sampled from {0, 1}.
+    """
+    rng = np.random.RandomState(seed)
+    b = np.asarray(state_bounds[env_name], dtype=float)
+    S = b[:, 0] + rng.random_sample((n, len(b))) * (b[:, 1] - b[:, 0])
+    if env_name == 'Acrobot':
+        t1, t2 = rng.uniform(-np.pi, np.pi, (2, n))
+        S[:, 0], S[:, 1], S[:, 2], S[:, 3] = np.cos(t1), np.sin(t1), np.cos(t2), np.sin(t2)
+    if env_name == 'LunarLander':
+        S[:, 6:8] = rng.randint(0, 2, (n, 2))
+    return S.astype(np.float32)
+
+
+def ridge_compile(factor, X_i: torch.Tensor, Q_glob_ref: torch.Tensor) -> torch.Tensor:
+    """W = (X^T X + λI)^{-1} X^T Q, using the pre-factored dual (m x m) or primal (D x D) form."""
+    form, L = factor
+    if form == 'dual':
+        v = torch.linalg.solve_triangular(
+            L.T, torch.linalg.solve_triangular(L, Q_glob_ref, upper=False), upper=True)
+        return X_i.T @ v
+    rhs = X_i.T @ Q_glob_ref
+    return torch.linalg.solve_triangular(
+        L.T, torch.linalg.solve_triangular(L, rhs, upper=False), upper=True)
+
+
+def compile_teacher(factor, X_i: torch.Tensor, Q_glob_ref: torch.Tensor, agent, args) -> torch.Tensor:
+    """Compile the anchor teacher into client i's readout.
+
+    ``--compile_mode overwrite`` (Algorithm 2 as submitted):
+        W = argmin ||X W − Q||² + λ||W||²            = (XᵀX + λI)⁻¹ Xᵀ Q
+    ``--compile_mode warmstart``:
+        W = argmin ||X W − Q||² + λ||W − W_local||²  = W_local + (XᵀX + λI)⁻¹ Xᵀ (Q − X W_local)
+    The warm start keeps the component of the local readout outside the anchor span (it is
+    only shrunk inside it), so local knowledge on states not covered by the anchors survives.
+    """
+    if getattr(args, 'compile_mode', 'overwrite') == 'warmstart':
+        W_loc = torch.tensor(agent.model_vectors.T, dtype=X_i.dtype, device=X_i.device)
+        return W_loc + ridge_compile(factor, X_i, Q_glob_ref - X_i @ W_loc)
+    return ridge_compile(factor, X_i, Q_glob_ref)
+
+
+def compile_diagnostics_init(anchor_features, lambda_reg: float) -> dict:
+    """Static anchor-conditioning quantities of Theorem 2 for each client.
+
+    One SVD per client; the row-space basis is kept in host memory (numpy) and the GPU
+    workspace is released immediately, so diagnostics do not limit how many runs share a GPU.
+    """
+    diag = {'lambda': lambda_reg, 'm': int(anchor_features[0].shape[0]), 'clients': [],
+            'rounds': [], '_row_bases': []}
+    for X_i in anchor_features:
+        _, sv, Vh = torch.linalg.svd(X_i, full_matrices=False)
+        tol = sv.max() * max(X_i.shape) * torch.finfo(sv.dtype).eps
+        keep = sv > tol
+        pos = sv[keep]
+        gamma = float(pos.min() ** 2)
+        s2 = (sv ** 2).cpu().numpy()
+        diag['clients'].append({
+            'D': int(X_i.shape[1]), 'rank': int(pos.numel()), 'gamma_min': gamma,
+            'amplification': float(np.sqrt(X_i.shape[0] / (gamma + lambda_reg))),
+            'shrinkage_factor': float(lambda_reg / (gamma + lambda_reg)),
+            # directions compiled with less than 50% ridge shrinkage (σ² > λ)
+            'effective_rank_lambda': int((s2 > lambda_reg).sum()),
+            'sv2_quantiles': [float(q) for q in np.quantile(s2, [0.0, 0.1, 0.5, 0.9, 1.0])],
+        })
+        diag['_row_bases'].append(Vh[keep].cpu().numpy())  # (rank, D_i) orthonormal rows
+        del sv, Vh, pos, keep
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    return diag
+
+
+def compile_diagnostics_round(diag: dict, agents, anchor_features, Q_list, Q_glob_ref,
+                              visited, episode: int):
+    """Per-round diagnostics: teacher disagreement and coverage ρ_i on visited states."""
+    rec = {'episode': int(episode + 1), 'teacher_disagreement': [], 'rho_mean': [],
+           'rho_max': []}
+    for i, agent in enumerate(agents):
+        rec['teacher_disagreement'].append(
+            float(torch.sqrt(torch.mean((Q_list[i] - Q_glob_ref) ** 2)).item()))
+        if visited[i]:
+            S = np.array([agent.normalize_state(s) for s in visited[i]])
+            Phi = np.sqrt(2.0 / agent.hd_dim) * np.cos(S @ agent.omega.T + agent.b)
+            proj = Phi @ diag['_row_bases'][i].T
+            nrm = (Phi ** 2).sum(1)
+            # ρ normalised by ||Φ||²: relative out-of-span feature energy in [0, 1]
+            rel = np.sqrt(np.clip(nrm - (proj ** 2).sum(1), 0.0, None) / nrm)
+            rec['rho_mean'].append(float(rel.mean()))
+            rec['rho_max'].append(float(rel.max()))
+    diag['rounds'].append(rec)
+
+
+def finalize_diagnostics(diag: dict) -> dict:
+    """Drop non-serializable entries before saving."""
+    return {k: v for k, v in diag.items() if not k.startswith('_')}
+
+
+def greedy_action(agent, state) -> int:
+    """Greedy (ε = 0) action of any client agent."""
+    if hasattr(agent, 'greedy_action'):
+        return agent.greedy_action(state)
+    if isinstance(agent, QHDAgent):
+        return int(np.argmax(agent.model_vectors @ agent.encode_state(state)))
+    with torch.no_grad():
+        q = agent.q_network(agent._state_to_tensor(state).unsqueeze(0))
+    return int(torch.argmax(q).item())
+
+
+def greedy_evaluate(agents, args, n_episodes: int = None) -> dict:
+    """Return of each client's greedy policy on fresh copies of its own environment.
+
+    Client i is evaluated with agents[i] (agents[0] for a single centralized agent), on
+    ``n_episodes`` episodes whose initial states come from a dedicated evaluation seed.
+    """
+    n_episodes = n_episodes or int(getattr(args, 'eval_episodes', 10) or 10)
+    per_client = []
+    for i in range(args.agent_num):
+        agent = agents[i] if len(agents) > 1 else agents[0]
+        env = create_env(args, client_id=i)
+        try:
+            env.env.reset(seed=10 ** 6 + int(getattr(args, 'random_seed', 42)) * 1000 + i)
+        except TypeError:
+            pass
+        rets = []
+        for _ in range(n_episodes):
+            state, _ = env.reset()
+            done, total = False, 0.0
+            while not done:
+                state, reward, done, _, _ = env.step(greedy_action(agent, state))
+                total += reward
+            rets.append(total)
+        per_client.append(float(np.mean(rets)))
+    return {'eval_return': float(np.mean(per_client)), 'eval_per_client': per_client,
+            'eval_episodes': n_episodes}
+
 
 class ExperimentResults:
     """Container for experiment results"""
@@ -31,6 +310,8 @@ class ExperimentResults:
         self.projection_residuals = []  # For heterogeneous case
         self.final_avg_reward = 0.0
         self.final_avg_success = 0.0
+        self.diagnostics = {}  # Optional per-method diagnostics (e.g. compile conditioning)
+        self.evaluation = {}   # Greedy-policy evaluation at the end of training
 
     def to_dict(self):
         return {
@@ -41,7 +322,9 @@ class ExperimentResults:
             'convergence_episode': self.convergence_episode,
             'projection_residuals': self.projection_residuals,
             'final_avg_reward': self.final_avg_reward,
-            'final_avg_success': self.final_avg_success
+            'final_avg_success': self.final_avg_success,
+            'diagnostics': self.diagnostics,
+            'evaluation': self.evaluation
         }
 
 
@@ -68,7 +351,7 @@ def train_independent_qhd(episodes: int, args, heterogeneous=False) -> Experimen
     start_time = time.time()
 
     num_agents = args.agent_num
-    envs = [create_env(args) for _ in range(num_agents)]
+    envs = [create_env(args, client_id=i) for i in range(num_agents)]
     state_dim = envs[0].state_dim
     action_dim = envs[0].action_dim
 
@@ -87,7 +370,7 @@ def train_independent_qhd(episodes: int, args, heterogeneous=False) -> Experimen
             """Create fresh heterogeneous agents (resets weights and exploration)."""
             agents = []
             for i in range(num_agents):
-                sigma_i = args.rff_gamma * np.random.uniform(0.5, 1.5)
+                sigma_i = _hetero_gamma(args, i)
                 agents.append(QHDAgent(
                     state_dim=state_dim,
                     action_dim=action_dim,
@@ -99,6 +382,7 @@ def train_independent_qhd(episodes: int, args, heterogeneous=False) -> Experimen
                     exploration_decay=(getattr(args, 'qhd_exploration_decay', None) or 0.995),
                     exploration_min=getattr(args, 'qhd_exploration_min', 0.001),
                     state_bounds=state_bounds.get(args.env),
+                    random_seed=_seed_base(args) + i,
                 ))
             return agents
 
@@ -119,7 +403,7 @@ def train_independent_qhd(episodes: int, args, heterogeneous=False) -> Experimen
                     action = agent.choose_action(state)
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
-                    agent.update_model(state, action, reward, next_state, done)
+                    agent.update_model(state, action, reward, next_state, _td_done(env, done, args))
                     state = next_state
                     total_reward += reward
 
@@ -132,8 +416,9 @@ def train_independent_qhd(episodes: int, args, heterogeneous=False) -> Experimen
             reward_history.append(np.mean(episode_rewards))
             success_history.append(np.mean(episode_successes))
 
-            # Reset every K episodes — no knowledge sharing across rounds
-            if (episode + 1) % args.qhd_agg_interval == 0:
+            # Reset every K episodes — no knowledge sharing across rounds (legacy behaviour;
+            # --indep_no_reset gives true independent learning without re-initialisation)
+            if (episode + 1) % args.qhd_agg_interval == 0 and not getattr(args, 'indep_no_reset', False):
                 agents = _make_hetero_agents()
 
     # ── Homogeneous branch (original behaviour) ────────────────────────────
@@ -149,7 +434,8 @@ def train_independent_qhd(episodes: int, args, heterogeneous=False) -> Experimen
             exploration_decay=(getattr(args, 'qhd_exploration_decay', None) or 0.995),
             exploration_min=getattr(args, 'qhd_exploration_min', 0.001),
             hd_dim=args.hyperdimension,
-            state_bounds=state_bounds.get(args.env)
+            state_bounds=state_bounds.get(args.env),
+            random_seed=_seed_base(args)
         )
 
         for episode in tqdm.tqdm(range(episodes), desc="Independent QHD"):
@@ -167,7 +453,7 @@ def train_independent_qhd(episodes: int, args, heterogeneous=False) -> Experimen
                     action = agent.choose_action(state)
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
-                    agent.update_model(state, action, reward, next_state, done)
+                    agent.update_model(state, action, reward, next_state, _td_done(env, done, args))
                     state = next_state
                     total_reward += reward
 
@@ -179,8 +465,9 @@ def train_independent_qhd(episodes: int, args, heterogeneous=False) -> Experimen
             reward_history.append(np.mean(episode_rewards))
             success_history.append(np.mean(episode_successes))
 
-            # Reset — discard any accumulated knowledge (no distribution)
-            if (episode + 1) % args.qhd_agg_interval == 0:
+            # Reset — discard any accumulated knowledge (no distribution); legacy behaviour,
+            # disabled by --indep_no_reset
+            if (episode + 1) % args.qhd_agg_interval == 0 and not getattr(args, 'indep_no_reset', False):
                 fed_agent = FedAvgAgent(
                     state_dim=state_dim,
                     action_dim=action_dim,
@@ -192,11 +479,14 @@ def train_independent_qhd(episodes: int, args, heterogeneous=False) -> Experimen
                     exploration_decay=(getattr(args, 'qhd_exploration_decay', None) or 0.995),
                     exploration_min=getattr(args, 'qhd_exploration_min', 0.01),
                     hd_dim=args.hyperdimension,
-                    state_bounds=state_bounds.get(args.env)
+                    state_bounds=state_bounds.get(args.env),
+                    random_seed=_seed_base(args)
                 )
 
     end_time = time.time()
 
+    if int(getattr(args, 'eval_episodes', 10) or 0) > 0:
+        results.evaluation = greedy_evaluate(agents if heterogeneous else fed_agent.agents, args)
     results.reward_history = reward_history
     results.success_history = success_history
     results.training_time = end_time - start_time
@@ -209,7 +499,8 @@ def train_independent_qhd(episodes: int, args, heterogeneous=False) -> Experimen
     return results
 
 
-def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False) -> ExperimentResults:
+def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False,
+                     pooled: bool = False) -> ExperimentResults:
     """
     Baseline 2: Oracle QHD (Heterogeneous-Aware)
 
@@ -227,7 +518,8 @@ def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False) -> Ex
         use_heterogeneous: If True, use heterogeneous encoders; else use homogeneous
     """
     results = ExperimentResults()
-    results.method_name = "Oracle QHD (Heterogeneous)" if use_heterogeneous else "Oracle QHD"
+    results.method_name = ("Oracle QHD (Heterogeneous)" if use_heterogeneous else
+                           "Pooled QHD" if pooled else "Oracle QHD")
 
     print(f"\n{'='*60}")
     print(f"Training Oracle QHD {'(heterogeneous-aware)' if use_heterogeneous else '(homogeneous)'}")
@@ -237,7 +529,7 @@ def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False) -> Ex
     start_time = time.time()
 
     num_agents = args.agent_num
-    envs = [create_env(args) for _ in range(num_agents)]
+    envs = [create_env(args, client_id=i) for i in range(num_agents)]
     state_dim = envs[0].state_dim
     action_dim = envs[0].action_dim
 
@@ -262,7 +554,7 @@ def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False) -> Ex
 
         for i in range(num_agents):
             # Each client has different bandwidth and dimension
-            sigma_i = args.rff_gamma * np.random.uniform(0.5, 1.5)
+            sigma_i = _hetero_gamma(args, i)
             agent = QHDAgent(
                 state_dim=state_dim,
                 action_dim=action_dim,
@@ -274,7 +566,7 @@ def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False) -> Ex
                 exploration_decay=(getattr(args, 'qhd_exploration_decay', None) or 0.995),
                 exploration_min=getattr(args, 'qhd_exploration_min', 0.01),
                 state_bounds=state_bounds.get(args.env),
-                random_seed=42 + i
+                random_seed=_seed_base(args) + i
             )
             agents.append(agent)
         print(f"Using heterogeneous encoders: {agent_dims}")
@@ -282,18 +574,7 @@ def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False) -> Ex
         # Pre-compute anchor features and Woodbury factors for hetero aggregation
         # (same anchor infrastructure as train_fedqhd_heterogeneous)
         anchor_set_size = getattr(args, 'anchor_set_size', 200)
-        anchor_states_list = []
-        temp_env = create_env(args)
-        while len(anchor_states_list) < anchor_set_size:
-            s, _ = temp_env.reset()
-            anchor_states_list.append(s)
-            for _ in range(50):
-                a = np.random.randint(action_dim)
-                ns, _, d, _, _ = temp_env.step(a)
-                anchor_states_list.append(ns)
-                if d or len(anchor_states_list) >= anchor_set_size:
-                    break
-        anchor_states_arr = np.array(anchor_states_list[:anchor_set_size])
+        anchor_states_arr = collect_anchor_states(args, action_dim, anchor_set_size)
         m_anchor = len(anchor_states_arr)
         oracle_device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -303,14 +584,32 @@ def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False) -> Ex
             X_i_np = np.sqrt(2.0 / agent.hd_dim) * np.cos(normalized @ agent.omega.T + agent.b)
             oracle_anchor_features.append(torch.tensor(X_i_np, dtype=torch.float64, device=oracle_device))
 
-        oracle_lambda_reg = 1e-4
-        oracle_woodbury_factors = []
+        oracle_lambda_reg = float(getattr(args, 'ridge_lambda', None) or 1e-4)
+        oracle_ridge_factors = []  # same dual/primal choice as train_fedqhd_heterogeneous
         for X_i in oracle_anchor_features:
-            A_i = X_i @ X_i.T + oracle_lambda_reg * torch.eye(m_anchor, dtype=torch.float64, device=oracle_device)
-            oracle_woodbury_factors.append(torch.linalg.cholesky(A_i))
+            D_i = X_i.shape[1]
+            if m_anchor <= D_i:
+                A_i = X_i @ X_i.T + oracle_lambda_reg * torch.eye(m_anchor, dtype=torch.float64, device=oracle_device)
+                oracle_ridge_factors.append(('dual', torch.linalg.cholesky(A_i)))
+            else:
+                A_i = X_i.T @ X_i + oracle_lambda_reg * torch.eye(D_i, dtype=torch.float64, device=oracle_device)
+                oracle_ridge_factors.append(('primal', torch.linalg.cholesky(A_i)))
 
         print(f"Oracle hetero anchor set: {m_anchor} states, device={oracle_device}")
         homo_n_agent_oracle = False  # hetero branch uses data-pooling (all agents on all envs)
+    elif pooled:
+        # Centralized oracle: ONE QHD agent (shared encoder) acts in every client environment
+        # and is trained on all clients' transitions (true pooled-data reference).
+        agents = [QHDAgent(
+            state_dim=state_dim, action_dim=action_dim, hd_dim=args.hyperdimension,
+            rff_gamma=args.rff_gamma, learning_rate=args.qhd_lr,
+            discount_factor=args.qhd_discount,
+            exploration_rate=(getattr(args, 'qhd_exploration_rate', None) or 1.0),
+            exploration_decay=(getattr(args, 'qhd_exploration_decay', None) or 0.995),
+            exploration_min=getattr(args, 'qhd_exploration_min', 0.01),
+            state_bounds=state_bounds.get(args.env), random_seed=_seed_base(args))]
+        homo_n_agent_oracle = False
+        print(f"Using pooled single-agent oracle, lr={args.qhd_lr:.4f}")
     else:
         # Homogeneous oracle: N agents with the SAME shared encoder (identical omega/b,
         # all initialised with random_seed=42 via FedAvgAgent), each training on its OWN
@@ -330,7 +629,8 @@ def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False) -> Ex
             exploration_decay=(getattr(args, 'qhd_exploration_decay', None) or 0.995),
             exploration_min=getattr(args, 'qhd_exploration_min', 0.01),
             hd_dim=args.hyperdimension,
-            state_bounds=state_bounds.get(args.env)
+            state_bounds=state_bounds.get(args.env),
+            random_seed=_seed_base(args)
         )
         agents = fed_agent_oracle.agents  # N agents, all with identical encoder (seed=42)
         homo_n_agent_oracle = True
@@ -364,10 +664,10 @@ def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False) -> Ex
                 # Homo oracle (N-agent): each agent trains only on its own env,
                 # matching FedQHD structure; per-episode aggregation handles sharing.
                 if homo_n_agent_oracle:
-                    agents[env_id].update_model(state, action, reward, next_state, done)
+                    agents[env_id].update_model(state, action, reward, next_state, _td_done(env, done, args))
                 else:
                     for agent in agents:
-                        agent.update_model(state, action, reward, next_state, done)
+                        agent.update_model(state, action, reward, next_state, _td_done(env, done, args))
 
                 state = next_state
                 client_rewards.append(reward)
@@ -406,13 +706,8 @@ def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False) -> Ex
                 Q_glob_ref = torch.mean(torch.stack(Q_list, dim=0), dim=0)
                 for agent_id in range(num_agents):
                     X_i = oracle_anchor_features[agent_id]
-                    L_i = oracle_woodbury_factors[agent_id]
-                    v = torch.linalg.solve_triangular(
-                        L_i.T,
-                        torch.linalg.solve_triangular(L_i, Q_glob_ref, upper=False),
-                        upper=True
-                    )
-                    W_glob_i = X_i.T @ v  # (D_i, |A|)
+                    W_glob_i = compile_teacher(oracle_ridge_factors[agent_id], X_i, Q_glob_ref,
+                                               agents[agent_id], args)
                     agents[agent_id].model_vectors = W_glob_i.T.cpu().numpy()  # (|A|, D_i)
 
         # Average across all client environments
@@ -422,6 +717,8 @@ def train_oracle_qhd(episodes: int, args, use_heterogeneous: bool = False) -> Ex
 
     end_time = time.time()
 
+    if int(getattr(args, 'eval_episodes', 10) or 0) > 0:
+        results.evaluation = greedy_evaluate(agents, args)
     results.reward_history = reward_history
     results.success_history = success_history
     results.training_time = end_time - start_time
@@ -452,7 +749,7 @@ def train_fedqhd_homogeneous(episodes: int, args) -> ExperimentResults:
     start_time = time.time()
 
     num_agents = args.agent_num
-    envs = [create_env(args) for _ in range(num_agents)]
+    envs = [create_env(args, client_id=i) for i in range(num_agents)]
 
     # Create FedAvg coordinator with shared encoder
     fed_agent = FedAvgAgent(
@@ -466,7 +763,8 @@ def train_fedqhd_homogeneous(episodes: int, args) -> ExperimentResults:
         exploration_decay=(getattr(args, 'qhd_exploration_decay', None) or 0.995),
         exploration_min=getattr(args, 'qhd_exploration_min', 0.01),
         hd_dim=args.hyperdimension,
-        state_bounds=state_bounds.get(args.env)
+        state_bounds=state_bounds.get(args.env),
+        random_seed=_seed_base(args)
     )
 
     reward_history = []
@@ -488,7 +786,7 @@ def train_fedqhd_homogeneous(episodes: int, args) -> ExperimentResults:
                 action = agent.choose_action(state)
                 next_state, reward, terminated, truncated, _ = env.step(action)
                 done = terminated or truncated
-                agent.update_model(state, action, reward, next_state, done)
+                agent.update_model(state, action, reward, next_state, _td_done(env, done, args))
                 state = next_state
                 total_reward += reward
 
@@ -508,6 +806,8 @@ def train_fedqhd_homogeneous(episodes: int, args) -> ExperimentResults:
 
     end_time = time.time()
 
+    if int(getattr(args, 'eval_episodes', 10) or 0) > 0:
+        results.evaluation = greedy_evaluate(fed_agent.agents, args)
     results.reward_history = reward_history
     results.success_history = success_history
     results.training_time = end_time - start_time
@@ -537,7 +837,7 @@ def train_fedqhd_heterogeneous(episodes: int, args) -> ExperimentResults:
     start_time = time.time()
 
     num_agents = args.agent_num
-    envs = [create_env(args) for _ in range(num_agents)]
+    envs = [create_env(args, client_id=i) for i in range(num_agents)]
     state_dim = envs[0].state_dim
     action_dim = envs[0].action_dim
 
@@ -552,7 +852,7 @@ def train_fedqhd_heterogeneous(episodes: int, args) -> ExperimentResults:
     agents = []
     for i in range(num_agents):
         # Each client has different bandwidth and dimension
-        sigma_i = args.rff_gamma * np.random.uniform(0.5, 1.5)  # Heterogeneous bandwidth
+        sigma_i = _hetero_gamma(args, i)  # Heterogeneous bandwidth
         agent = QHDAgent(
             state_dim=state_dim,
             action_dim=action_dim,
@@ -564,24 +864,13 @@ def train_fedqhd_heterogeneous(episodes: int, args) -> ExperimentResults:
             exploration_decay=(getattr(args, 'qhd_exploration_decay', None) or 0.995),
             exploration_min=getattr(args, 'qhd_exploration_min', 0.01),
             state_bounds=state_bounds.get(args.env),
-            random_seed=42 + i  # Different seed per agent
+            random_seed=_seed_base(args) + i  # Different seed per agent
         )
         agents.append(agent)
 
     # Server: Construct anchor set (methodology.tex line 36)
     # Collect m=args.anchor_set_size states from random rollouts
-    anchor_states = []
-    temp_env = create_env(args)
-    while len(anchor_states) < args.anchor_set_size:
-        state, _ = temp_env.reset()
-        anchor_states.append(state)
-        for _ in range(50):  # Random rollout steps
-            action = np.random.randint(action_dim)
-            next_state, _, done, _, _ = temp_env.step(action)
-            anchor_states.append(next_state)
-            if done or len(anchor_states) >= args.anchor_set_size:
-                break
-    anchor_states = np.array(anchor_states[:args.anchor_set_size])
+    anchor_states = collect_anchor_states(args, action_dim, args.anchor_set_size)
     m = len(anchor_states)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -594,13 +883,26 @@ def train_fedqhd_heterogeneous(episodes: int, args) -> ExperimentResults:
         X_i_np = np.sqrt(2.0 / agent.hd_dim) * np.cos(normalized @ agent.omega.T + agent.b)
         anchor_features.append(torch.tensor(X_i_np, dtype=torch.float64, device=device))
 
-    # Pre-compute Cholesky factors of (X_i X_i^T + λI) for the Woodbury solve.
-    # These (m, m) matrices are constant — factorize once, reuse every aggregation round.
-    lambda_reg = 1e-4
-    woodbury_factors = []  # list of (m, m) lower-triangular torch tensors
+    # Pre-compute Cholesky factors for the ridge solve. These matrices are constant —
+    # factorize once, reuse every aggregation round. When m <= D_i we use the Woodbury
+    # (m x m) form X^T (X X^T + λI)^{-1} Q; when m > D_i the primal (D_i x D_i) form
+    # (X^T X + λI)^{-1} X^T Q, which is cheaper and better conditioned.
+    lambda_reg = float(getattr(args, 'ridge_lambda', None) or 1e-4)
+    ridge_factors = []  # list of (form, lower-triangular factor)
     for X_i in anchor_features:
-        A_i = X_i @ X_i.T + lambda_reg * torch.eye(m, dtype=torch.float64, device=device)
-        woodbury_factors.append(torch.linalg.cholesky(A_i))
+        D_i = X_i.shape[1]
+        if m <= D_i:
+            A_i = X_i @ X_i.T + lambda_reg * torch.eye(m, dtype=torch.float64, device=device)
+            ridge_factors.append(('dual', torch.linalg.cholesky(A_i)))
+        else:
+            A_i = X_i.T @ X_i + lambda_reg * torch.eye(D_i, dtype=torch.float64, device=device)
+            ridge_factors.append(('primal', torch.linalg.cholesky(A_i)))
+
+    # Diagnostics for Theorem 2: anchor conditioning γ_i, rank, and the coverage term ρ_i(s)
+    # evaluated on recently visited client states (right singular basis of X_i).
+    no_diag = bool(getattr(args, 'no_diagnostics', False))  # e.g. tuning runs
+    compile_diag = None if no_diag else compile_diagnostics_init(anchor_features, lambda_reg)
+    visited = [[] for _ in range(num_agents)]  # recent visited states per client
 
     reward_history = []
     success_history = []
@@ -622,9 +924,11 @@ def train_fedqhd_heterogeneous(episodes: int, args) -> ExperimentResults:
                 action = agent.choose_action(state)
                 next_state, reward, terminated, truncated, _ = env.step(action)
                 done = terminated or truncated
-                agent.update_model(state, action, reward, next_state, done)
+                agent.update_model(state, action, reward, next_state, _td_done(env, done, args))
+                visited[agent_id].append(state)
                 state = next_state
                 total_reward += reward
+            visited[agent_id] = visited[agent_id][-512:]
 
             episode_rewards.append(total_reward)
             episode_successes.append(1 if env.is_success(state) else 0)
@@ -641,21 +945,17 @@ def train_fedqhd_heterogeneous(episodes: int, args) -> ExperimentResults:
             # Step 2: Server averages Q-values (function-space consensus)
             Q_glob_ref = torch.mean(torch.stack(Q_list, dim=0), dim=0)  # (m, |A|)
 
+            if compile_diag is not None:
+                compile_diagnostics_round(compile_diag, agents, anchor_features, Q_list,
+                                          Q_glob_ref, visited, episode)
+
             # Step 3: Compile back to each client's parameter space (Eq. 212)
             # Woodbury:  (X^T X + λI)^{-1} X^T Q  =  X^T (X X^T + λI)^{-1} Q
-            # Solved via pre-factored Cholesky L_i (m×m) — GPU-friendly triangular solves.
+            # Solved via pre-factored Cholesky factors — GPU-friendly triangular solves.
             for agent_id in range(num_agents):
                 agent = agents[agent_id]
                 X_i = anchor_features[agent_id]   # (m, D_i) on device
-                L_i = woodbury_factors[agent_id]  # (m, m) lower-triangular on device
-
-                # (X X^T + λI)^{-1} Q_glob_ref  via two triangular solves
-                v = torch.linalg.solve_triangular(
-                    L_i.T,
-                    torch.linalg.solve_triangular(L_i, Q_glob_ref, upper=False),
-                    upper=True
-                )  # (m, |A|)
-                W_glob_i = X_i.T @ v  # (D_i, |A|)
+                W_glob_i = compile_teacher(ridge_factors[agent_id], X_i, Q_glob_ref, agent, args)  # (D_i, |A|)
 
                 # Copy back to numpy for local training
                 agent.model_vectors = W_glob_i.T.cpu().numpy()  # (|A|, D_i)
@@ -674,10 +974,13 @@ def train_fedqhd_heterogeneous(episodes: int, args) -> ExperimentResults:
 
     end_time = time.time()
 
+    if int(getattr(args, 'eval_episodes', 10) or 0) > 0:
+        results.evaluation = greedy_evaluate(agents, args)
     results.reward_history = reward_history
     results.success_history = success_history
     results.training_time = end_time - start_time
     results.projection_residuals = projection_residuals
+    results.diagnostics = finalize_diagnostics(compile_diag) if compile_diag else {}
     results.final_avg_reward = np.mean(reward_history[-100:])
     results.final_avg_success = np.mean(success_history[-100:])
 
@@ -688,23 +991,23 @@ def train_fedqhd_heterogeneous(episodes: int, args) -> ExperimentResults:
     return results
 
 
-def train_fedavg_dqn(episodes: int, args) -> ExperimentResults:
+def train_fedavg_dqn(episodes: int, args, prox: bool = False) -> ExperimentResults:
     """
     Baseline 3: FedAvg-DQN
     Federated deep Q-learning with parameter averaging.
     Uses a 2-layer MLP with 128 hidden units per layer.
     """
     results = ExperimentResults()
-    results.method_name = "FedAvg-DQN"
+    results.method_name = "FedProx-DQN" if prox else "FedAvg-DQN"
 
     print(f"\n{'='*60}")
-    print("Training FedAvg-DQN")
+    print(f"Training {results.method_name}")
     print(f"{'='*60}")
 
     start_time = time.time()
 
     num_agents = args.agent_num
-    envs = [create_env(args) for _ in range(num_agents)]
+    envs = [create_env(args, client_id=i) for i in range(num_agents)]
 
     fed_agent = FedAvgAgent(
         state_dim=envs[0].state_dim,
@@ -717,8 +1020,16 @@ def train_fedavg_dqn(episodes: int, args) -> ExperimentResults:
         exploration_decay=getattr(args, 'dqn_exploration_decay', 0.995),
         exploration_min=args.dqn_exploration_min if args.dqn_exploration_min is not None else args.exploration_min,
         hd_dim=None,
-        state_bounds=state_bounds.get(args.env)
+        state_bounds=state_bounds.get(args.env),
+        random_seed=_seed_base(args),
+        dqn_kwargs=dqn_config(args) if getattr(args, 'dqn_preset', 'legacy') == 'zoo' else None,
     )
+    if prox:
+        mu = float(getattr(args, 'fedprox_mu', None) or 0.01)
+        for agent in fed_agent.agents:
+            agent.prox_mu = mu
+            agent.set_prox_reference()
+        results.diagnostics = {'fedprox_mu': mu}
 
     reward_history = []
     success_history = []
@@ -738,7 +1049,7 @@ def train_fedavg_dqn(episodes: int, args) -> ExperimentResults:
                 action = agent.choose_action(state)
                 next_state, reward, terminated, truncated, _ = env.step(action)
                 done = terminated or truncated
-                agent.update_model(state, action, reward, next_state, done)
+                agent.update_model(state, action, reward, next_state, _td_done(env, done, args))
                 state = next_state
                 total_reward += reward
 
@@ -757,6 +1068,8 @@ def train_fedavg_dqn(episodes: int, args) -> ExperimentResults:
 
     end_time = time.time()
 
+    if int(getattr(args, 'eval_episodes', 10) or 0) > 0:
+        results.evaluation = greedy_evaluate(fed_agent.agents, args)
     results.reward_history = reward_history
     results.success_history = success_history
     results.training_time = end_time - start_time
@@ -798,32 +1111,27 @@ def train_oracle_dqn(episodes: int, args, use_heterogeneous: bool = False) -> Ex
     start_time = time.time()
 
     num_agents = args.agent_num
-    envs = [create_env(args) for _ in range(num_agents)]
+    envs = [create_env(args, client_id=i) for i in range(num_agents)]
     state_dim = envs[0].state_dim
     action_dim = envs[0].action_dim
 
-    oracle_lr = args.dqn_lr / num_agents  # used only for heterogeneous branch
-
-    common_kwargs = dict(
-        discount_factor=args.dqn_discount if args.dqn_discount is not None else args.discount_factor,
-        exploration_rate=getattr(args, 'dqn_exploration_rate', 1.0),
-        exploration_decay=getattr(args, 'dqn_exploration_decay', 0.995),
-        exploration_min=args.dqn_exploration_min if args.dqn_exploration_min is not None else args.exploration_min,
-    )
+    # Legacy: heterogeneous oracle LR is scaled by 1/N (each agent sees N× the transitions).
+    # Zoo preset: the zoo learning rate is used unchanged.
+    legacy = getattr(args, 'dqn_preset', 'legacy') != 'zoo'
+    oracle_scale = 1.0 / num_agents if legacy else 1.0
 
     if use_heterogeneous:
         hidden_sizes = [64, 128, 256, 512]
         agent_hidden = [hidden_sizes[i % len(hidden_sizes)] for i in range(num_agents)]
         agents = [
             DQNAgent(state_dim=state_dim, action_dim=action_dim,
-                     hidden_size=agent_hidden[i], learning_rate=oracle_lr, **common_kwargs)
+                     **dqn_config(args, hidden_size=agent_hidden[i], lr_scale=oracle_scale))
             for i in range(num_agents)
         ]
         print(f"Using heterogeneous hidden sizes: {agent_hidden}")
     else:
         # Homogeneous oracle: single centralized agent trained on all N environments.
-        agents = [DQNAgent(state_dim=state_dim, action_dim=action_dim,
-                           learning_rate=args.dqn_lr, **common_kwargs)]
+        agents = [DQNAgent(state_dim=state_dim, action_dim=action_dim, **dqn_config(args))]
 
     reward_history = []
     success_history = []
@@ -848,7 +1156,7 @@ def train_oracle_dqn(episodes: int, args, use_heterogeneous: bool = False) -> Ex
 
                 # Train ALL agents on this transition (data pooling)
                 for agent in agents:
-                    agent.update_model(state, action, reward, next_state, done)
+                    agent.update_model(state, action, reward, next_state, _td_done(env, done, args))
 
                 state = next_state
                 client_rewards.append(reward)
@@ -866,6 +1174,8 @@ def train_oracle_dqn(episodes: int, args, use_heterogeneous: bool = False) -> Ex
 
     end_time = time.time()
 
+    if int(getattr(args, 'eval_episodes', 10) or 0) > 0:
+        results.evaluation = greedy_evaluate(agents, args)
     results.reward_history = reward_history
     results.success_history = success_history
     results.training_time = end_time - start_time
@@ -905,7 +1215,7 @@ def train_truncate_fedavg_qhd(episodes: int, args,
     start_time = time.time()
 
     num_agents = args.agent_num
-    envs = [create_env(args) for _ in range(num_agents)]
+    envs = [create_env(args, client_id=i) for i in range(num_agents)]
     state_dim = envs[0].state_dim
     action_dim = envs[0].action_dim
 
@@ -923,7 +1233,7 @@ def train_truncate_fedavg_qhd(episodes: int, args,
     # Create agents
     agents = []
     for i in range(num_agents):
-        sigma_i = args.rff_gamma * (np.random.uniform(0.5, 1.5) if heterogeneous else 1.0)
+        sigma_i = _hetero_gamma(args, i) if heterogeneous else args.rff_gamma
         agent = QHDAgent(
             state_dim=state_dim,
             action_dim=action_dim,
@@ -934,7 +1244,8 @@ def train_truncate_fedavg_qhd(episodes: int, args,
             exploration_decay=(getattr(args, 'qhd_exploration_decay', None) or 0.995),
             exploration_min=getattr(args, 'qhd_exploration_min', 0.01),
             state_bounds=state_bounds.get(args.env),
-            rff_gamma=sigma_i
+            rff_gamma=sigma_i,
+            random_seed=_seed_base(args) + (i if heterogeneous else 0)
         )
         agents.append(agent)
 
@@ -957,7 +1268,7 @@ def train_truncate_fedavg_qhd(episodes: int, args,
                 action = agent.choose_action(state)
                 next_state, reward, terminated, truncated, _ = env.step(action)
                 done = terminated or truncated
-                agent.update_model(state, action, reward, next_state, done)
+                agent.update_model(state, action, reward, next_state, _td_done(env, done, args))
                 state = next_state
                 total_reward += reward
 
@@ -1007,6 +1318,8 @@ def train_truncate_fedavg_qhd(episodes: int, args,
 
     end_time = time.time()
 
+    if int(getattr(args, 'eval_episodes', 10) or 0) > 0:
+        results.evaluation = greedy_evaluate(agents, args)
     results.reward_history = reward_history
     results.success_history = success_history
     results.training_time = end_time - start_time
@@ -1057,7 +1370,7 @@ def train_distillation_dqn(episodes: int, args,
     start_time = time.time()
 
     num_agents = args.agent_num
-    envs = [create_env(args) for _ in range(num_agents)]
+    envs = [create_env(args, client_id=i) for i in range(num_agents)]
     state_dim = envs[0].state_dim
     action_dim = envs[0].action_dim
 
@@ -1078,33 +1391,26 @@ def train_distillation_dqn(episodes: int, args,
         agent = DQNAgent(
             state_dim=state_dim,
             action_dim=action_dim,
-            hidden_size=agent_hidden[i],
-            learning_rate=args.dqn_lr  ,
-            discount_factor=args.dqn_discount if args.dqn_discount is not None else args.discount_factor,
-            exploration_rate=args.dqn_exploration_rate if getattr(args, 'dqn_exploration_rate', None) is not None else 1.0,
-            exploration_decay=args.dqn_exploration_decay if getattr(args, 'dqn_exploration_decay', None) is not None else 0.995,
-            exploration_min=args.dqn_exploration_min if args.dqn_exploration_min is not None else args.exploration_min,
+            **dqn_config(args, hidden_size=agent_hidden[i] if heterogeneous else None),
         )
         agents.append(agent)
 
-    # Build distillation set S_d: random rollout states from the environment
-    distill_states: List[np.ndarray] = []
-    temp_env = create_env(args)
-    while len(distill_states) < args.anchor_set_size:
-        state, _ = temp_env.reset()
-        distill_states.append(state)
-        for _ in range(50):
-            action = np.random.randint(action_dim)
-            next_state, _, done, _, _ = temp_env.step(action)
-            distill_states.append(next_state)
-            if done or len(distill_states) >= args.anchor_set_size:
-                break
-    distill_states = distill_states[:args.anchor_set_size]
+    # Build distillation set S_d: the same random-rollout anchor set S_ref used by FedQHD
+    # (same size m, same states for the same seed).
+    distill_states = list(collect_anchor_states(args, action_dim, args.anchor_set_size))
 
     # Distillation temperature τ: higher → softer targets (less confident teacher)
-    tau = 1.0
+    tau = float(getattr(args, 'distill_tau', None) or 1.0)
     # Number of gradient steps per distillation round
-    distill_steps = 10
+    distill_steps = int(getattr(args, 'distill_steps', None) or 10)
+    # Loss: 'kl' = policy distillation on softmax(Q/τ) (default, as submitted);
+    #       'mse' = Q-value regression to the teacher (the same target FedQHD compiles).
+    distill_loss = getattr(args, 'distill_loss', None) or 'kl'
+    # Federation interval: by default the DQN interval; --distill_interval overrides it
+    # (set it to qhd_agg_interval for a communication-matched comparison).
+    distill_interval = (getattr(args, 'distill_interval', None) or
+                        (args.dqn_agg_interval if args.dqn_agg_interval is not None
+                         else args.aggregation_interval))
 
     reward_history = []
     success_history = []
@@ -1125,7 +1431,7 @@ def train_distillation_dqn(episodes: int, args,
                 action = agent.choose_action(state)
                 next_state, reward, terminated, truncated, _ = env.step(action)
                 done = terminated or truncated
-                agent.update_model(state, action, reward, next_state, done)
+                agent.update_model(state, action, reward, next_state, _td_done(env, done, args))
                 state = next_state
                 total_reward += reward
 
@@ -1133,7 +1439,7 @@ def train_distillation_dqn(episodes: int, args,
             episode_successes.append(1 if env.is_success(state) else 0)
 
         # ── Phase 2: Distillation aggregation every K episodes ───────────────
-        if (episode + 1) % (args.dqn_agg_interval if args.dqn_agg_interval is not None else args.aggregation_interval) == 0:
+        if (episode + 1) % distill_interval == 0:
             device = agents[0].device
 
             # Convert distillation states to a batch tensor (shared across all clients)
@@ -1160,13 +1466,16 @@ def train_distillation_dqn(episodes: int, args,
             # PyTorch F.kl_div expects log-probs as input and probs as target.
             for agent in agents:
                 distill_optimizer = torch.optim.Adam(
-                    agent.q_network.parameters(), lr=args.dqn_lr
+                    agent.q_network.parameters(), lr=agent.lr
                 )
                 for _ in range(distill_steps):
                     Q_i = agent.q_network(S_d)                           # (|S_d|, action_dim)
-                    log_pi_student = F.log_softmax(Q_i / tau, dim=-1)    # (|S_d|, action_dim)
-                    # reduction='batchmean': sum over actions, mean over states
-                    loss = F.kl_div(log_pi_student, pi_teacher, reduction='batchmean')
+                    if distill_loss == 'mse':
+                        loss = F.mse_loss(Q_i, Q_teacher.detach())
+                    else:
+                        log_pi_student = F.log_softmax(Q_i / tau, dim=-1)    # (|S_d|, action_dim)
+                        # reduction='batchmean': sum over actions, mean over states
+                        loss = F.kl_div(log_pi_student, pi_teacher, reduction='batchmean')
                     distill_optimizer.zero_grad()
                     loss.backward()
                     torch.nn.utils.clip_grad_norm_(agent.q_network.parameters(), 1.0)
@@ -1182,6 +1491,8 @@ def train_distillation_dqn(episodes: int, args,
 
     end_time = time.time()
 
+    if int(getattr(args, 'eval_episodes', 10) or 0) > 0:
+        results.evaluation = greedy_evaluate(agents, args)
     results.reward_history = reward_history
     results.success_history = success_history
     results.training_time = end_time - start_time
