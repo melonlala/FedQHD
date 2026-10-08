@@ -9,7 +9,7 @@ import os
 import json
 from typing import List, Dict
 import matplotlib.pyplot as plt
-from experiments_runner import (
+from scripts.experiments_runner import (
     train_independent_qhd,
     train_fedqhd_homogeneous,
     ExperimentResults
